@@ -1,9 +1,9 @@
 {
-  "name": "my-turborepo",
+  "name": "tisops-hub",
   "version": "0.0.0",
   "private": true,
-  "description": "",
-  "author": "",
+  "description": "TisOps Hub - Operations Management Platform",
+  "author": "philip",
   "license": "UNLICENSED",
   "scripts": {
     "dev": "turbo run dev",
@@ -16,11 +16,11 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "prettier": "^3.2.5",
-    "turbo": "^2.5.8"
+    "prettier": "3.6.2",
+    "turbo": "2.5.8"
   },
-  "packageManager": "pnpm@8.15.5",
+  "packageManager": "pnpm@10.20.0",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   }
 }
