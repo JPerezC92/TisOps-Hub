@@ -1,16 +1,8 @@
-# Turborepo starter
+# TisOps Hub
 
-This is a community-maintained example. If you experience a problem, please submit a pull request with a fix. GitHub Issues will be closed.
+A modern monorepo application built with Turborepo, following Clean Architecture and Domain-Driven Design (DDD) principles.
 
-## Using this example
-
-Run the following command:
-
-```bash
-npx create-turbo@latest -e with-nestjs
-```
-
-## What's inside?
+## 🏗️ Project Structure
 
 This Turborepo includes the following packages & apps:
 
@@ -19,69 +11,194 @@ This Turborepo includes the following packages & apps:
 ```shell
 .
 ├── apps
-│   ├── api                       # NestJS app (https://nestjs.com).
-│   └── web                       # Next.js app (https://nextjs.org).
+│   ├── reports-api              # NestJS API with Clean Architecture (port 3000)
+│   └── web                      # Next.js frontend with App Router (port 3001)
 └── packages
-    ├── @repo/api                 # Shared `NestJS` resources.
-    ├── @repo/eslint-config       # `eslint` configurations (includes `prettier`)
-    ├── @repo/jest-config         # `jest` configurations
-    ├── @repo/typescript-config   # `tsconfig.json`s used throughout the monorepo
-    └── @repo/ui                  # Shareable stub React component library.
+    ├── @repo/reports            # Shared DTOs and TypeScript types
+    ├── @repo/ui                 # Shared React components
+    ├── @repo/eslint-config      # ESLint configurations (includes Prettier)
+    ├── @repo/jest-config        # Jest configurations
+    └── @repo/typescript-config  # TypeScript configurations
 ```
 
-Each package and application are mostly written in [TypeScript](https://www.typescriptlang.org/).
+### Current Features
 
-### Utilities
+- ✅ **Tasks Module**: Complete reference implementation with Clean Architecture
+  - Domain entities with business logic
+  - Use cases for application logic
+  - Repository pattern with Drizzle ORM
+  - Shared DTOs via `@repo/reports`
 
-This `Turborepo` has some additional tools already set for you:
+### Planned Features
 
-- [TypeScript](https://www.typescriptlang.org/) for static type-safety
+- 🔜 **Belcorp Reports**: Weekly and monthly reports
+- 🔜 **Report Templates**: Reusable report configurations
+- 🔜 **Data Sources**: Belcorp data integration
+
+## 🛠️ Tech Stack
+
+- **Framework**: [NestJS](https://nestjs.com) (Backend) + [Next.js 15](https://nextjs.org) (Frontend)
+- **Database**: [Turso](https://turso.tech) (SQLite cloud)
+- **ORM**: [Drizzle ORM](https://orm.drizzle.team)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **Package Manager**: [pnpm](https://pnpm.io)
+- **Monorepo**: [Turborepo](https://turbo.build/repo)
+
+### Development Tools
+
 - [ESLint](https://eslint.org/) for code linting
 - [Prettier](https://prettier.io) for code formatting
-- [Jest](https://prettier.io) & [Playwright](https://playwright.dev/) for testing
+- [Jest](https://jestjs.io/) for testing
+- [Drizzle Kit](https://orm.drizzle.team/kit-docs/overview) for database migrations
 
-### Commands
+## 🚀 Getting Started
 
-This `Turborepo` already configured useful commands for all your apps and packages.
+### Prerequisites
 
-#### Build
+- Node.js 18+ 
+- pnpm 8+
 
-```bash
-# Will build all the app & packages with the supported `build` script.
-pnpm run build
-
-# ℹ️ If you plan to only build apps individually,
-# Please make sure you've built the packages first.
-```
-
-#### Develop
+### Installation
 
 ```bash
-# Will run the development server for all the app & packages with the supported `dev` script.
-pnpm run dev
+# Clone the repository
+git clone <repository-url>
+
+# Install dependencies
+pnpm install
+
+# Setup environment variables
+cp apps/reports-api/.env.example apps/reports-api/.env
+# Edit .env with your Turso credentials
 ```
 
-#### test
+### Database Setup
 
 ```bash
-# Will launch a test suites for all the app & packages with the supported `test` script.
-pnpm run test
+# Generate migrations
+pnpm db:generate
 
-# You can launch e2e testes with `test:e2e`
-pnpm run test:e2e
+# Apply migrations
+pnpm db:migrate
 
-# See `@repo/jest-config` to customize the behavior.
+# Open Drizzle Studio (optional)
+pnpm db:studio
 ```
 
-#### Lint
+## 📋 Commands
+
+### Development
 
 ```bash
-# Will lint all the app & packages with the supported `lint` script.
-# See `@repo/eslint-config` to customize the behavior.
-pnpm run lint
+# Start all apps in development mode (uses Turbo)
+pnpm dev
+
+# Start specific app
+pnpm dev --filter=reports-api
+pnpm dev --filter=web
 ```
 
-#### Format
+### Build
+
+```bash
+# Build all apps and packages (uses Turbo)
+pnpm build
+
+# Build specific package
+pnpm build --filter=@repo/reports
+```
+
+### Testing
+
+```bash
+# Run all tests (uses Turbo)
+pnpm test
+
+# Run e2e tests (uses Turbo)
+pnpm test:e2e
+
+# Run tests with coverage
+pnpm test -- --coverage
+```
+
+### Database
+
+```bash
+# Generate migration from schema changes
+pnpm db:generate
+
+# Apply migrations to database
+pnpm db:migrate
+
+# Push schema directly (development only)
+pnpm db:push
+
+# Open Drizzle Studio GUI
+pnpm db:studio
+
+# Reset database (⚠️ destructive)
+pnpm db:reset
+```
+
+### Code Quality
+
+```bash
+# Lint all code (uses Turbo)
+pnpm lint
+
+# Format code with Prettier
+pnpm format
+```
+
+**Note:** Commands like `dev`, `build`, `test`, and `lint` use **Turborepo** for parallel execution, smart caching, and optimized builds.
+
+## 📖 Documentation
+
+- [`ARCHITECTURE_PLAN.md`](./ARCHITECTURE_PLAN.md) - Project architecture overview
+- [`CLEAN_ARCHITECTURE.md`](./CLEAN_ARCHITECTURE.md) - Clean Architecture implementation guide
+- [`SHARED_DTO_PATTERN.md`](./SHARED_DTO_PATTERN.md) - Quick reference for shared DTO pattern
+- [`.github/copilot-instructions.md`](./.github/copilot-instructions.md) - Complete development guidelines
+- [`apps/reports-api/DATABASE_COMMANDS.md`](./apps/reports-api/DATABASE_COMMANDS.md) - Database workflow guide
+
+## 🏛️ Architecture Highlights
+
+### Clean Architecture in API
+
+Each feature module follows three-layer architecture:
+- **Domain**: Pure business logic (entities, value objects, repository interfaces)
+- **Application**: Use cases and application-specific logic
+- **Infrastructure**: Technical implementations (repositories, controllers, modules)
+
+### Shared DTO Pattern
+
+- **`packages/reports/src/{module}/`**: Shared DTOs and TypeScript types
+- **`apps/reports-api/src/{module}/`**: Business logic with Clean Architecture
+- Both API and frontend import from `@repo/reports` for type safety
+
+### Example: Tasks Module
+
+```typescript
+// Frontend imports shared types
+import type { Task } from '@repo/reports';
+
+// API controller imports shared DTOs
+import { CreateTaskDto } from '@repo/reports';
+
+// Use cases use domain entities (internal)
+import { Task } from './domain/entities/task.entity';
+```
+
+## 🤝 Contributing
+
+1. Create a new branch for your feature
+2. Follow the Clean Architecture pattern (see documentation)
+3. Create both shared DTOs and domain entities
+4. Write tests for use cases
+5. Update documentation if needed
+
+## 📝 License
+
+[MIT](./LICENSE)
 
 ```bash
 # Will format all the supported `.ts,.js,json,.tsx,.jsx` files.

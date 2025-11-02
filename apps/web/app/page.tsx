@@ -1,4 +1,3 @@
-import type { Link } from '@repo/api';
 import { Button } from '@repo/ui/button';
 import Image, { type ImageProps } from 'next/image';
 
@@ -20,25 +19,7 @@ const ThemeImage = (props: Props) => {
   );
 };
 
-async function getLinks(): Promise<Link[]> {
-  try {
-    const res = await fetch('http://localhost:3000/links', {
-      cache: 'no-store',
-    });
-
-    if (!res.ok) {
-      throw new Error('Failed to fetch links');
-    }
-
-    return res.json();
-  } catch (error) {
-    console.error('Error fetching links:', error);
-    return [];
-  }
-}
-
 export default async function Home() {
-  const links = await getLinks();
 
   return (
     <div className={styles.page}>
@@ -57,6 +38,11 @@ export default async function Home() {
             Get started by editing <code>apps/web/app/page.tsx</code>
           </li>
           <li>Save and see your changes instantly.</li>
+          <li>
+            <a href="/tasks" style={{ color: '#0070f3', textDecoration: 'underline' }}>
+              Go to Tasks Manager →
+            </a>
+          </li>
         </ol>
 
         <div className={styles.ctas}>
@@ -89,27 +75,15 @@ export default async function Home() {
           Open alert
         </Button>
 
-        {links.length > 0 ? (
-          <div className={styles.ctas}>
-            {links.map((link) => (
-              <a
-                key={link.id}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={link.description}
-                className={styles.secondary}
-              >
-                {link.title}
-              </a>
-            ))}
-          </div>
-        ) : (
-          <div style={{ color: '#666' }}>
-            No links available. Make sure the NestJS API is running on port
-            3000.
-          </div>
-        )}
+        <div className={styles.ctas}>
+          <a
+            href="/tasks"
+            className={styles.secondary}
+            style={{ textDecoration: 'none' }}
+          >
+            View Tasks →
+          </a>
+        </div>
       </main>
 
       <footer className={styles.footer}>
