@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { GetAllTasksUseCase } from './application/use-cases/get-all-tasks.use-case';
-import { GetTaskByIdUseCase } from './application/use-cases/get-task-by-id.use-case';
-import { CreateTaskUseCase } from './application/use-cases/create-task.use-case';
-import { UpdateTaskUseCase } from './application/use-cases/update-task.use-case';
-import { DeleteTaskUseCase } from './application/use-cases/delete-task.use-case';
-import { Task } from './domain/entities/task.entity';
+import { GetAllTasksUseCase } from '@tasks/application/use-cases/get-all-tasks.use-case';
+import { GetTaskByIdUseCase } from '@tasks/application/use-cases/get-task-by-id.use-case';
+import { CreateTaskUseCase } from '@tasks/application/use-cases/create-task.use-case';
+import { UpdateTaskUseCase } from '@tasks/application/use-cases/update-task.use-case';
+import { DeleteTaskUseCase } from '@tasks/application/use-cases/delete-task.use-case';
+import { Task } from '@tasks/domain/entities/task.entity';
 import type { CreateTaskDto, UpdateTaskDto } from '@repo/reports';
 
 @Injectable()

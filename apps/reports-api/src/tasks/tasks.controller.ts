@@ -15,7 +15,7 @@ import {
   ApiParam,
   ApiBody,
 } from '@nestjs/swagger';
-import { TasksService } from './tasks.service';
+import { TasksService } from '@tasks/tasks.service';
 import { CreateTaskDto, UpdateTaskDto } from '@repo/reports';
 import type { Task } from '@repo/reports';
 

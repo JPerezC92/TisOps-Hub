@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
-import { ITaskRepository } from '../../domain/repositories/task.repository.interface';
-import { Task } from '../../domain/entities/task.entity';
+import { ITaskRepository } from '@tasks/domain/repositories/task.repository.interface';
+import { Task } from '@tasks/domain/entities/task.entity';
 import { Database, tasks } from '@repo/database';
 
 export class TaskRepository implements ITaskRepository {

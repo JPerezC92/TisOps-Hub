@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { TasksService } from './tasks.service';
-import { TasksController } from './tasks.controller';
-import { TASK_REPOSITORY } from './domain/repositories/task.repository.interface';
-import { TaskRepository } from './infrastructure/repositories/task.repository';
-import { GetAllTasksUseCase } from './application/use-cases/get-all-tasks.use-case';
-import { GetTaskByIdUseCase } from './application/use-cases/get-task-by-id.use-case';
-import { CreateTaskUseCase } from './application/use-cases/create-task.use-case';
-import { UpdateTaskUseCase } from './application/use-cases/update-task.use-case';
-import { DeleteTaskUseCase } from './application/use-cases/delete-task.use-case';
+import { TasksService } from '@tasks/tasks.service';
+import { TasksController } from '@tasks/tasks.controller';
+import { TASK_REPOSITORY } from '@tasks/domain/repositories/task.repository.interface';
+import { TaskRepository } from '@tasks/infrastructure/repositories/task.repository';
+import { GetAllTasksUseCase } from '@tasks/application/use-cases/get-all-tasks.use-case';
+import { GetTaskByIdUseCase } from '@tasks/application/use-cases/get-task-by-id.use-case';
+import { CreateTaskUseCase } from '@tasks/application/use-cases/create-task.use-case';
+import { UpdateTaskUseCase } from '@tasks/application/use-cases/update-task.use-case';
+import { DeleteTaskUseCase } from '@tasks/application/use-cases/delete-task.use-case';
 import { DATABASE_CONNECTION } from '@repo/database';
 
 @Module({

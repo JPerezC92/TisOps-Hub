@@ -24,6 +24,16 @@ export default async function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        {/* Tailwind CSS Test Section */}
+        <div className="mb-6 rounded-lg border-2 border-blue-500 bg-blue-50 p-4 dark:bg-blue-950">
+          <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100">
+            ✨ Tailwind CSS v4 is Working!
+          </h3>
+          <p className="mt-2 text-sm text-blue-700 dark:text-blue-300">
+            This card is styled with Tailwind utility classes.
+          </p>
+        </div>
+
         <ThemeImage
           className={styles.logo}
           srcLight="turborepo-dark.svg"
