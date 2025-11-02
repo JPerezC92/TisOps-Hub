@@ -1,4 +1,4 @@
-import { ITaskRepository } from '../../domain/repositories/task.repository.interface';
+import { ITaskRepository } from '@tasks/domain/repositories/task.repository.interface';
 
 export class DeleteTaskUseCase {
   constructor(private readonly taskRepository: ITaskRepository) {}
