@@ -1,0 +1,9 @@
+# Ignore markdown documentation files
+*.md
+JPC_DESIGN_SYSTEM.md
+JPC_PALETTE.md
+
+# Ignore build outputs
+.next/
+.turbo/
+node_modules/

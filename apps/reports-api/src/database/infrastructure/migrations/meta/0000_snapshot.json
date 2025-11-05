@@ -1,9 +1,186 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "c1da58d1-836e-46a4-b7ec-e8a0d4328580",
+  "id": "a5763875-0830-4471-a9af-b3b912a95c3d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
+    "parent_child_requests": {
+      "name": "parent_child_requests",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "request_id": {
+          "name": "request_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "linked_request_id": {
+          "name": "linked_request_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "request_id_link": {
+          "name": "request_id_link",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "linked_request_id_link": {
+          "name": "linked_request_id_link",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "linked_request_id_idx": {
+          "name": "linked_request_id_idx",
+          "columns": [
+            "linked_request_id"
+          ],
+          "isUnique": false
+        },
+        "request_id_idx": {
+          "name": "request_id_idx",
+          "columns": [
+            "request_id"
+          ],
+          "isUnique": false
+        },
+        "unique_relationship_idx": {
+          "name": "unique_relationship_idx",
+          "columns": [
+            "request_id",
+            "linked_request_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "request_categorization": {
+      "name": "request_categorization",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "category": {
+          "name": "category",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "technician": {
+          "name": "technician",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "requestId": {
+          "name": "requestId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "requestIdLink": {
+          "name": "requestIdLink",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "createdTime": {
+          "name": "createdTime",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "modulo": {
+          "name": "modulo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "subject": {
+          "name": "subject",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "problemId": {
+          "name": "problemId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "linkedRequestId": {
+          "name": "linkedRequestId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "linkedRequestIdLink": {
+          "name": "linkedRequestIdLink",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "rc_category_idx": {
+          "name": "rc_category_idx",
+          "columns": [
+            "category"
+          ],
+          "isUnique": false
+        },
+        "rc_request_id_idx": {
+          "name": "rc_request_id_idx",
+          "columns": [
+            "requestId"
+          ],
+          "isUnique": false
+        },
+        "rc_technician_idx": {
+          "name": "rc_technician_idx",
+          "columns": [
+            "technician"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "tasks": {
       "name": "tasks",
       "columns": {
@@ -27,6 +204,14 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
+        },
+        "priority": {
+          "name": "priority",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'medium'"
         },
         "completed": {
           "name": "completed",

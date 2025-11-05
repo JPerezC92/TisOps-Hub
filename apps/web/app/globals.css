@@ -1,52 +1,94 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* JPC Color Palette - Personal Design System by Juan Perez Castro */
+  --color-jpc-50: #e6fffe;
+  --color-jpc-100: #ccfffc;
+  --color-jpc-200: #99fff9;
+  --color-jpc-300: #66fff7;
+  --color-jpc-400: #32E6C7; /* Primary cyan/teal */
+  --color-jpc-500: #2bc4a9;
+  --color-jpc-600: #22a28c;
+  --color-jpc-700: #1a7f6e;
+  --color-jpc-800: #115c51;
+  --color-jpc-900: #007260; /* Dark teal */
+  --color-jpc-950: #004035;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* JPC Purple Palette */
+  --color-jpc-purple-50: #f5e6ff;
+  --color-jpc-purple-100: #ebccff;
+  --color-jpc-purple-200: #d799ff;
+  --color-jpc-purple-300: #c366ff;
+  --color-jpc-purple-400: #af33ff;
+  --color-jpc-purple-500: #A43FD9; /* Primary purple */
+  --color-jpc-purple-600: #8933b3;
+  --color-jpc-purple-700: #6e268c;
+  --color-jpc-purple-800: #531a66;
+  --color-jpc-purple-900: #2F0B43; /* Dark purple header */
+  --color-jpc-purple-950: #1a0626;
+
+  /* JPC Orange Palette */
+  --color-jpc-orange-50: #fff3e6;
+  --color-jpc-orange-100: #ffe7cc;
+  --color-jpc-orange-200: #ffcf99;
+  --color-jpc-orange-300: #ffb766;
+  --color-jpc-orange-400: #ff9f33;
+  --color-jpc-orange-500: #E54302; /* Primary orange/red */
+  --color-jpc-orange-600: #cc3c02;
+  --color-jpc-orange-700: #b33501;
+  --color-jpc-orange-800: #992e01;
+  --color-jpc-orange-900: #802701;
+  --color-jpc-orange-950: #661f01;
+
+  /* JPC Background Palette */
+  --color-jpc-bg-50: #e6ebf0;
+  --color-jpc-bg-100: #ccd7e1;
+  --color-jpc-bg-200: #99afc3;
+  --color-jpc-bg-300: #6687a5;
+  --color-jpc-bg-400: #335f87;
+  --color-jpc-bg-500: #001a2e; /* Mid-dark background */
+  --color-jpc-bg-600: #001729;
+  --color-jpc-bg-700: #001324;
+  --color-jpc-bg-800: #000f1f;
+  --color-jpc-bg-900: #000813; /* Very dark blue background */
+  --color-jpc-bg-950: #000510;
+
+  /* JPC Gold Palette */
+  --color-jpc-gold-50: #fdfbf7;
+  --color-jpc-gold-100: #faf7ef;
+  --color-jpc-gold-200: #f5efdf;
+  --color-jpc-gold-300: #f0e7cf;
+  --color-jpc-gold-400: #ebdfbf;
+  --color-jpc-gold-500: #E9D8A5; /* Primary gold text */
+  --color-jpc-gold-600: #d4be80;
+  --color-jpc-gold-700: #bfa45b;
+  --color-jpc-gold-800: #aa8a36;
+  --color-jpc-gold-900: #957011;
+  --color-jpc-gold-950: #6a4f0b;
 }
 
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: #171717;
+  background: #f9fafb;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
   box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
+/* Removed global anchor styles to allow custom link colors */
+/* If you need to remove underlines, do it per-component instead */
 
-.imgDark {
-  display: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-
-  .imgLight {
-    display: none;
-  }
-  .imgDark {
-    display: unset;
-  }
-}
