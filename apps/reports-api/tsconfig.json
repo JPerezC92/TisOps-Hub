@@ -5,6 +5,7 @@
     "outDir": "./dist",
     "paths": {
       "@tasks/*": ["src/tasks/*"],
+      "@parent-child-requests/*": ["src/parent-child-requests/*"],
       "@database/*": ["src/database/*"],
       "@common/*": ["src/common/*"]
     }

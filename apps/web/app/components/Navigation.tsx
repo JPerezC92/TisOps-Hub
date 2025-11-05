@@ -19,6 +19,21 @@ export function Navigation() {
               Tasks
             </Link>
           </li>
+          <li>
+            <Link href="/imports" className={styles.link}>
+              File Imports
+            </Link>
+          </li>
+          <li>
+            <Link href="/request-relationships" className={styles.link}>
+              Request Relationships
+            </Link>
+          </li>
+          <li>
+            <Link href="/error-categorization" className={styles.link}>
+              Error Categorization
+            </Link>
+          </li>
         </ul>
       </div>
     </nav>

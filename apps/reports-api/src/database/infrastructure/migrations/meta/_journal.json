@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1761803265118,
-      "tag": "0000_same_vampiro",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1761806850478,
-      "tag": "0001_simple_princess_powerful",
+      "when": 1762328387993,
+      "tag": "0000_loving_puff_adder",
       "breakpoints": true
     }
   ]

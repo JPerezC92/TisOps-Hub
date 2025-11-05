@@ -5,6 +5,9 @@
 This document outlines the implementation plan for transforming TisOps Hub into a clean architecture monorepo with domain-driven design principles. The architecture currently supports:
 
 - **Tasks Management System**: Starter example implementing full clean architecture (✅ Implemented)
+- **File Import Features**: Excel file processing and data transformation (✅ Implemented)
+  - Request Categorization (Error categorization reports)
+  - Parent-Child Requests (Request relationships)
 - **Belcorp Reports System**: Business intelligence and reporting for Belcorp operations (🔜 Future)
 - **Shared DTOs**: Type-safe contracts between database, API, and frontend
 - **Turso Database**: SQLite-compatible edge database with global replication
@@ -46,25 +49,65 @@ TisOps Hub/
 │   │   │   │       │   ├── tasks.schema.ts
 │   │   │   │       │   └── index.ts
 │   │   │   │       └── migrations/  # SQL migration files
-│   │   │   └── tasks/               # ✅ STARTER EXAMPLE - Full Clean Architecture
-│   │   │       ├── domain/          # Business Logic Layer
+│   │   │   ├── tasks/               # ✅ STARTER EXAMPLE - Full Clean Architecture
+│   │   │   │   ├── domain/          # Business Logic Layer
+│   │   │   │   │   ├── entities/
+│   │   │   │   │   │   └── task.entity.ts
+│   │   │   │   │   └── repositories/
+│   │   │   │   │       └── task.repository.interface.ts
+│   │   │   │   ├── application/     # Use Cases Layer
+│   │   │   │   │   └── use-cases/
+│   │   │   │   │       ├── get-all-tasks.use-case.ts
+│   │   │   │   │       ├── get-task-by-id.use-case.ts
+│   │   │   │   │       ├── create-task.use-case.ts
+│   │   │   │   │       ├── update-task.use-case.ts
+│   │   │   │   │       └── delete-task.use-case.ts
+│   │   │   │   ├── infrastructure/  # Technical Implementation
+│   │   │   │   │   └── repositories/
+│   │   │   │   │       └── task.repository.ts
+│   │   │   │   ├── tasks.module.ts  # NestJS module with factory providers
+│   │   │   │   ├── tasks.service.ts # Orchestrates use cases
+│   │   │   │   └── tasks.controller.ts
+│   │   │   ├── request-categorization/  # ✅ File Import Feature - Error Categorization
+│   │   │   │   ├── domain/
+│   │   │   │   │   ├── entities/
+│   │   │   │   │   │   └── request-categorization.entity.ts
+│   │   │   │   │   └── repositories/
+│   │   │   │   │       └── request-categorization.repository.interface.ts
+│   │   │   │   ├── application/
+│   │   │   │   │   └── use-cases/
+│   │   │   │   │       ├── get-all.use-case.ts
+│   │   │   │   │       ├── delete-all.use-case.ts
+│   │   │   │   │       ├── create-many.use-case.ts
+│   │   │   │   │       └── get-category-summary.use-case.ts
+│   │   │   │   ├── infrastructure/
+│   │   │   │   │   ├── repositories/
+│   │   │   │   │   │   └── request-categorization.repository.ts
+│   │   │   │   │   └── services/
+│   │   │   │   │       └── excel-parser.service.ts  # Excel parsing logic
+│   │   │   │   ├── request-categorization.module.ts
+│   │   │   │   ├── request-categorization.service.ts
+│   │   │   │   └── request-categorization.controller.ts
+│   │   │   └── parent-child-requests/   # ✅ File Import Feature - Request Relationships
+│   │   │       ├── domain/
 │   │   │       │   ├── entities/
-│   │   │       │   │   └── task.entity.ts
+│   │   │       │   │   └── parent-child-request.entity.ts
 │   │   │       │   └── repositories/
-│   │   │       │       └── task.repository.interface.ts
-│   │   │       ├── application/     # Use Cases Layer
+│   │   │       │       └── parent-child-request.repository.interface.ts
+│   │   │       ├── application/
 │   │   │       │   └── use-cases/
-│   │   │       │       ├── get-all-tasks.use-case.ts
-│   │   │       │       ├── get-task-by-id.use-case.ts
-│   │   │       │       ├── create-task.use-case.ts
-│   │   │       │       ├── update-task.use-case.ts
-│   │   │       │       └── delete-task.use-case.ts
-│   │   │       ├── infrastructure/  # Technical Implementation
-│   │   │       │   └── repositories/
-│   │   │       │       └── task.repository.ts
-│   │   │       ├── tasks.module.ts  # NestJS module with factory providers
-│   │   │       ├── tasks.service.ts # Orchestrates use cases
-│   │   │       └── tasks.controller.ts
+│   │   │       │       ├── get-all.use-case.ts
+│   │   │       │       ├── get-stats.use-case.ts
+│   │   │       │       ├── create-many.use-case.ts
+│   │   │       │       └── delete-all.use-case.ts
+│   │   │       ├── infrastructure/
+│   │   │       │   ├── repositories/
+│   │   │       │   │   └── parent-child-request.repository.ts
+│   │   │       │   └── services/
+│   │   │       │       └── excel-parser.service.ts  # Excel parsing logic
+│   │   │       ├── parent-child-requests.module.ts
+│   │   │       ├── parent-child-requests.service.ts
+│   │   │       └── parent-child-requests.controller.ts
 │   │   └── package.json
 │   │
 │   └── web/                          # Next.js App (Port 3001)
@@ -73,14 +116,21 @@ TisOps Hub/
 │       │   ├── page.tsx
 │       │   ├── components/
 │       │   │   └── Navigation.tsx   # Site navigation
-│       │   └── tasks/               # ✅ Tasks UI
+│       │   ├── tasks/               # ✅ Tasks UI
+│       │   │   └── page.tsx
+│       │   ├── error-categorization/  # ✅ Error Categorization UI
+│       │   │   └── page.tsx
+│       │   └── request-relationships/  # ✅ Request Relationships UI
 │       │       └── page.tsx
 │       └── package.json
 │
 ├── packages/
-│   ├── reports/                      # ✅ Shared DTOs (currently for tasks)
+│   ├── reports/                      # ✅ Shared DTOs
 │   │   └── src/
-│   │       └── entry.ts             # Exports task DTOs and entities
+│   │       ├── tasks/                # Task DTOs
+│   │       ├── request-categorization/  # Error categorization DTOs
+│   │       ├── parent-child-requests/   # Request relationships DTOs
+│   │       └── entry.ts             # Exports all DTOs and entities
 │   ├── ui/                          # ✅ Shared UI components
 │   │   └── src/
 │   │       ├── button.tsx
@@ -146,18 +196,18 @@ apps/reports-api/src/
 │   ├── templates.service.ts
 │   └── templates.controller.ts
 │
-└── data-sources/                    # 🔜 Data Sources Module
+└── data-sources/                    # 🔜 Data Sources Module (Connection Management)
     ├── domain/
     │   ├── entities/
-    │   │   ├── data-source.entity.ts
-    │   │   ├── connection.entity.ts
+    │   │   ├── data-source.entity.ts     # Database connection configuration
+    │   │   ├── connection.entity.ts      # Connection state & health
     │   │   └── index.ts
     │   └── repositories/
     │       └── data-source.repository.interface.ts
     ├── application/
     │   └── use-cases/
-    │       ├── create-data-source.use-case.ts
-    │       ├── test-connection.use-case.ts
+    │       ├── create-data-source.use-case.ts     # Save connection config
+    │       ├── test-connection.use-case.ts        # Verify connection health
     │       ├── get-data-source.use-case.ts
     │       └── list-data-sources.use-case.ts
     ├── infrastructure/
@@ -166,6 +216,9 @@ apps/reports-api/src/
     ├── data-sources.module.ts
     ├── data-sources.service.ts
     └── data-sources.controller.ts
+
+# NOTE: Data Sources Module is for CONNECTION MANAGEMENT (database configs, credentials, health checks),
+# NOT for file import/processing. File imports are independent feature modules (like request-categorization).
 
 apps/web/app/
 ├── belcorp-reports/                 # 🔜 Belcorp Reports UI
@@ -238,6 +291,19 @@ packages/
    - [x] Update Copilot instructions with patterns
    - [x] Create Navigation component for web app
 
+4. **File Import Features** ✅
+   - [x] Request Categorization Module (Error categorization reports)
+     - [x] Excel parser service with XLSX library
+     - [x] Domain entities with business logic
+     - [x] Use cases for batch operations
+     - [x] Category summary aggregation
+     - [x] Frontend UI with portfolio design
+   - [x] Parent-Child Requests Module (Request relationships)
+     - [x] Excel parser service for relationship data
+     - [x] Domain entities for request relationships
+     - [x] Statistics and summary use cases
+     - [x] Frontend UI with relationship visualization
+
 ### 🔜 Phase 2: Belcorp Reports System (Future)
 4. **Implement Belcorp Reports Module**
    - [ ] Create belcorp-reports module following Tasks pattern
@@ -259,12 +325,13 @@ packages/
 
 6. **Implement Data Sources Module**
    - [ ] Create data-sources module following Tasks pattern
-   - [ ] Define data source entity and connection logic
+   - [ ] Define data source entity (connection configs, credentials)
    - [ ] Implement connection testing use cases
-   - [ ] Add Turso connection integration
+   - [ ] Add database connection health checks (Turso, MySQL, PostgreSQL, etc.)
    - [ ] Create schemas for data sources tables
    - [ ] Build REST API endpoints
    - [ ] Implement UI for data source management
+   - **Note**: This module is for CONNECTION MANAGEMENT, not file import processing
 
 ### 🔜 Phase 3: Advanced Features (Future)
 7. **Report Generation Engine**
@@ -328,6 +395,8 @@ apps/reports-api/src/
     ├── database.module.ts          # Global DATABASE_CONNECTION export
     ├── schemas/                    # All Drizzle schemas
     │   ├── tasks.schema.ts         # ✅ Implemented
+    │   ├── request-categorization.schema.ts  # ✅ Implemented
+    │   ├── parent-child-requests.schema.ts   # ✅ Implemented
     │   ├── index.ts
     │   └── [future-tables].schema.ts  # 🔜 Add here
     └── migrations/                 # SQL migration files
@@ -427,6 +496,9 @@ When implementing Belcorp Reports, add these schemas to `database/infrastructure
 3. ~~Implement clean architecture (Domain/Application/Infrastructure)~~ **DONE**
 4. ~~Create comprehensive documentation~~ **DONE** (see `CLEAN_ARCHITECTURE.md`)
 5. ~~Build working API + UI~~ **DONE**
+6. ~~Implement File Import Features~~ **DONE**
+   - ~~Request Categorization (Error categorization reports with Excel parsing)~~ **DONE**
+   - ~~Parent-Child Requests (Request relationships with Excel parsing)~~ **DONE**
 
 ### 🔜 Next Priorities
 1. **Implement Belcorp Reports Module**
@@ -441,10 +513,11 @@ When implementing Belcorp Reports, add these schemas to `database/infrastructure
    - Create template management use cases
    - Integrate with reports system
 
-3. **Add Data Sources Module**
-   - Implement connection management
-   - Add Turso connection testing
+3. **Add Data Sources Module** (Connection Management)
+   - Implement database connection configuration management
+   - Add connection health checks and testing
    - Create data source configuration UI
+   - **Important**: This is for managing database connections, NOT for file imports
 
 4. **Refine and Scale**
    - Extract common patterns to @repo/shared

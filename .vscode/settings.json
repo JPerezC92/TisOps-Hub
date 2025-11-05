@@ -6,5 +6,12 @@
   ],
   "tailwindCSS.experimental.classRegex": [
     ["([\"'`][^\"'`]*.*?[\"'`])", "[\"'`]([^\"'`]*).*?[\"'`]"]
-  ]
+  ],
+  "tailwindCSS.validate": false,
+  "tailwindCSS.files.exclude": [
+    "**/*.md"
+  ],
+  "[markdown]": {
+    "tailwindCSS.validate": false
+  }
 }
