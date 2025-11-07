@@ -1,37 +1,31 @@
 import Link from 'next/link';
-import styles from './Navigation.module.css';
 
 export function Navigation() {
   return (
-    <nav className={styles.nav}>
-      <div className={styles.container}>
-        <Link href="/" className={styles.logo}>
+    <nav className="bg-black border-b border-gray-700 sticky top-0 z-[100]">
+      <div className="max-w-[1200px] mx-auto px-8 py-4 flex items-center justify-between md:px-4">
+        <Link href="/" className="text-xl font-semibold text-white no-underline transition-colors hover:text-blue-500">
           TisOps Hub
         </Link>
-        <ul className={styles.links}>
+        <ul className="flex gap-8 list-none m-0 p-0 md:gap-4">
           <li>
-            <Link href="/" className={styles.link}>
+            <Link href="/" className="text-gray-400 no-underline text-[0.95rem] transition-colors hover:text-white md:text-sm">
               Home
             </Link>
           </li>
           <li>
-            <Link href="/tasks" className={styles.link}>
+            <Link href="/tasks" className="text-gray-400 no-underline text-[0.95rem] transition-colors hover:text-white md:text-sm">
               Tasks
             </Link>
           </li>
           <li>
-            <Link href="/imports" className={styles.link}>
+            <Link href="/imports" className="text-gray-400 no-underline text-[0.95rem] transition-colors hover:text-white md:text-sm">
               File Imports
             </Link>
           </li>
           <li>
-            <Link href="/request-relationships" className={styles.link}>
-              Request Relationships
-            </Link>
-          </li>
-          <li>
-            <Link href="/error-categorization" className={styles.link}>
-              Error Categorization
+            <Link href="/reports" className="text-gray-400 no-underline text-[0.95rem] transition-colors hover:text-white md:text-sm">
+              Reports
             </Link>
           </li>
         </ul>

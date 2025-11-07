@@ -9,7 +9,7 @@ interface FileImport {
   uploadedAt: string;
   recordCount: number;
   status: 'success' | 'processing' | 'failed';
-  source: 'request-relationships' | 'error-categorization' | 'other-source';
+  source: 'request-relationships' | 'error-categorization' | 'rep01-tags' | 'other-source';
   sourceLabel: string;
 }
 
@@ -20,9 +20,10 @@ export default function ImportsPage() {
   useEffect(() => {
     const fetchImportData = async () => {
       try {
-        const [reqRelResponse, errorCatResponse] = await Promise.all([
+        const [reqRelResponse, errorCatResponse, rep01Response] = await Promise.all([
           fetch('http://localhost:3000/parent-child-requests', { cache: 'no-store' }),
           fetch('http://localhost:3000/request-categorization', { cache: 'no-store' }),
+          fetch('http://localhost:3000/rep01-tags', { cache: 'no-store' }),
         ]);
 
         const imports: FileImport[] = [];
@@ -63,6 +64,24 @@ export default function ImportsPage() {
           }
         }
 
+        // REP01 Tags
+        if (rep01Response.ok) {
+          const rep01Data = await rep01Response.json();
+          console.log('REP01 Tags data:', rep01Data);
+          // API returns { data: [], total: number }
+          if (rep01Data.data && rep01Data.data.length > 0) {
+            imports.push({
+              id: '3',
+              filename: 'REP01 XD TAG 2025.xlsx',
+              uploadedAt: new Date().toISOString(),
+              recordCount: rep01Data.total || rep01Data.data.length,
+              status: 'success',
+              source: 'rep01-tags',
+              sourceLabel: 'REP01 Tags',
+            });
+          }
+        }
+
         console.log('Final imports array:', imports);
         setFileImports(imports);
       } catch (error) {
@@ -79,11 +98,21 @@ export default function ImportsPage() {
 
   const [uploadingErrorCat, setUploadingErrorCat] = useState(false);
   const [uploadingReqRel, setUploadingReqRel] = useState(false);
+  const [uploadingRep01, setUploadingRep01] = useState(false);
+
+  // Error states for each upload type
+  const [errorCatError, setErrorCatError] = useState<string | null>(null);
+  const [reqRelError, setReqRelError] = useState<string | null>(null);
+  const [rep01Error, setRep01Error] = useState<string | null>(null);
+
+  // Success states for each upload type
+  const [errorCatSuccess, setErrorCatSuccess] = useState<string | null>(null);
+  const [reqRelSuccess, setReqRelSuccess] = useState<string | null>(null);
+  const [rep01Success, setRep01Success] = useState<string | null>(null);
 
   const copyFilenameWithoutExtension = (filename: string) => {
     const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
     navigator.clipboard.writeText(nameWithoutExt);
-    alert(`Copied: ${nameWithoutExt}`);
   };
 
   const handleErrorCategorizationFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,6 +120,8 @@ export default function ImportsPage() {
     if (!file) return;
     
     setUploadingErrorCat(true);
+    setErrorCatError(null);
+    setErrorCatSuccess(null);
     
     const formData = new FormData();
     formData.append('file', file);
@@ -101,13 +132,19 @@ export default function ImportsPage() {
         body: formData,
       });
 
-      if (!response.ok) throw new Error('Upload failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Upload failed' }));
+        throw new Error(errorData.message || `Upload failed with status ${response.status}`);
+      }
       
-      alert('File uploaded successfully!');
+      setErrorCatSuccess('File uploaded successfully!');
       // Reset the input
       e.target.value = '';
-    } catch {
-      alert('Upload failed. Please try again.');
+      // Auto-hide success after 5 seconds
+      setTimeout(() => setErrorCatSuccess(null), 5000);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Upload failed. Please try again.';
+      setErrorCatError(message);
       e.target.value = '';
     } finally {
       setUploadingErrorCat(false);
@@ -119,6 +156,8 @@ export default function ImportsPage() {
     if (!file) return;
     
     setUploadingReqRel(true);
+    setReqRelError(null);
+    setReqRelSuccess(null);
     
     const formData = new FormData();
     formData.append('file', file);
@@ -129,16 +168,61 @@ export default function ImportsPage() {
         body: formData,
       });
 
-      if (!response.ok) throw new Error('Upload failed');
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Upload failed' }));
+        throw new Error(errorData.message || `Upload failed with status ${response.status}`);
+      }
       
-      alert('File uploaded successfully!');
+      setReqRelSuccess('File uploaded successfully!');
       // Reset the input
       e.target.value = '';
-    } catch {
-      alert('Upload failed. Please try again.');
+      // Auto-hide success after 5 seconds
+      setTimeout(() => setReqRelSuccess(null), 5000);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Upload failed. Please try again.';
+      setReqRelError(message);
       e.target.value = '';
     } finally {
       setUploadingReqRel(false);
+    }
+  };
+
+  const handleRep01TagsFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setUploadingRep01(true);
+    setRep01Error(null);
+    setRep01Success(null);
+    
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('http://localhost:3000/rep01-tags/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Upload failed' }));
+        throw new Error(errorData.message || `Upload failed with status ${response.status}`);
+      }
+      
+      const result = await response.json();
+      setRep01Success(`File uploaded successfully! Imported: ${result.imported || 0} records, Skipped: ${result.skipped || 0} duplicates`);
+      // Reset the input
+      e.target.value = '';
+      // Auto-hide success after 5 seconds
+      setTimeout(() => setRep01Success(null), 5000);
+      // Refresh the page data
+      setTimeout(() => window.location.reload(), 5000);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Upload failed. Please try again.';
+      setRep01Error(message);
+      e.target.value = '';
+    } finally {
+      setUploadingRep01(false);
     }
   };
 
@@ -159,6 +243,8 @@ export default function ImportsPage() {
         return '/request-relationships';
       case 'error-categorization':
         return '/error-categorization';
+      case 'rep01-tags':
+        return '/rep01-tags';
       default:
         return '/';
     }
@@ -237,7 +323,7 @@ export default function ImportsPage() {
         </div>
 
         {/* Upload Sections */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {/* Error Categorization Upload */}
           <div className="bg-jpc-orange-500/10 border border-jpc-orange-500/50 rounded-xl shadow-[0_0_9px_2px] shadow-jpc-orange-500/30 p-4">
             <div className="flex items-center justify-between gap-3">
@@ -262,14 +348,6 @@ export default function ImportsPage() {
                 </div>
               </div>
               <div className="relative shrink-0">
-                <input
-                  type="file"
-                  id="error-cat-upload"
-                  accept=".xlsx,.xls"
-                  onChange={handleErrorCategorizationFileChange}
-                  disabled={uploadingErrorCat}
-                  className="hidden"
-                />
                 <label
                   htmlFor="error-cat-upload"
                   className={`cursor-pointer inline-flex items-center justify-center px-3 py-2 rounded-md text-xs font-medium transition-colors ${
@@ -278,6 +356,14 @@ export default function ImportsPage() {
                       : 'bg-jpc-orange-500 hover:bg-jpc-orange-500/80 text-white'
                   }`}
                 >
+                  <input
+                    type="file"
+                    id="error-cat-upload"
+                    accept=".xlsx,.xls"
+                    onChange={handleErrorCategorizationFileChange}
+                    disabled={uploadingErrorCat}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
                   {uploadingErrorCat ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   ) : (
@@ -288,6 +374,51 @@ export default function ImportsPage() {
                 </label>
               </div>
             </div>
+            
+            {/* Error Message Box */}
+            {errorCatError && (
+              <div className="mt-3 bg-red-500/10 border border-red-500/50 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <svg className="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-red-500 mb-1">Upload Failed</p>
+                    <p className="text-xs text-red-400 break-words">{errorCatError}</p>
+                  </div>
+                  <button
+                    onClick={() => setErrorCatError(null)}
+                    className="text-red-400 hover:text-red-300 shrink-0"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {/* Success Message Box */}
+            {errorCatSuccess && (
+              <div className="mt-3 bg-green-500/10 border border-green-500/50 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <svg className="h-5 w-5 text-green-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-xs text-green-400">{errorCatSuccess}</p>
+                  </div>
+                  <button
+                    onClick={() => setErrorCatSuccess(null)}
+                    className="text-green-400 hover:text-green-300 shrink-0"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Request Relationships Upload */}
@@ -314,14 +445,6 @@ export default function ImportsPage() {
                 </div>
               </div>
               <div className="relative shrink-0">
-                <input
-                  type="file"
-                  id="req-rel-upload"
-                  accept=".xlsx,.xls"
-                  onChange={handleRequestRelationshipsFileChange}
-                  disabled={uploadingReqRel}
-                  className="hidden"
-                />
                 <label
                   htmlFor="req-rel-upload"
                   className={`cursor-pointer inline-flex items-center justify-center px-3 py-2 rounded-md text-xs font-medium transition-colors ${
@@ -330,6 +453,14 @@ export default function ImportsPage() {
                       : 'bg-jpc-400 hover:bg-jpc-400/80 text-white'
                   }`}
                 >
+                  <input
+                    type="file"
+                    id="req-rel-upload"
+                    accept=".xlsx,.xls"
+                    onChange={handleRequestRelationshipsFileChange}
+                    disabled={uploadingReqRel}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
                   {uploadingReqRel ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   ) : (
@@ -340,6 +471,148 @@ export default function ImportsPage() {
                 </label>
               </div>
             </div>
+            
+            {/* Error Message Box */}
+            {reqRelError && (
+              <div className="mt-3 bg-red-500/10 border border-red-500/50 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <svg className="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-red-500 mb-1">Upload Failed</p>
+                    <p className="text-xs text-red-400 break-words">{reqRelError}</p>
+                  </div>
+                  <button
+                    onClick={() => setReqRelError(null)}
+                    className="text-red-400 hover:text-red-300 shrink-0"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {/* Success Message Box */}
+            {reqRelSuccess && (
+              <div className="mt-3 bg-green-500/10 border border-green-500/50 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <svg className="h-5 w-5 text-green-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-xs text-green-400">{reqRelSuccess}</p>
+                  </div>
+                  <button
+                    onClick={() => setReqRelSuccess(null)}
+                    className="text-green-400 hover:text-green-300 shrink-0"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* REP01 Tags Upload */}
+          <div className="bg-jpc-purple-500/10 border border-jpc-purple-500/50 rounded-xl shadow-[0_0_9px_2px] shadow-jpc-purple-500/30 p-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <svg className="h-5 w-5 text-jpc-purple-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-jpc-gold-500 truncate">REP01 Tags</h3>
+                  <div className="flex items-center gap-1">
+                    <p className="text-xs text-jpc-gold-500/70 truncate">REP01 XD TAG 2025.xlsx</p>
+                    <button
+                      onClick={() => copyFilenameWithoutExtension('REP01 XD TAG 2025.xlsx')}
+                      className="shrink-0 p-0.5 hover:bg-jpc-purple-500/20 rounded transition-colors"
+                      title="Copy filename without extension"
+                    >
+                      <svg className="h-3 w-3 text-jpc-gold-500/70 hover:text-jpc-gold-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="relative shrink-0">
+                <label
+                  htmlFor="rep01-upload"
+                  className={`cursor-pointer inline-flex items-center justify-center px-3 py-2 rounded-md text-xs font-medium transition-colors ${
+                    uploadingRep01
+                      ? 'bg-jpc-purple-500/50 cursor-not-allowed'
+                      : 'bg-jpc-purple-500 hover:bg-jpc-purple-500/80 text-white'
+                  }`}
+                >
+                  <input
+                    type="file"
+                    id="rep01-upload"
+                    accept=".xlsx,.xls"
+                    onChange={handleRep01TagsFileChange}
+                    disabled={uploadingRep01}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  />
+                  {uploadingRep01 ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  ) : (
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                  )}
+                </label>
+              </div>
+            </div>
+            
+            {/* Error Message Box */}
+            {rep01Error && (
+              <div className="mt-3 bg-red-500/10 border border-red-500/50 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <svg className="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-xs font-semibold text-red-500 mb-1">Upload Failed</p>
+                    <p className="text-xs text-red-400 break-words">{rep01Error}</p>
+                  </div>
+                  <button
+                    onClick={() => setRep01Error(null)}
+                    className="text-red-400 hover:text-red-300 shrink-0"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+            
+            {/* Success Message Box */}
+            {rep01Success && (
+              <div className="mt-3 bg-green-500/10 border border-green-500/50 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <svg className="h-5 w-5 text-green-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-xs text-green-400">{rep01Success}</p>
+                  </div>
+                  <button
+                    onClick={() => setRep01Success(null)}
+                    className="text-green-400 hover:text-green-300 shrink-0"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

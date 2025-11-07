@@ -7,9 +7,10 @@ import {
   UploadedFile,
   HttpException,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { RequestCategorizationService } from './request-categorization.service';
 
 @ApiTags('request-categorization')
@@ -31,6 +32,57 @@ export class RequestCategorizationController {
   @ApiResponse({ status: 200, description: 'Returns category summary' })
   async getCategorySummary() {
     return this.requestCategorizationService.getCategorySummary();
+  }
+
+  @Get('request-ids-by-categorization')
+  @ApiOperation({
+    summary: 'Get request IDs that share a linked request and categorization',
+  })
+  @ApiQuery({
+    name: 'linkedRequestId',
+    required: true,
+    description: 'The linked request ID to filter by',
+  })
+  @ApiQuery({
+    name: 'categorizacion',
+    required: true,
+    description: 'The categorization value to filter by',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns array of request IDs with their links',
+    schema: {
+      type: 'object',
+      properties: {
+        requestIds: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              requestId: { type: 'string' },
+              requestIdLink: { type: 'string', nullable: true },
+            },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 400, description: 'Missing required query parameters' })
+  async getRequestIdsByCategorizacion(
+    @Query('linkedRequestId') linkedRequestId: string,
+    @Query('categorizacion') categorizacion: string,
+  ) {
+    if (!linkedRequestId || !categorizacion) {
+      throw new HttpException(
+        'linkedRequestId and categorizacion query parameters are required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return this.requestCategorizationService.getRequestIdsByCategorizacion(
+      linkedRequestId,
+      categorizacion,
+    );
   }
 
   @Post('upload')
