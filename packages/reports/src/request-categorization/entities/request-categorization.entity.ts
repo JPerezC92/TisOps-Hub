@@ -1,8 +1,7 @@
 export interface RequestCategorization {
-  id: number;
+  requestId: string; // Primary key - unique identifier
   category: string;
   technician: string;
-  requestId: string;
   requestIdLink?: string;
   createdTime: string;
   modulo: string;

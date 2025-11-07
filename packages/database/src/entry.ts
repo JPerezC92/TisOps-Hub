@@ -19,3 +19,17 @@ export type {
   RequestCategorization as DbRequestCategorization,
   InsertRequestCategorization,
 } from './schemas/request-categorization.schema';
+
+// REP01 Tags schema and types
+export { rep01Tags } from './schemas/rep01-tags.schema';
+export type {
+  Rep01Tag as DbRep01Tag,
+  InsertRep01Tag,
+} from './schemas/rep01-tags.schema';
+
+// Error Logs schema and types
+export { errorLogs } from './schemas/error-logs.schema';
+export type { ErrorLog, InsertErrorLog } from './schemas/error-logs.schema';
+
+
+

@@ -1,9 +1,8 @@
 export class RequestCategorizationEntity {
   constructor(
-    private readonly id: number,
+    private readonly requestId: string,
     private readonly category: string,
     private readonly technician: string,
-    private readonly requestId: string,
     private readonly createdTime: string,
     private readonly modulo: string,
     private readonly subject: string,
@@ -14,9 +13,9 @@ export class RequestCategorizationEntity {
   ) {}
 
   static create(
+    requestId: string,
     category: string,
     technician: string,
-    requestId: string,
     createdTime: string,
     modulo: string,
     subject: string,
@@ -26,10 +25,9 @@ export class RequestCategorizationEntity {
     linkedRequestIdLink?: string,
   ): RequestCategorizationEntity {
     return new RequestCategorizationEntity(
-      0,
+      requestId,
       category,
       technician,
-      requestId,
       createdTime,
       modulo,
       subject,
@@ -40,8 +38,8 @@ export class RequestCategorizationEntity {
     );
   }
 
-  getId(): number {
-    return this.id;
+  getRequestId(): string {
+    return this.requestId;
   }
 
   getCategory(): string {
@@ -50,10 +48,6 @@ export class RequestCategorizationEntity {
 
   getTechnician(): string {
     return this.technician;
-  }
-
-  getRequestId(): string {
-    return this.requestId;
   }
 
   getCreatedTime(): string {

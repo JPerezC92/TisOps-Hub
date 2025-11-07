@@ -35,3 +35,17 @@ export type {
   ParentChildRequestStats,
   ParentChildRequestResponse,
 } from './parent-child-requests';
+
+// REP01 Tags validation schemas, DTOs and Types
+export {
+  insertRep01TagSchema,
+  updateRep01TagSchema,
+  CreateRep01TagDto,
+  UpdateRep01TagDto,
+} from './rep01-tags';
+
+export type {
+  Rep01Tag,
+  Rep01TagResponse,
+} from './rep01-tags';
+

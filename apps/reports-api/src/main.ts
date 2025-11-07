@@ -3,10 +3,15 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
 
 import { AppModule } from './app.module';
+import { DatabaseExceptionFilter } from './error-logs/infrastructure/filters/database-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
+
+  // Global Exception Filter for database errors
+  const databaseExceptionFilter = app.get(DatabaseExceptionFilter);
+  app.useGlobalFilters(databaseExceptionFilter);
 
   // Swagger Configuration
   const config = new DocumentBuilder()

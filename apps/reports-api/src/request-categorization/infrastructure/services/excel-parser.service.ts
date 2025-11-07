@@ -58,14 +58,14 @@ export class ExcelParserService {
         const linkedRequestIdLink = this.extractHyperlink(worksheet, currentRowIndex, 7);
 
         const entity = RequestCategorizationEntity.create(
-          currentCategory,
-          String(row[1] || '').trim(),
-          String(row[2] || '').trim(),
-          String(row[3] || '').trim(),
-          String(row[4] || '').trim(),
-          String(row[5] || '').trim(),
-          String(row[6] || '').trim(),
-          String(row[7] || '').trim(),
+          String(row[2] || '').trim(), // requestId (moved to first parameter)
+          currentCategory,              // category
+          String(row[1] || '').trim(), // technician
+          String(row[3] || '').trim(), // createdTime
+          String(row[4] || '').trim(), // modulo
+          String(row[5] || '').trim(), // subject
+          String(row[6] || '').trim(), // problemId
+          String(row[7] || '').trim(), // linkedRequestId
           requestIdLink,
           linkedRequestIdLink,
         );
@@ -96,6 +96,19 @@ export class ExcelParserService {
     return requestId && !isNaN(Number(requestId));
   }
 
+  private decodeHTMLEntities(text: string): string {
+    const entities: Record<string, string> = {
+      '&amp;': '&',
+      '&lt;': '<',
+      '&gt;': '>',
+      '&quot;': '"',
+      '&#39;': "'",
+      '&nbsp;': ' ',
+    };
+
+    return text.replace(/&[a-z]+;|&#\d+;/gi, (match) => entities[match] || match);
+  }
+
   private extractHyperlink(
     worksheet: XLSX.WorkSheet,
     rowIndex: number,
@@ -105,7 +118,8 @@ export class ExcelParserService {
     const cell = worksheet[cellAddress];
 
     if (cell && cell.l && cell.l.Target) {
-      return cell.l.Target;
+      // Decode HTML entities like &amp; to &
+      return this.decodeHTMLEntities(cell.l.Target);
     }
 
     return undefined;
