@@ -7,8 +7,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
-import { GetAllErrorLogsUseCase } from './application/use-cases/get-all-error-logs.use-case';
-import { GetErrorLogByIdUseCase } from './application/use-cases/get-error-log-by-id.use-case';
+import { GetAllErrorLogsUseCase } from '@error-logs/application/use-cases/get-all-error-logs.use-case';
+import { GetErrorLogByIdUseCase } from '@error-logs/application/use-cases/get-error-log-by-id.use-case';
 
 @ApiTags('error-logs')
 @Controller('error-logs')

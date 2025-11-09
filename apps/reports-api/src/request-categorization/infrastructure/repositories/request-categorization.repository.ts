@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { eq, sql, and, isNotNull, ne } from 'drizzle-orm';
-import { Database, requestCategorization, rep01Tags } from '@repo/database';
+import { Database, requestCategorization, requestTags } from '@repo/database';
 import { IRequestCategorizationRepository } from '../../domain/repositories/request-categorization.repository.interface';
 import { RequestCategorizationEntity } from '../../domain/entities/request-categorization.entity';
 
@@ -44,14 +44,14 @@ export class RequestCategorizationRepository
         linkedRequestId: requestCategorization.linkedRequestId,
         requestIdLink: requestCategorization.requestIdLink,
         linkedRequestIdLink: requestCategorization.linkedRequestIdLink,
-        informacionAdicional: rep01Tags.informacionAdicional,
-        categorizacion: rep01Tags.categorizacion,
+        informacionAdicional: requestTags.informacionAdicional,
+        categorizacion: requestTags.categorizacion,
       })
       .from(requestCategorization)
       .leftJoin(
-        rep01Tags,
+        requestTags,
         and(
-          eq(requestCategorization.linkedRequestId, rep01Tags.linkedRequestId),
+          eq(requestCategorization.linkedRequestId, requestTags.linkedRequestId),
           // Exclude "No asignado" from JOIN to avoid fetching computed columns
           ne(requestCategorization.linkedRequestId, 'No asignado'),
           isNotNull(requestCategorization.linkedRequestId),
@@ -236,21 +236,21 @@ export class RequestCategorizationRepository
   ): Promise<Array<{ requestId: string; requestIdLink?: string }>> {
     const results = await this.db
       .selectDistinct({
-        requestId: rep01Tags.requestId,
-        requestIdLink: rep01Tags.requestIdLink,
+        requestId: requestTags.requestId,
+        requestIdLink: requestTags.requestIdLink,
       })
-      .from(rep01Tags)
+      .from(requestTags)
       .leftJoin(
         requestCategorization,
-        eq(rep01Tags.requestId, requestCategorization.requestId),
+        eq(requestTags.requestId, requestCategorization.requestId),
       )
       .where(
         and(
-          eq(rep01Tags.linkedRequestId, linkedRequestId),
-          eq(rep01Tags.categorizacion, categorizacion),
+          eq(requestTags.linkedRequestId, linkedRequestId),
+          eq(requestTags.categorizacion, categorizacion),
         ),
       )
-      .orderBy(rep01Tags.requestId);
+      .orderBy(requestTags.requestId);
 
     return results.map((r) => ({
       requestId: r.requestId,

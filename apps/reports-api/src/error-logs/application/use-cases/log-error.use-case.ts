@@ -1,5 +1,5 @@
-import { ErrorLog } from '../../domain/entities/error-log.entity';
-import { IErrorLogRepository } from '../../domain/repositories/error-log.repository.interface';
+import { ErrorLog } from '@error-logs/domain/entities/error-log.entity';
+import { IErrorLogRepository } from '@error-logs/domain/repositories/error-log.repository.interface';
 
 export interface LogErrorData {
   errorType: string;

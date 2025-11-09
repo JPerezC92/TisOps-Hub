@@ -20,12 +20,12 @@ export type {
   InsertRequestCategorization,
 } from './schemas/request-categorization.schema';
 
-// REP01 Tags schema and types
-export { rep01Tags } from './schemas/rep01-tags.schema';
+// Request Tags schema and types
+export { requestTags } from './schemas/request-tags.schema';
 export type {
-  Rep01Tag as DbRep01Tag,
-  InsertRep01Tag,
-} from './schemas/rep01-tags.schema';
+  RequestTag as DbRequestTag,
+  InsertRequestTag,
+} from './schemas/request-tags.schema';
 
 // Error Logs schema and types
 export { errorLogs } from './schemas/error-logs.schema';

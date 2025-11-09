@@ -12,9 +12,9 @@ export default function Home() {
       color: 'cyan',
     },
     {
-      href: '/rep01-tags',
-      title: 'REP01 Tags',
-      description: 'View and manage REP01 tag data',
+      href: '/request-tags',
+      title: 'Request Tags',
+      description: 'View and manage request tag data',
       icon: '🏷️',
       color: 'purple',
     },

@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { LibsqlError } from '@libsql/client';
-import { LogErrorUseCase } from '../../application/use-cases/log-error.use-case';
+import { LogErrorUseCase } from '@error-logs/application/use-cases/log-error.use-case';
 
 @Catch()
 export class DatabaseExceptionFilter implements ExceptionFilter {

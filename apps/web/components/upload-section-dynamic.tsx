@@ -11,6 +11,9 @@ interface UploadSectionProps {
   uploading: boolean
   onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   onUpload: () => void
+  hardcodedFilename: string
+  title: string
+  description: string
 }
 
 export function UploadSectionDynamic({
@@ -19,26 +22,27 @@ export function UploadSectionDynamic({
   file,
   uploading,
   onFileChange,
-  onUpload
+  onUpload,
+  hardcodedFilename,
+  title,
+  description
 }: UploadSectionProps) {
   const [copied, setCopied] = useState(false)
 
   const handleCopyFilename = async () => {
-    if (currentFilename) {
-      // Remove file extension before copying
-      const filenameWithoutExtension = currentFilename.replace(/\.[^/.]+$/, '')
-      await navigator.clipboard.writeText(filenameWithoutExtension)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
-    }
+    // Remove extension before copying
+    const filenameWithoutExtension = hardcodedFilename.replace(/\.(xlsx|xls)$/i, '')
+    await navigator.clipboard.writeText(filenameWithoutExtension)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
     <div className="mb-12 rounded-xl border border-border/60 bg-card p-8 shadow-xl">
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-foreground">Upload Error Categorization Report</h2>
+        <h2 className="text-2xl font-bold text-foreground">{title}</h2>
         <p className="mt-2 text-sm text-muted-foreground/80">
-          Upload an Excel file (REPORT PARA ETIQUETAR) to parse and categorize error reports
+          {description}
         </p>
       </div>
 
@@ -55,13 +59,12 @@ export function UploadSectionDynamic({
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className="inline-flex items-center gap-2 rounded-lg bg-jpc-vibrant-cyan-500/10 px-3 py-1.5 text-xs font-medium text-jpc-vibrant-cyan-400 border border-jpc-vibrant-cyan-500/20">
-              {currentFilename || 'No file'}
+              {hardcodedFilename}
             </span>
             <button
               onClick={handleCopyFilename}
-              disabled={!currentFilename}
-              className="p-1.5 hover:bg-jpc-vibrant-cyan-500/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title={currentFilename ? "Copy filename" : "No filename to copy"}
+              className="p-1.5 hover:bg-jpc-vibrant-cyan-500/20 rounded transition-colors"
+              title="Copy filename without extension"
             >
               {copied ? (
                 <Check className="h-3.5 w-3.5 text-jpc-vibrant-emerald-400" />

@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { eq, desc } from 'drizzle-orm';
 import { LibSQLDatabase } from 'drizzle-orm/libsql';
 import { errorLogs } from '@repo/database';
-import { ErrorLog } from '../../domain/entities/error-log.entity';
-import { IErrorLogRepository } from '../../domain/repositories/error-log.repository.interface';
+import { ErrorLog } from '@error-logs/domain/entities/error-log.entity';
+import { IErrorLogRepository } from '@error-logs/domain/repositories/error-log.repository.interface';
 
 @Injectable()
 export class ErrorLogRepository implements IErrorLogRepository {

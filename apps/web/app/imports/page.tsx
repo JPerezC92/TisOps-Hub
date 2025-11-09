@@ -9,7 +9,7 @@ interface FileImport {
   uploadedAt: string;
   recordCount: number;
   status: 'success' | 'processing' | 'failed';
-  source: 'request-relationships' | 'error-categorization' | 'rep01-tags' | 'other-source';
+  source: 'request-relationships' | 'error-categorization' | 'request-tags' | 'other-source';
   sourceLabel: string;
 }
 
@@ -23,7 +23,7 @@ export default function ImportsPage() {
         const [reqRelResponse, errorCatResponse, rep01Response] = await Promise.all([
           fetch('http://localhost:3000/parent-child-requests', { cache: 'no-store' }),
           fetch('http://localhost:3000/request-categorization', { cache: 'no-store' }),
-          fetch('http://localhost:3000/rep01-tags', { cache: 'no-store' }),
+          fetch('http://localhost:3000/request-tags', { cache: 'no-store' }),
         ]);
 
         const imports: FileImport[] = [];
@@ -64,10 +64,10 @@ export default function ImportsPage() {
           }
         }
 
-        // REP01 Tags
+        // Request Tags
         if (rep01Response.ok) {
           const rep01Data = await rep01Response.json();
-          console.log('REP01 Tags data:', rep01Data);
+          console.log('Request Tags data:', rep01Data);
           // API returns { data: [], total: number }
           if (rep01Data.data && rep01Data.data.length > 0) {
             imports.push({
@@ -76,8 +76,8 @@ export default function ImportsPage() {
               uploadedAt: new Date().toISOString(),
               recordCount: rep01Data.total || rep01Data.data.length,
               status: 'success',
-              source: 'rep01-tags',
-              sourceLabel: 'REP01 Tags',
+              source: 'request-tags',
+              sourceLabel: 'Request Tags',
             });
           }
         }
@@ -187,7 +187,7 @@ export default function ImportsPage() {
     }
   };
 
-  const handleRep01TagsFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRequestTagsFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     
@@ -199,7 +199,7 @@ export default function ImportsPage() {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:3000/rep01-tags/upload', {
+      const response = await fetch('http://localhost:3000/request-tags/upload', {
         method: 'POST',
         body: formData,
       });
@@ -243,8 +243,8 @@ export default function ImportsPage() {
         return '/request-relationships';
       case 'error-categorization':
         return '/error-categorization';
-      case 'rep01-tags':
-        return '/rep01-tags';
+      case 'request-tags':
+        return '/request-tags';
       default:
         return '/';
     }
@@ -512,7 +512,7 @@ export default function ImportsPage() {
             )}
           </div>
 
-          {/* REP01 Tags Upload */}
+          {/* Request Tags Upload */}
           <div className="bg-card border border-jpc-vibrant-purple-500/20 rounded-xl shadow-xl p-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -520,7 +520,7 @@ export default function ImportsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-foreground truncate">REP01 Tags</h3>
+                  <h3 className="text-sm font-semibold text-foreground truncate">Request Tags</h3>
                   <div className="flex items-center gap-1">
                     <p className="text-xs text-foreground/70 truncate">REP01 XD TAG 2025.xlsx</p>
                     <button
@@ -548,7 +548,7 @@ export default function ImportsPage() {
                     type="file"
                     id="rep01-upload"
                     accept=".xlsx,.xls"
-                    onChange={handleRep01TagsFileChange}
+                    onChange={handleRequestTagsFileChange}
                     disabled={uploadingRep01}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
