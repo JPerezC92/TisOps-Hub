@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
-import { Navigation } from './components/Navigation';
 import './globals.css';
+import { Header } from '@/components/header';
 
 export const metadata: Metadata = {
   title: 'TisOps Hub',
@@ -13,9 +13,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        <Navigation />
+    <html lang="en" className="dark">
+      <body className="font-sans antialiased">
+        <Header />
         {children}
       </body>
     </html>

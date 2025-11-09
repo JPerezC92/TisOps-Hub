@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { StatsGrid } from '@/components/stats-grid';
+import { Badge } from '@/components/ui/badge';
 
 interface ErrorLog {
   id: number;
@@ -54,191 +56,156 @@ export default function ErrorLogsPage() {
   const getErrorTypeColor = (type: string) => {
     switch (type) {
       case 'DatabaseError':
-        return 'bg-jpc-orange-500/10 text-jpc-orange-500 border-jpc-orange-500/50';
+        return 'bg-jpc-vibrant-orange-500/20 text-jpc-vibrant-orange-400 border-jpc-vibrant-orange-500/40 hover:bg-jpc-vibrant-orange-500/30';
       case 'ValidationError':
-        return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/50';
+        return 'bg-yellow-500/20 text-yellow-100 border-yellow-500/40 hover:bg-yellow-500/30';
       case 'NotFoundException':
-        return 'bg-jpc-400/10 text-jpc-400 border-jpc-400/50';
+        return 'bg-jpc-vibrant-cyan-500/20 text-jpc-vibrant-cyan-400 border-jpc-vibrant-cyan-500/40 hover:bg-jpc-vibrant-cyan-500/30';
       default:
-        return 'bg-jpc-purple-500/10 text-jpc-purple-500 border-jpc-purple-500/50';
+        return 'bg-jpc-vibrant-purple-500/20 text-jpc-vibrant-purple-400 border-jpc-vibrant-purple-500/40 hover:bg-jpc-vibrant-purple-500/30';
     }
   };
 
   const getMethodColor = (method?: string) => {
     switch (method) {
       case 'GET':
-        return 'bg-green-500/10 text-green-500 border-green-500/50';
+        return 'bg-green-500/20 text-green-100 border-green-500/40 hover:bg-green-500/30';
       case 'POST':
-        return 'bg-jpc-400/10 text-jpc-400 border-jpc-400/50';
+        return 'bg-jpc-vibrant-cyan-500/20 text-jpc-vibrant-cyan-400 border-jpc-vibrant-cyan-500/40 hover:bg-jpc-vibrant-cyan-500/30';
       case 'PATCH':
       case 'PUT':
-        return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/50';
+        return 'bg-yellow-500/20 text-yellow-100 border-yellow-500/40 hover:bg-yellow-500/30';
       case 'DELETE':
-        return 'bg-jpc-orange-500/10 text-jpc-orange-500 border-jpc-orange-500/50';
+        return 'bg-jpc-vibrant-orange-500/20 text-jpc-vibrant-orange-400 border-jpc-vibrant-orange-500/40 hover:bg-jpc-vibrant-orange-500/30';
       default:
-        return 'bg-jpc-gold-500/10 text-jpc-gold-500 border-jpc-gold-500/50';
+        return 'bg-gray-500/20 text-gray-100 border-gray-500/40 hover:bg-gray-500/30';
     }
   };
 
-  return (
-    <div className="min-h-screen bg-jpc-bg-900 relative overflow-hidden">
-      {/* Background layers */}
-      <div className="fixed inset-0 bg-linear-to-br from-jpc-bg-900 via-jpc-bg-500 to-jpc-bg-900 -z-10"></div>
-      <div className="fixed inset-0 backdrop-blur-sm bg-jpc-900/10 -z-10"></div>
+  // Prepare stats data for StatsGrid
+  const statsData = [
+    { label: "TOTAL ERRORS", value: errorLogs.length.toString(), color: 'cyan' as const },
+    {
+      label: "DATABASE ERRORS",
+      value: errorLogs.filter((e) => e.errorType === 'DatabaseError').length.toString(),
+      color: 'orange' as const
+    },
+    {
+      label: "LAST 24H",
+      value: errorLogs.filter((e) => new Date(e.timestamp).getTime() > Date.now() - 24 * 60 * 60 * 1000).length.toString(),
+      color: 'purple' as const
+    },
+  ];
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-jpc-gold-500">
-            🐛 Error Logs
-          </h1>
-          <p className="text-jpc-gold-500/70 mt-2">
+  return (
+    <div className="min-h-screen bg-background">
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-12">
+          <h1 className="text-4xl font-bold text-foreground">Error Logs</h1>
+          <p className="mt-3 text-base text-muted-foreground/90">
             Monitor and track all system errors and exceptions
           </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-jpc-400/10 border border-jpc-400/50 rounded-xl p-6 shadow-[0_0_9px_2px] shadow-jpc-400/30">
-            <div className="text-xs font-semibold text-jpc-gold-500/70 uppercase tracking-wider mb-2">Total Errors</div>
-            <div className="text-4xl font-bold text-jpc-400">
-              {errorLogs.length}
-            </div>
-          </div>
-          <div className="bg-jpc-orange-500/10 border border-jpc-orange-500/50 rounded-xl p-6 shadow-[0_0_9px_2px] shadow-jpc-orange-500/30">
-            <div className="text-xs font-semibold text-jpc-gold-500/70 uppercase tracking-wider mb-2">Database Errors</div>
-            <div className="text-4xl font-bold text-jpc-orange-500">
-              {errorLogs.filter((e) => e.errorType === 'DatabaseError').length}
-            </div>
-          </div>
-          <div className="bg-jpc-purple-500/10 border border-jpc-purple-500/50 rounded-xl p-6 shadow-[0_0_9px_2px] shadow-jpc-purple-500/30">
-            <div className="text-xs font-semibold text-jpc-gold-500/70 uppercase tracking-wider mb-2">Last 24h</div>
-            <div className="text-4xl font-bold text-jpc-purple-500">
-              {
-                errorLogs.filter(
-                  (e) =>
-                    new Date(e.timestamp).getTime() >
-                    Date.now() - 24 * 60 * 60 * 1000
-                ).length
-              }
-            </div>
-          </div>
-          <div className="bg-jpc-400/10 border border-jpc-400/50 rounded-xl p-6 shadow-[0_0_9px_2px] shadow-jpc-400/30">
-            <div className="text-xs font-semibold text-jpc-gold-500/70 uppercase tracking-wider mb-2">Showing</div>
-            <div className="flex items-center gap-2">
-              <select
-                value={limit}
-                onChange={(e) => setLimit(Number(e.target.value))}
-                className="text-lg font-bold text-jpc-gold-500 bg-jpc-bg-900 border border-jpc-400/50 rounded px-2 py-1"
-              >
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-                <option value={200}>200</option>
-              </select>
-              <span className="text-xs text-jpc-gold-500/70">records</span>
-            </div>
-          </div>
-        </div>
+        {/* Statistics */}
+        <StatsGrid
+          stats={statsData}
+          onRefresh={fetchErrorLogs}
+          loading={loading}
+        />
 
-        {/* Controls */}
-        <div className="flex justify-between items-center mb-4">
-          <button
-            onClick={fetchErrorLogs}
-            disabled={loading}
-            className="px-4 py-2 bg-jpc-bg-900 border border-jpc-400/50 text-jpc-400 rounded-lg hover:bg-jpc-400/10 hover:shadow-[0_0_9px_2px] hover:shadow-jpc-400/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-semibold"
-          >
-            {loading ? 'Loading...' : '🔄 Refresh'}
-          </button>
+        {/* Limit Selector */}
+        <div className="mb-8 bg-card border border-border/60 rounded-xl p-4 shadow-xl">
+          <div className="flex items-center justify-between">
+            <label className="text-sm font-medium text-foreground">Records per page:</label>
+            <select
+              value={limit}
+              onChange={(e) => setLimit(Number(e.target.value))}
+              className="px-4 py-2 bg-background border border-border/60 rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            >
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+              <option value={200}>200</option>
+            </select>
+          </div>
         </div>
 
         {/* Error Logs Table */}
-        <div className="bg-jpc-bg-900/50 border border-jpc-400/30 rounded-xl shadow-[0_0_9px_2px] shadow-jpc-400/20 overflow-hidden">
-          {loading ? (
-            <div className="p-8 text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jpc-400 mx-auto mb-4"></div>
-              <div className="text-jpc-gold-500/70">Loading errors...</div>
-            </div>
-          ) : errorLogs.length === 0 ? (
-            <div className="p-8 text-center">
-              <div className="text-6xl mb-4">✅</div>
-              <div className="text-xl font-semibold text-jpc-gold-500 mb-2">
-                No Errors Logged
+        <div className="rounded-2xl border border-jpc-vibrant-orange-500/20 bg-card/60 overflow-hidden shadow-2xl shadow-jpc-vibrant-orange-500/10 backdrop-blur-sm hover:border-jpc-vibrant-orange-500/30 transition-all duration-300">
+          <div className="px-6 py-6 border-b border-jpc-vibrant-orange-500/20 bg-gradient-to-r from-jpc-vibrant-orange-500/10 to-jpc-vibrant-purple-500/5">
+            <h3 className="text-sm font-bold text-foreground">
+              Error Log Entries
+              <span className="ml-3 text-xs font-normal text-muted-foreground/70">
+                Showing {errorLogs.length} errors
+              </span>
+            </h3>
+          </div>
+          <div className="overflow-x-auto">
+            {loading ? (
+              <div className="text-center py-12 text-foreground">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <p className="mt-4">Loading error logs...</p>
               </div>
-              <div className="text-jpc-gold-500/70">
-                Your system is running smoothly!
+            ) : errorLogs.length === 0 ? (
+              <div className="text-center py-12 bg-card border border-border/60 rounded-xl shadow-xl">
+                <div className="text-6xl mb-4">✅</div>
+                <p className="text-foreground text-lg mb-2 mt-4">No Errors Logged</p>
+                <p className="text-muted-foreground/70 text-sm">Your system is running smoothly!</p>
               </div>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-jpc-bg-900/80 border-b border-jpc-400/30">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-jpc-gold-500/70 uppercase tracking-wider">
-                      ID
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-jpc-gold-500/70 uppercase tracking-wider">
-                      Timestamp
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-jpc-gold-500/70 uppercase tracking-wider">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-jpc-gold-500/70 uppercase tracking-wider">
-                      Method
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-jpc-gold-500/70 uppercase tracking-wider">
-                      Endpoint
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-jpc-gold-500/70 uppercase tracking-wider">
-                      Message
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-jpc-gold-500/70 uppercase tracking-wider">
-                      Actions
-                    </th>
+            ) : (
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-jpc-vibrant-orange-500/10 hover:bg-transparent">
+                    <th className="h-12 text-xs font-bold text-jpc-vibrant-orange-400 bg-jpc-vibrant-orange-500/5 uppercase tracking-wider text-left py-4 px-6">ID</th>
+                    <th className="h-12 text-xs font-bold text-jpc-vibrant-orange-400 bg-jpc-vibrant-orange-500/5 uppercase tracking-wider text-left py-4 px-6">Timestamp</th>
+                    <th className="h-12 text-xs font-bold text-jpc-vibrant-orange-400 bg-jpc-vibrant-orange-500/5 uppercase tracking-wider text-left py-4 px-6">Type</th>
+                    <th className="h-12 text-xs font-bold text-jpc-vibrant-orange-400 bg-jpc-vibrant-orange-500/5 uppercase tracking-wider text-left py-4 px-6">Method</th>
+                    <th className="h-12 text-xs font-bold text-jpc-vibrant-orange-400 bg-jpc-vibrant-orange-500/5 uppercase tracking-wider text-left py-4 px-6">Endpoint</th>
+                    <th className="h-12 text-xs font-bold text-jpc-vibrant-orange-400 bg-jpc-vibrant-orange-500/5 uppercase tracking-wider text-left py-4 px-6">Message</th>
+                    <th className="h-12 text-xs font-bold text-jpc-vibrant-orange-400 bg-jpc-vibrant-orange-500/5 uppercase tracking-wider text-left py-4 px-6">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-jpc-bg-900/30 divide-y divide-jpc-400/20">
+                <tbody>
                   {errorLogs.map((error) => (
                     <tr
                       key={error.id}
-                      className="hover:bg-jpc-400/10 transition-colors"
+                      className="border-b border-jpc-vibrant-orange-500/10 hover:bg-jpc-vibrant-orange-500/10 transition-all duration-300 group"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-jpc-gold-500">
+                      <td className="px-6 py-4 text-xs text-foreground/80 group-hover:text-jpc-vibrant-orange-400 transition-colors font-medium">
                         #{error.id}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-jpc-gold-500/70">
+                      <td className="px-6 py-4 text-xs text-muted-foreground/80 whitespace-nowrap">
                         {formatDate(error.timestamp)}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`px-2 py-1 text-xs font-semibold rounded border ${getErrorTypeColor(
-                            error.errorType
-                          )}`}
+                      <td className="px-6 py-4">
+                        <Badge
+                          variant="outline"
+                          className={`${getErrorTypeColor(error.errorType)} border font-medium transition-all duration-300`}
                         >
                           {error.errorType}
-                        </span>
+                        </Badge>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-6 py-4">
                         {error.method && (
-                          <span
-                            className={`px-2 py-1 text-xs font-semibold rounded border ${getMethodColor(
-                              error.method
-                            )}`}
+                          <Badge
+                            variant="outline"
+                            className={`${getMethodColor(error.method)} border font-medium transition-all duration-300`}
                           >
                             {error.method}
-                          </span>
+                          </Badge>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-sm text-jpc-gold-500/70 max-w-xs truncate">
+                      <td className="px-6 py-4 text-xs text-muted-foreground/80 max-w-[200px] truncate">
                         {error.endpoint || '-'}
                       </td>
-                      <td className="px-6 py-4 text-sm text-jpc-gold-500 max-w-md">
-                        <div className="line-clamp-2">{error.errorMessage}</div>
+                      <td className="px-6 py-4 text-xs text-foreground/80 max-w-[300px]">
+                        <div className="line-clamp-1 truncate">{error.errorMessage}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button
                           onClick={() => setSelectedError(error)}
-                          className="text-jpc-400 hover:text-jpc-400/80 font-medium transition-colors"
+                          className="text-jpc-vibrant-cyan-400 hover:text-jpc-vibrant-cyan-400/80 font-medium transition-colors"
                         >
                           View Details
                         </button>
@@ -247,61 +214,60 @@ export default function ErrorLogsPage() {
                   ))}
                 </tbody>
               </table>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </main>
 
       {/* Error Detail Modal */}
       {selectedError && (
         <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setSelectedError(null)}
         >
           <div
-            className="bg-jpc-bg-900 border border-jpc-400/50 rounded-xl shadow-[0_0_20px_4px] shadow-jpc-400/30 max-w-4xl w-full max-h-[90vh] overflow-y-auto"
+            className="bg-card border border-jpc-vibrant-orange-500/30 rounded-xl shadow-[0_0_30px_5px] shadow-jpc-vibrant-orange-500/30 max-w-4xl w-full max-h-[90vh] overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-jpc-bg-900/95 backdrop-blur-sm border-b border-jpc-400/30 p-6 flex justify-between items-start">
+            {/* Header */}
+            <div className="bg-card/80 border-b border-jpc-vibrant-orange-500/30 px-6 py-4 flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-jpc-gold-500 mb-2">
-                  Error Details #{selectedError.id}
-                </h2>
-                <p className="text-sm text-jpc-gold-500/70">
+                <h3 className="text-xl font-bold text-foreground/80">Error Details #{selectedError.id}</h3>
+                <p className="text-sm text-muted-foreground/80 mt-1">
                   {formatDate(selectedError.timestamp)}
                 </p>
               </div>
               <button
                 onClick={() => setSelectedError(null)}
-                className="text-jpc-gold-500/50 hover:text-jpc-400 text-2xl leading-none transition-colors"
+                className="text-muted-foreground/80 hover:text-orange-300 text-2xl leading-none transition-colors"
+                title="Close"
               >
                 ×
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            {/* Content */}
+            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)] space-y-6">
               {/* Error Type and Method */}
               <div className="flex gap-4">
                 <div>
-                  <div className="text-sm text-jpc-gold-500/70 mb-1">Error Type</div>
-                  <span
-                    className={`inline-block px-3 py-1 text-sm font-semibold rounded border ${getErrorTypeColor(
-                      selectedError.errorType
-                    )}`}
+                  <div className="text-sm text-muted-foreground/80 mb-2">Error Type</div>
+                  <Badge
+                    variant="outline"
+                    className={`${getErrorTypeColor(selectedError.errorType)} border font-medium transition-all duration-300`}
                   >
                     {selectedError.errorType}
-                  </span>
+                  </Badge>
                 </div>
                 {selectedError.method && (
                   <div>
-                    <div className="text-sm text-jpc-gold-500/70 mb-1">Method</div>
-                    <span
-                      className={`inline-block px-3 py-1 text-sm font-semibold rounded border ${getMethodColor(
-                        selectedError.method
-                      )}`}
+                    <div className="text-sm text-muted-foreground/80 mb-2">Method</div>
+                    <Badge
+                      variant="outline"
+                      className={`${getMethodColor(selectedError.method)} border font-medium transition-all duration-300`}
                     >
                       {selectedError.method}
-                    </span>
+                    </Badge>
                   </div>
                 )}
               </div>
@@ -309,10 +275,8 @@ export default function ErrorLogsPage() {
               {/* Endpoint */}
               {selectedError.endpoint && (
                 <div>
-                  <div className="text-sm font-semibold text-jpc-gold-500 mb-1">
-                    Endpoint
-                  </div>
-                  <div className="bg-jpc-bg-900/50 border border-jpc-400/30 p-3 rounded font-mono text-sm text-jpc-gold-500/70">
+                  <div className="text-sm font-semibold text-foreground mb-2">Endpoint</div>
+                  <div className="bg-background border border-border/60 p-3 rounded font-mono text-sm text-foreground/80">
                     {selectedError.endpoint}
                   </div>
                 </div>
@@ -320,10 +284,8 @@ export default function ErrorLogsPage() {
 
               {/* Error Message */}
               <div>
-                <div className="text-sm font-semibold text-jpc-gold-500 mb-1">
-                  Error Message
-                </div>
-                <div className="bg-jpc-orange-500/10 border border-jpc-orange-500/50 p-4 rounded text-sm text-jpc-orange-500">
+                <div className="text-sm font-semibold text-foreground mb-2">Error Message</div>
+                <div className="bg-jpc-vibrant-orange-500/10 border border-jpc-vibrant-orange-500/50 p-4 rounded text-sm text-jpc-vibrant-orange-400">
                   {selectedError.errorMessage}
                 </div>
               </div>
@@ -331,10 +293,8 @@ export default function ErrorLogsPage() {
               {/* Stack Trace */}
               {selectedError.stackTrace && (
                 <div>
-                  <div className="text-sm font-semibold text-jpc-gold-500 mb-1">
-                    Stack Trace
-                  </div>
-                  <div className="bg-black/50 border border-jpc-400/30 text-jpc-gold-500/70 p-4 rounded overflow-x-auto">
+                  <div className="text-sm font-semibold text-foreground mb-2">Stack Trace</div>
+                  <div className="bg-black/50 border border-border/60 text-foreground/70 p-4 rounded overflow-x-auto">
                     <pre className="text-xs font-mono whitespace-pre-wrap">
                       {selectedError.stackTrace}
                     </pre>
@@ -345,11 +305,9 @@ export default function ErrorLogsPage() {
               {/* Metadata */}
               {selectedError.metadata && (
                 <div>
-                  <div className="text-sm font-semibold text-jpc-gold-500 mb-1">
-                    Request Metadata
-                  </div>
-                  <div className="bg-jpc-bg-900/50 border border-jpc-400/30 p-4 rounded overflow-x-auto">
-                    <pre className="text-xs font-mono whitespace-pre-wrap text-jpc-gold-500/70">
+                  <div className="text-sm font-semibold text-foreground mb-2">Request Metadata</div>
+                  <div className="bg-background border border-border/60 p-4 rounded overflow-x-auto">
+                    <pre className="text-xs font-mono whitespace-pre-wrap text-foreground/70">
                       {JSON.stringify(selectedError.metadata, null, 2)}
                     </pre>
                   </div>

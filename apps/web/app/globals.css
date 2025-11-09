@@ -1,65 +1,226 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
-@theme {
-  /* JPC Color Palette - Personal Design System by Juan Perez Castro */
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Light mode - not used but kept for completeness */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+/* Updated dark mode theme for modern enterprise dashboard */
+.dark {
+  --background: oklch(0.08 0 0);
+  --foreground: oklch(0.98 0.001 0);
+  --card: oklch(0.13 0.001 0);
+  --card-foreground: oklch(0.96 0.001 0);
+  --popover: oklch(0.13 0.001 0);
+  --popover-foreground: oklch(0.96 0.001 0);
+  --primary: oklch(0.4 0.05 199);
+  --primary-foreground: oklch(0.98 0.001 0);
+  --secondary: oklch(0.2 0.001 0);
+  --secondary-foreground: oklch(0.95 0.001 0);
+  --muted: oklch(0.18 0.001 0);
+  --muted-foreground: oklch(0.6 0.001 0);
+  --accent: oklch(0.5 0.1 199);
+  --accent-foreground: oklch(0.98 0.001 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.15 0.001 0);
+  --input: oklch(0.15 0.001 0);
+  --ring: oklch(0.5 0.1 199);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.12 0.001 0);
+  --sidebar-foreground: oklch(0.96 0.001 0);
+  --sidebar-primary: oklch(0.5 0.1 199);
+  --sidebar-primary-foreground: oklch(0.98 0.001 0);
+  --sidebar-accent: oklch(0.2 0.001 0);
+  --sidebar-accent-foreground: oklch(0.96 0.001 0);
+  --sidebar-border: oklch(0.15 0.001 0);
+  --sidebar-ring: oklch(0.5 0.1 199);
+}
+
+@theme inline {
+  --font-sans: "Geist", "Geist Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* ═══════════════════════════════════════════════════════════════════
+   * JPC VIBRANT COLOR PALETTE - Modern Design System
+   * ═══════════════════════════════════════════════════════════════════
+   * Personal Design System by Juan Perez Castro
+   * Reference: File Imports page (http://localhost:3001/imports)
+   *
+   * Key Principle: Use -400 variants for maximum vibrancy on dark backgrounds
+   * - Text & Icons: Use -400 variants (vibrant!)
+   * - Backgrounds: Use -500 with low opacity (/5, /10, /20)
+   * - Borders: Use -500 with medium opacity (/20, /40, /50)
+   */
+
+  /* Primary: Cyan - Total counts, main stats, processing states, primary actions */
+  --color-jpc-vibrant-cyan-400: #22d3ee;  /* Main vibrant cyan - for text & icons */
+  --color-jpc-vibrant-cyan-500: #06b6d4;  /* For backgrounds with opacity */
+
+  /* Success: Emerald - Success states, completed counts, positive indicators */
+  --color-jpc-vibrant-emerald-400: #34d399; /* Main vibrant green - for text & icons */
+  --color-jpc-vibrant-emerald-500: #10b981; /* For backgrounds with opacity */
+
+  /* Warning: Orange - Error counts, warnings, failed states, alerts */
+  --color-jpc-vibrant-orange-400: #fb923c; /* Main vibrant orange - for text & icons */
+  --color-jpc-vibrant-orange-500: #f97316; /* For backgrounds with opacity */
+
+  /* Secondary: Purple - Special stats, REP01 tags, secondary elements */
+  --color-jpc-vibrant-purple-400: #c084fc; /* Main vibrant purple - for text & icons */
+  --color-jpc-vibrant-purple-500: #a855f7; /* For backgrounds with opacity */
+
+  /* ═══════════════════════════════════════════════════════════════════
+   * ⚠️ DEPRECATED - Old JPC Color Palette (Pre-Vibrant Style)
+   * ═══════════════════════════════════════════════════════════════════
+   * These colors are from the old design system and are NO LONGER USED.
+   * They are preserved here for reference and potential future reuse.
+   *
+   * Old System Used:
+   * - jpc-400 (#32E6C7) - Replaced by jpc-vibrant-cyan-400
+   * - jpc-purple-500 (#A43FD9) - Replaced by jpc-vibrant-purple-400
+   * - jpc-orange-500 (#E54302) - Replaced by jpc-vibrant-orange-400
+   * - jpc-gold-500 (#E9D8A5) - Replaced by foreground/muted-foreground
+   * - jpc-bg-900 (#000813) - Replaced by background/card CSS variables
+   *
+   * JPC VIBRANT STYLE NOW USES:
+   * - jpc-vibrant-cyan-400, jpc-vibrant-emerald-400, jpc-vibrant-orange-400, jpc-vibrant-purple-400
+   * - Standard CSS variables: --background, --foreground, --card, --muted-foreground
+   */
+
+  /* Old JPC Cyan Palette - DEPRECATED */
   --color-jpc-50: #e6fffe;
   --color-jpc-100: #ccfffc;
   --color-jpc-200: #99fff9;
   --color-jpc-300: #66fff7;
-  --color-jpc-400: #32E6C7; /* Primary cyan/teal */
+  --color-jpc-400: #32E6C7; /* Old primary cyan - NOW USE jpc-vibrant-cyan-400 */
   --color-jpc-500: #2bc4a9;
   --color-jpc-600: #22a28c;
   --color-jpc-700: #1a7f6e;
   --color-jpc-800: #115c51;
-  --color-jpc-900: #007260; /* Dark teal */
+  --color-jpc-900: #007260; /* Old dark teal */
   --color-jpc-950: #004035;
 
-  /* JPC Purple Palette */
+  /* Old JPC Purple Palette - DEPRECATED */
   --color-jpc-purple-50: #f5e6ff;
   --color-jpc-purple-100: #ebccff;
   --color-jpc-purple-200: #d799ff;
   --color-jpc-purple-300: #c366ff;
   --color-jpc-purple-400: #af33ff;
-  --color-jpc-purple-500: #A43FD9; /* Primary purple */
+  --color-jpc-purple-500: #A43FD9; /* Old primary purple - NOW USE jpc-vibrant-purple-400 */
   --color-jpc-purple-600: #8933b3;
   --color-jpc-purple-700: #6e268c;
   --color-jpc-purple-800: #531a66;
-  --color-jpc-purple-900: #2F0B43; /* Dark purple header */
+  --color-jpc-purple-900: #2F0B43; /* Old dark purple header */
   --color-jpc-purple-950: #1a0626;
 
-  /* JPC Orange Palette */
+  /* Old JPC Orange Palette - DEPRECATED */
   --color-jpc-orange-50: #fff3e6;
   --color-jpc-orange-100: #ffe7cc;
   --color-jpc-orange-200: #ffcf99;
   --color-jpc-orange-300: #ffb766;
   --color-jpc-orange-400: #ff9f33;
-  --color-jpc-orange-500: #E54302; /* Primary orange/red */
+  --color-jpc-orange-500: #E54302; /* Old primary orange - NOW USE jpc-vibrant-orange-400 */
   --color-jpc-orange-600: #cc3c02;
   --color-jpc-orange-700: #b33501;
   --color-jpc-orange-800: #992e01;
   --color-jpc-orange-900: #802701;
   --color-jpc-orange-950: #661f01;
 
-  /* JPC Background Palette */
+  /* Old JPC Background Palette - DEPRECATED */
   --color-jpc-bg-50: #e6ebf0;
   --color-jpc-bg-100: #ccd7e1;
   --color-jpc-bg-200: #99afc3;
   --color-jpc-bg-300: #6687a5;
   --color-jpc-bg-400: #335f87;
-  --color-jpc-bg-500: #001a2e; /* Mid-dark background */
+  --color-jpc-bg-500: #001a2e; /* Old mid-dark background - NOW USE --background */
   --color-jpc-bg-600: #001729;
   --color-jpc-bg-700: #001324;
   --color-jpc-bg-800: #000f1f;
-  --color-jpc-bg-900: #000813; /* Very dark blue background */
+  --color-jpc-bg-900: #000813; /* Old dark background - NOW USE --background or --card */
   --color-jpc-bg-950: #000510;
 
-  /* JPC Gold Palette */
+  /* Old JPC Gold Palette - DEPRECATED */
   --color-jpc-gold-50: #fdfbf7;
   --color-jpc-gold-100: #faf7ef;
   --color-jpc-gold-200: #f5efdf;
   --color-jpc-gold-300: #f0e7cf;
   --color-jpc-gold-400: #ebdfbf;
-  --color-jpc-gold-500: #E9D8A5; /* Primary gold text */
+  --color-jpc-gold-500: #E9D8A5; /* Old primary gold text - NOW USE --foreground or --muted-foreground */
   --color-jpc-gold-600: #d4be80;
   --color-jpc-gold-700: #bfa45b;
   --color-jpc-gold-800: #aa8a36;
@@ -67,28 +228,12 @@
   --color-jpc-gold-950: #6a4f0b;
 }
 
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-  margin: 0;
-  padding: 0;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
-
-body {
-  color: #171717;
-  background: #f9fafb;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-/* Removed global anchor styles to allow custom link colors */
-/* If you need to remove underlines, do it per-component instead */
 
