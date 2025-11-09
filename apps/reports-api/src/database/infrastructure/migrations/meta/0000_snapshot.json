@@ -1,9 +1,82 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "a5763875-0830-4471-a9af-b3b912a95c3d",
+  "id": "e5c405c0-9872-44b3-9422-e0d0014a7b18",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
+    "error_logs": {
+      "name": "error_logs",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "error_type": {
+          "name": "error_type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "error_message": {
+          "name": "error_message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "stack_trace": {
+          "name": "stack_trace",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "endpoint": {
+          "name": "endpoint",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "method": {
+          "name": "method",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "parent_child_requests": {
       "name": "parent_child_requests",
       "columns": {
@@ -75,12 +148,12 @@
     "request_categorization": {
       "name": "request_categorization",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
+        "requestId": {
+          "name": "requestId",
+          "type": "text",
           "primaryKey": true,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "category": {
           "name": "category",
@@ -91,13 +164,6 @@
         },
         "technician": {
           "name": "technician",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "requestId": {
-          "name": "requestId",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -161,17 +227,133 @@
           ],
           "isUnique": false
         },
-        "rc_request_id_idx": {
-          "name": "rc_request_id_idx",
-          "columns": [
-            "requestId"
-          ],
-          "isUnique": false
-        },
         "rc_technician_idx": {
           "name": "rc_technician_idx",
           "columns": [
             "technician"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "request_tags": {
+      "name": "request_tags",
+      "columns": {
+        "request_id": {
+          "name": "request_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "request_id_link": {
+          "name": "request_id_link",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_time": {
+          "name": "created_time",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "informacion_adicional": {
+          "name": "informacion_adicional",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "modulo": {
+          "name": "modulo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "problem_id": {
+          "name": "problem_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "linked_request_id": {
+          "name": "linked_request_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "linked_request_id_link": {
+          "name": "linked_request_id_link",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "jira": {
+          "name": "jira",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "categorizacion": {
+          "name": "categorizacion",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "technician": {
+          "name": "technician",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "request_problem_id_idx": {
+          "name": "request_problem_id_idx",
+          "columns": [
+            "problem_id"
+          ],
+          "isUnique": false
+        },
+        "request_linked_request_id_idx": {
+          "name": "request_linked_request_id_idx",
+          "columns": [
+            "linked_request_id"
+          ],
+          "isUnique": false
+        },
+        "request_categorizacion_idx": {
+          "name": "request_categorizacion_idx",
+          "columns": [
+            "categorizacion"
+          ],
+          "isUnique": false
+        },
+        "request_technician_idx": {
+          "name": "request_technician_idx",
+          "columns": [
+            "technician"
+          ],
+          "isUnique": false
+        },
+        "request_modulo_idx": {
+          "name": "request_modulo_idx",
+          "columns": [
+            "modulo"
           ],
           "isUnique": false
         }

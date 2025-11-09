@@ -437,7 +437,7 @@ export default function RequestCategorizationPage() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/rep01-tags/by-additional-info?info=${encodeURIComponent(additionalInfo)}&linkedRequestId=${encodeURIComponent(linkedRequestId)}`,
+        `http://localhost:3000/request-tags/by-additional-info?info=${encodeURIComponent(additionalInfo)}&linkedRequestId=${encodeURIComponent(linkedRequestId)}`,
         { cache: 'no-store' }
       );
 
@@ -493,7 +493,7 @@ export default function RequestCategorizationPage() {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/rep01-tags/missing-ids?linkedRequestId=${encodeURIComponent(linkedRequestId)}`,
+        `http://localhost:3000/request-tags/missing-ids?linkedRequestId=${encodeURIComponent(linkedRequestId)}`,
         { cache: 'no-store' }
       );
 
@@ -606,6 +606,9 @@ export default function RequestCategorizationPage() {
           uploading={uploading}
           onFileChange={handleFileChange}
           onUpload={handleUpload}
+          hardcodedFilename="REP001 PARA ETIQUETAR.xlsx"
+          title="Upload Error Categorization Report"
+          description="Upload an Excel file (REPORT PARA ETIQUETAR) to parse and categorize error reports"
         />
 
         {/* Statistics */}

@@ -6,8 +6,12 @@
     "paths": {
       "@tasks/*": ["src/tasks/*"],
       "@parent-child-requests/*": ["src/parent-child-requests/*"],
+      "@request-categorization/*": ["src/request-categorization/*"],
+      "@error-logs/*": ["src/error-logs/*"],
+      "@request-tags/*": ["src/request-tags/*"],
       "@database/*": ["src/database/*"],
-      "@common/*": ["src/common/*"]
+      "@common/*": ["src/common/*"],
+      "@src/*": ["src/*"]
     }
   }
 }

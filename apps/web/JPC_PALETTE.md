@@ -400,7 +400,7 @@ className="bg-jpc-gold-500/10"               // Subtle gold tint
 
 - **Primary Vibrant Reference**: `apps/web/app/imports/page.tsx` - THE standard!
 - **Secondary References**:
-  - `apps/web/app/rep01-tags/page.tsx`
+  - `apps/web/app/request-tags/page.tsx`
   - `apps/web/app/error-categorization/page.tsx`
   - `apps/web/app/tasks/page.tsx`
 - **Old Implementation**: `apps/web/app/request-relationships/page.tsx`

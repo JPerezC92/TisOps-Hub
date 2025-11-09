@@ -183,6 +183,9 @@ export default function PortfolioStylePage() {
           uploading={uploading}
           onFileChange={handleFileChange}
           onUpload={handleUpload}
+          hardcodedFilename="REP02 padre hijo.xlsx"
+          title="Upload Request Relationships Report"
+          description="Upload an Excel file (REP02 padre hijo) to import parent-child request relationships"
         />
 
         {/* Statistics */}

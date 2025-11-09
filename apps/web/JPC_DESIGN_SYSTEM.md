@@ -793,7 +793,7 @@ To convert existing pages from the old design system:
 Complete vibrant style implementation can be found in:
 - **Primary Reference**: `apps/web/app/imports/page.tsx` - The VIBRANT standard!
 - **Secondary Pages**:
-  - `apps/web/app/rep01-tags/page.tsx`
+  - `apps/web/app/request-tags/page.tsx`
   - `apps/web/app/error-categorization/page.tsx`
   - `apps/web/app/error-logs/page.tsx`
   - `apps/web/app/tasks/page.tsx`

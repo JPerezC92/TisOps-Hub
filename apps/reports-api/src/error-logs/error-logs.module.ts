@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { DATABASE_CONNECTION } from '@repo/database';
-import { ErrorLogsController } from './error-logs.controller';
-import { ErrorLogRepository } from './infrastructure/repositories/error-log.repository';
-import { LogErrorUseCase } from './application/use-cases/log-error.use-case';
-import { GetAllErrorLogsUseCase } from './application/use-cases/get-all-error-logs.use-case';
-import { GetErrorLogByIdUseCase } from './application/use-cases/get-error-log-by-id.use-case';
-import { DatabaseExceptionFilter } from './infrastructure/filters/database-exception.filter';
-import { ERROR_LOG_REPOSITORY } from './domain/repositories/error-log.repository.interface';
+import { ErrorLogsController } from '@error-logs/error-logs.controller';
+import { ErrorLogRepository } from '@error-logs/infrastructure/repositories/error-log.repository';
+import { LogErrorUseCase } from '@error-logs/application/use-cases/log-error.use-case';
+import { GetAllErrorLogsUseCase } from '@error-logs/application/use-cases/get-all-error-logs.use-case';
+import { GetErrorLogByIdUseCase } from '@error-logs/application/use-cases/get-error-log-by-id.use-case';
+import { DatabaseExceptionFilter } from '@error-logs/infrastructure/filters/database-exception.filter';
+import { ERROR_LOG_REPOSITORY } from '@error-logs/domain/repositories/error-log.repository.interface';
 
 @Module({
   controllers: [ErrorLogsController],

@@ -17,7 +17,7 @@ export default function ReportsPage() {
           color: 'cyan',
         },
         {
-          href: '/rep01-tags',
+          href: '/request-tags',
           title: 'REP01 Tags',
           description: 'Upload and view REP01 tag data',
           icon: '🏷️',

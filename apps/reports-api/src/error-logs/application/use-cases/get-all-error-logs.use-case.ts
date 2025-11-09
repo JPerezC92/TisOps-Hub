@@ -1,4 +1,4 @@
-import { IErrorLogRepository } from '../../domain/repositories/error-log.repository.interface';
+import { IErrorLogRepository } from '@error-logs/domain/repositories/error-log.repository.interface';
 
 export class GetAllErrorLogsUseCase {
   constructor(private readonly errorLogRepository: IErrorLogRepository) {}

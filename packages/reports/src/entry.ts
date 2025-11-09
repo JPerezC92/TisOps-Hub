@@ -36,16 +36,16 @@ export type {
   ParentChildRequestResponse,
 } from './parent-child-requests';
 
-// REP01 Tags validation schemas, DTOs and Types
+// Request Tags validation schemas, DTOs and Types
 export {
-  insertRep01TagSchema,
-  updateRep01TagSchema,
-  CreateRep01TagDto,
-  UpdateRep01TagDto,
-} from './rep01-tags';
+  insertRequestTagSchema,
+  updateRequestTagSchema,
+  CreateRequestTagDto,
+  UpdateRequestTagDto,
+} from './request-tags';
 
 export type {
-  Rep01Tag,
-  Rep01TagResponse,
-} from './rep01-tags';
+  RequestTag,
+  RequestTagResponse,
+} from './request-tags';
 
