@@ -9,8 +9,11 @@ export class ImportRep01TagsUseCase {
       return { imported: 0, skipped: 0 };
     }
 
-    // Import with batch processing and duplicate handling
-    // The repository will handle batch insertion and skip duplicates automatically
+    // Delete all existing records before importing new data
+    await this.repository.deleteAll();
+
+    // Import with batch processing
+    // Since we cleared the table, there should be no duplicates
     const imported = await this.repository.createMany(data);
     const skipped = data.length - imported;
 

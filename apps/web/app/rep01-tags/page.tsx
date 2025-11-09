@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import type { Rep01Tag } from '@repo/reports';
+import { StatsGrid } from '@/components/stats-grid';
+import { UploadSectionDynamic } from '@/components/upload-section-dynamic';
+import { Badge } from '@/components/ui/badge';
 
 export default function Rep01TagsPage() {
   const [tags, setTags] = useState<Rep01Tag[]>([]);
@@ -12,24 +15,120 @@ export default function Rep01TagsPage() {
   const [filterCategorizacion, setFilterCategorizacion] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [currentFilename, setCurrentFilename] = useState<string>('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const fetchTags = async () => {
-      try {
-        const response = await fetch('http://localhost:3000/rep01-tags', { cache: 'no-store' });
-        if (response.ok) {
-          const data = await response.json();
-          setTags(data.data || []);
-        }
-      } catch (error) {
-        console.error('Failed to fetch REP01 tags:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTags();
+    const savedFilename = localStorage.getItem('lastUploadedRep01TagsFile');
+    if (savedFilename) {
+      setCurrentFilename(savedFilename);
+    }
   }, []);
+
+  const fetchTags = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:3000/rep01-tags', { cache: 'no-store' });
+      if (response.ok) {
+        const data = await response.json();
+        setTags(data.data || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch REP01 tags:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('http://localhost:3000/rep01-tags/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        alert(
+          `✅ ${result.message}\n` +
+          `📊 Total records: ${result.total}\n` +
+          `✨ Imported: ${result.imported}\n` +
+          `⏭️ Skipped: ${result.skipped}`
+        );
+        setCurrentFilename(file.name);
+        localStorage.setItem('lastUploadedRep01TagsFile', file.name);
+        setFile(null);
+        const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+        if (fileInput) fileInput.value = '';
+        await fetchTags();
+      } else {
+        const error = await response.json();
+        alert(`❌ Upload failed: ${error.message}`);
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('❌ Failed to upload file');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDropTable = async () => {
+    const confirmed = window.confirm(
+      '⚠️ WARNING: This will permanently delete all data from the rep01_tags table!\n\n' +
+      'Are you sure you want to continue?'
+    );
+
+    if (!confirmed) return;
+
+    const doubleConfirm = window.confirm(
+      '🚨 FINAL CONFIRMATION\n\n' +
+      'This action CANNOT be undone. All data will be lost.\n\n' +
+      'Type OK in your mind and click OK to proceed.'
+    );
+
+    if (!doubleConfirm) return;
+
+    setLoading(true);
+    try {
+      const response = await fetch(
+        'http://localhost:3000/rep01-tags',
+        {
+          method: 'DELETE',
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        alert(`✅ ${result.message}`);
+        await fetchTags();
+      } else {
+        const error = await response.json();
+        alert(`❌ Failed to delete records: ${error.message}`);
+      }
+    } catch (error) {
+      console.error('Delete records error:', error);
+      alert('❌ Failed to delete records');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Get unique modules and categorizations for filters
   const modules = ['all', ...Array.from(new Set(tags.map(t => t.modulo)))];
@@ -65,102 +164,69 @@ export default function Rep01TagsPage() {
   const withJiraCount = tags.filter(t => t.jira !== 'No asignado').length;
   const linkedCount = tags.filter(t => t.linkedRequestId !== 'No asignado').length;
 
+  // Prepare stats data for StatsGrid
+  const statsData = [
+    { label: "TOTAL TAGS", value: totalTags.toLocaleString(), color: 'purple' as const },
+    {
+      label: "CATEGORIZED",
+      value: `${categorizedCount.toLocaleString()} (${totalTags > 0 ? Math.round((categorizedCount / totalTags) * 100) : 0}%)`,
+      color: 'cyan' as const
+    },
+    {
+      label: "WITH JIRA",
+      value: `${withJiraCount.toLocaleString()} (${totalTags > 0 ? Math.round((withJiraCount / totalTags) * 100) : 0}%)`,
+      color: 'orange' as const
+    },
+    {
+      label: "LINKED",
+      value: `${linkedCount.toLocaleString()} (${totalTags > 0 ? Math.round((linkedCount / totalTags) * 100) : 0}%)`,
+      color: 'emerald' as const
+    }
+  ];
+
   return (
-    <div className="min-h-screen bg-jpc-bg-900 relative overflow-hidden">
-      {/* Background layers */}
-      <div className="fixed inset-0 bg-linear-to-br from-jpc-bg-900 via-jpc-bg-500 to-jpc-bg-900 -z-10"></div>
-      <div className="fixed inset-0 backdrop-blur-sm bg-jpc-900/10 -z-10"></div>
-      
-      <main className="max-w-7xl mx-auto px-6 py-8">
-        {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
+    <div className="min-h-screen bg-background">
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-12 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-jpc-gold-500">
-              🏷️ REP01 Tags
-            </h1>
-            <p className="text-jpc-gold-500/70 mt-2">
+            <h1 className="text-4xl font-bold text-foreground">REP01 Tags</h1>
+            <p className="mt-3 text-base text-muted-foreground/90">
               View and manage REP01 XD TAG 2025 import data
             </p>
           </div>
           <Link
             href="/imports"
-            className="px-4 py-2 bg-jpc-400/20 hover:bg-jpc-400/30 border border-jpc-400/50 rounded-lg text-jpc-gold-500 transition-colors"
+            className="px-4 py-2 bg-card border border-border/60 hover:bg-accent rounded-lg text-foreground transition-colors"
           >
             ← Back to Imports
           </Link>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-jpc-purple-500/10 border border-jpc-purple-500/50 rounded-xl p-6 shadow-[0_0_9px_2px] shadow-jpc-purple-500/30">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-jpc-gold-500/70 uppercase tracking-wider">Total Tags</p>
-                <p className="text-4xl font-bold text-jpc-purple-500">{totalTags}</p>
-              </div>
-              <svg className="h-10 w-10 text-jpc-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-              </svg>
-            </div>
-          </div>
+        {/* Upload Section */}
+        <UploadSectionDynamic
+          currentFilename={currentFilename}
+          recordsCount={tags.length}
+          file={file}
+          uploading={uploading}
+          onFileChange={handleFileChange}
+          onUpload={handleUpload}
+        />
 
-          <div className="bg-jpc-400/10 border border-jpc-400/50 rounded-xl p-6 shadow-[0_0_9px_2px] shadow-jpc-400/30">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-jpc-gold-500/70 uppercase tracking-wider">Categorized</p>
-                <p className="text-4xl font-bold text-jpc-400">
-                  {categorizedCount}
-                  <span className="text-sm ml-2 text-jpc-gold-500/70">
-                    ({totalTags > 0 ? Math.round((categorizedCount / totalTags) * 100) : 0}%)
-                  </span>
-                </p>
-              </div>
-              <svg className="h-10 w-10 text-jpc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-              </svg>
-            </div>
-          </div>
-
-          <div className="bg-jpc-orange-500/10 border border-jpc-orange-500/50 rounded-xl p-6 shadow-[0_0_9px_2px] shadow-jpc-orange-500/30">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-jpc-gold-500/70 uppercase tracking-wider">With Jira</p>
-                <p className="text-4xl font-bold text-jpc-orange-500">
-                  {withJiraCount}
-                  <span className="text-sm ml-2 text-jpc-gold-500/70">
-                    ({totalTags > 0 ? Math.round((withJiraCount / totalTags) * 100) : 0}%)
-                  </span>
-                </p>
-              </div>
-              <svg className="h-10 w-10 text-jpc-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
-            </div>
-          </div>
-
-          <div className="bg-jpc-400/10 border border-jpc-400/50 rounded-xl p-6 shadow-[0_0_9px_2px] shadow-jpc-400/30">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold text-jpc-gold-500/70 uppercase tracking-wider">Linked</p>
-                <p className="text-4xl font-bold text-jpc-400">
-                  {linkedCount}
-                  <span className="text-sm ml-2 text-jpc-gold-500/70">
-                    ({totalTags > 0 ? Math.round((linkedCount / totalTags) * 100) : 0}%)
-                  </span>
-                </p>
-              </div>
-              <svg className="h-10 w-10 text-jpc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
-            </div>
-          </div>
-        </div>
+        {/* Statistics */}
+        {statsData.length > 0 && (
+          <StatsGrid
+            stats={statsData}
+            onRefresh={fetchTags}
+            onClearData={tags.length > 0 ? handleDropTable : undefined}
+            loading={loading}
+          />
+        )}
 
         {/* Filters */}
-        <div className="bg-jpc-400/10 border border-jpc-400/30 rounded-xl p-6 mb-8 shadow-[0_0_9px_2px] shadow-jpc-400/30">
+        <div className="bg-card border border-border/60 rounded-xl p-6 mb-8 shadow-xl">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-jpc-gold-500 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Search
               </label>
               <input
@@ -168,17 +234,17 @@ export default function Rep01TagsPage() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Request ID, Technician, Module..."
-                className="w-full px-4 py-2 bg-jpc-bg-900 border border-jpc-400/30 rounded-lg text-jpc-gold-500 placeholder-jpc-gold-500/40 focus:outline-none focus:border-jpc-400"
+                className="w-full px-4 py-2 bg-background border border-border/60 rounded-lg text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-jpc-vibrant-cyan-500/50 focus:border-jpc-vibrant-cyan-500/50"
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-jpc-gold-500 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Module
               </label>
               <select
                 value={filterModule}
                 onChange={(e) => setFilterModule(e.target.value)}
-                className="w-full px-4 py-2 bg-jpc-bg-900 border border-jpc-400/30 rounded-lg text-jpc-gold-500 focus:outline-none focus:border-jpc-400"
+                className="w-full px-4 py-2 bg-background border border-border/60 rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-jpc-vibrant-cyan-500/50 focus:border-jpc-vibrant-cyan-500/50"
               >
                 {modules.map(module => (
                   <option key={module} value={module}>
@@ -188,13 +254,13 @@ export default function Rep01TagsPage() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-jpc-gold-500 mb-2">
+              <label className="block text-sm font-medium text-foreground mb-2">
                 Categorization
               </label>
               <select
                 value={filterCategorizacion}
                 onChange={(e) => setFilterCategorizacion(e.target.value)}
-                className="w-full px-4 py-2 bg-jpc-bg-900 border border-jpc-400/30 rounded-lg text-jpc-gold-500 focus:outline-none focus:border-jpc-400"
+                className="w-full px-4 py-2 bg-background border border-border/60 rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-jpc-vibrant-cyan-500/50 focus:border-jpc-vibrant-cyan-500/50"
               >
                 {categorizaciones.map(cat => (
                   <option key={cat} value={cat}>
@@ -205,18 +271,18 @@ export default function Rep01TagsPage() {
             </div>
           </div>
           <div className="mt-4 flex items-center justify-between">
-            <div className="text-sm text-jpc-gold-500/70">
+            <div className="text-sm text-muted-foreground/80">
               Showing {startIndex + 1}-{Math.min(endIndex, filteredTags.length)} of {filteredTags.length} filtered records ({totalTags} total)
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-sm text-jpc-gold-500/70">Per page:</label>
+              <label className="text-sm text-muted-foreground/80">Per page:</label>
               <select
                 value={itemsPerPage}
                 onChange={(e) => {
                   setItemsPerPage(Number(e.target.value));
                   setCurrentPage(1);
                 }}
-                className="px-2 py-1 bg-jpc-bg-900 border border-jpc-400/30 rounded text-jpc-gold-500 text-sm focus:outline-none focus:border-jpc-400"
+                className="px-2 py-1 bg-background border border-border/60 rounded text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-jpc-vibrant-cyan-500/50 focus:border-jpc-vibrant-cyan-500/50"
               >
                 <option value={25}>25</option>
                 <option value={50}>50</option>
@@ -228,89 +294,101 @@ export default function Rep01TagsPage() {
         </div>
 
         {/* Data Table */}
-        <div className="bg-jpc-400/10 border border-jpc-400/30 rounded-xl shadow-[0_0_9px_2px] shadow-jpc-400/30 overflow-hidden">
-          <div className="px-6 py-4 border-b border-jpc-400/30">
-            <h2 className="text-lg font-semibold text-jpc-gold-500">
+        <div className="rounded-2xl border border-jpc-vibrant-cyan-500/20 bg-card/60 overflow-hidden shadow-2xl shadow-jpc-vibrant-cyan-500/10 backdrop-blur-sm hover:border-jpc-vibrant-cyan-500/30 transition-all duration-300">
+          <div className="px-6 py-6 border-b border-jpc-vibrant-cyan-500/20 bg-gradient-to-r from-jpc-vibrant-cyan-500/10 to-jpc-vibrant-purple-500/5">
+            <h3 className="text-sm font-bold text-foreground">
               Tag Records
-            </h2>
+              <span className="ml-3 text-xs font-normal text-muted-foreground/70">
+                Showing {filteredTags.length} records
+              </span>
+            </h3>
           </div>
 
           <div className="overflow-x-auto">
             {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jpc-400 mx-auto mb-4"></div>
-                <p className="text-jpc-gold-500/70">Loading tags...</p>
+              <div className="text-center py-12 text-foreground">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <p className="mt-4">Loading tags...</p>
               </div>
             ) : filteredTags.length === 0 ? (
-              <div className="text-center py-12 text-jpc-gold-500/70">
-                <p className="text-lg font-medium mb-2">No tags found</p>
-                <p className="text-sm">Try adjusting your filters or upload a file</p>
+              <div className="text-center py-12 bg-card border border-border/60 rounded-xl shadow-xl">
+                <svg className="mx-auto h-12 w-12 text-muted-foreground/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+                <p className="text-foreground text-lg mb-2 mt-4">No tags found</p>
+                <p className="text-muted-foreground/70 text-sm">Try adjusting your filters or upload a file</p>
               </div>
             ) : (
-              <table className="w-full">
-                <thead className="bg-jpc-400/5">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-jpc-gold-500 uppercase tracking-wider">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-transparent">
+                    <th className="h-12 text-xs font-bold text-cyan-100 bg-jpc-vibrant-cyan-500/5 uppercase tracking-wider text-left py-4 px-6">
                       Request ID
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-jpc-gold-500 uppercase tracking-wider">
+                    <th className="h-12 text-xs font-bold text-cyan-100 bg-jpc-vibrant-cyan-500/5 uppercase tracking-wider text-left py-4 px-6">
                       Created Time
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-jpc-gold-500 uppercase tracking-wider">
+                    <th className="h-12 text-xs font-bold text-cyan-100 bg-jpc-vibrant-cyan-500/5 uppercase tracking-wider text-left py-4 px-6">
                       Module
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-jpc-gold-500 uppercase tracking-wider">
+                    <th className="h-12 text-xs font-bold text-cyan-100 bg-jpc-vibrant-cyan-500/5 uppercase tracking-wider text-left py-4 px-6">
                       Categorization
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-jpc-gold-500 uppercase tracking-wider">
+                    <th className="h-12 text-xs font-bold text-cyan-100 bg-jpc-vibrant-cyan-500/5 uppercase tracking-wider text-left py-4 px-6">
                       Technician
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-jpc-gold-500 uppercase tracking-wider">
+                    <th className="h-12 text-xs font-bold text-cyan-100 bg-jpc-vibrant-cyan-500/5 uppercase tracking-wider text-left py-4 px-6">
                       Jira
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold text-jpc-gold-500 uppercase tracking-wider">
+                    <th className="h-12 text-xs font-bold text-cyan-100 bg-jpc-vibrant-cyan-500/5 uppercase tracking-wider text-left py-4 px-6">
                       Linked Request
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-jpc-400/20">
+                <tbody>
                   {paginatedTags.map((tag) => (
-                    <tr key={tag.requestId} className="hover:bg-jpc-400/5 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-jpc-gold-500">
+                    <tr key={tag.requestId} className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-jpc-vibrant-cyan-500/10 transition-all duration-300 group">
+                      <td className="px-6 py-4 text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors font-medium">
                         {tag.requestId}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-jpc-gold-500/70">
+                      <td className="px-6 py-4 text-xs text-muted-foreground/80">
                         {tag.createdTime}
                       </td>
-                      <td className="px-6 py-4 text-sm text-jpc-gold-500/70">
+                      <td className="px-6 py-4 text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
                         <div className="max-w-xs truncate" title={tag.modulo}>
                           {tag.modulo}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          tag.categorizacion === 'No asignado'
-                            ? 'bg-gray-100 text-gray-700'
-                            : 'bg-jpc-purple-500/20 text-jpc-purple-500 border border-jpc-purple-500/50'
-                        }`}>
+                      <td className="px-6 py-4">
+                        <Badge
+                          variant="outline"
+                          className={`${
+                            tag.categorizacion === 'No asignado'
+                              ? 'bg-gray-500/20 text-gray-100 border-gray-500/40'
+                              : 'bg-jpc-vibrant-purple-500/20 text-purple-100 border-jpc-vibrant-purple-500/40 hover:bg-jpc-vibrant-purple-500/30'
+                          } border font-medium transition-all duration-300`}
+                        >
                           {tag.categorizacion}
-                        </span>
+                        </Badge>
                       </td>
-                      <td className="px-6 py-4 text-sm text-jpc-gold-500/70">
+                      <td className="px-6 py-4 text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
                         <div className="max-w-xs truncate" title={tag.technician}>
                           {tag.technician}
                         </div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          tag.jira === 'No asignado'
-                            ? 'bg-gray-100 text-gray-700'
-                            : 'bg-jpc-orange-500/20 text-jpc-orange-500 border border-jpc-orange-500/50'
-                        }`}>
+                      <td className="px-6 py-4">
+                        <Badge
+                          variant="outline"
+                          className={`${
+                            tag.jira === 'No asignado'
+                              ? 'bg-gray-500/20 text-gray-100 border-gray-500/40'
+                              : 'bg-jpc-vibrant-orange-500/20 text-jpc-vibrant-orange-400 border-jpc-vibrant-orange-500/40 hover:bg-jpc-vibrant-orange-500/30'
+                          } border font-medium transition-all duration-300`}
+                        >
                           {tag.jira}
-                        </span>
+                        </Badge>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-jpc-gold-500/70">
+                      <td className="px-6 py-4 text-xs text-muted-foreground/80">
                         {tag.linkedRequestId}
                       </td>
                     </tr>
@@ -322,9 +400,9 @@ export default function Rep01TagsPage() {
 
           {/* Pagination Controls */}
           {!loading && filteredTags.length > 0 && (
-            <div className="px-6 py-4 border-t border-jpc-400/30">
+            <div className="px-6 py-4 border-t border-jpc-vibrant-cyan-500/20">
               <div className="flex items-center justify-between">
-                <div className="text-sm text-jpc-gold-500/70">
+                <div className="text-sm text-muted-foreground/80">
                   Page {currentPage} of {totalPages}
                 </div>
                 <div className="flex items-center gap-2">
@@ -333,8 +411,8 @@ export default function Rep01TagsPage() {
                     disabled={currentPage === 1}
                     className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                       currentPage === 1
-                        ? 'bg-jpc-400/10 text-jpc-gold-500/40 cursor-not-allowed'
-                        : 'bg-jpc-400/20 text-jpc-gold-500 hover:bg-jpc-400/30'
+                        ? 'bg-muted/40 text-muted-foreground/40 cursor-not-allowed'
+                        : 'bg-jpc-vibrant-cyan-500/20 text-cyan-100 hover:bg-jpc-vibrant-cyan-500/30 border border-jpc-vibrant-cyan-500/40'
                     }`}
                   >
                     First
@@ -344,13 +422,13 @@ export default function Rep01TagsPage() {
                     disabled={currentPage === 1}
                     className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                       currentPage === 1
-                        ? 'bg-jpc-400/10 text-jpc-gold-500/40 cursor-not-allowed'
-                        : 'bg-jpc-400/20 text-jpc-gold-500 hover:bg-jpc-400/30'
+                        ? 'bg-muted/40 text-muted-foreground/40 cursor-not-allowed'
+                        : 'bg-jpc-vibrant-cyan-500/20 text-cyan-100 hover:bg-jpc-vibrant-cyan-500/30 border border-jpc-vibrant-cyan-500/40'
                     }`}
                   >
                     Previous
                   </button>
-                  
+
                   {/* Page numbers */}
                   <div className="flex items-center gap-1">
                     {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
@@ -364,15 +442,15 @@ export default function Rep01TagsPage() {
                       } else {
                         pageNum = currentPage - 2 + i;
                       }
-                      
+
                       return (
                         <button
                           key={pageNum}
                           onClick={() => setCurrentPage(pageNum)}
                           className={`w-8 h-8 rounded-md text-sm font-medium transition-colors ${
                             currentPage === pageNum
-                              ? 'bg-jpc-purple-500 text-white'
-                              : 'bg-jpc-400/20 text-jpc-gold-500 hover:bg-jpc-400/30'
+                              ? 'bg-jpc-vibrant-purple-500 text-white border border-jpc-vibrant-purple-500/50'
+                              : 'bg-jpc-vibrant-cyan-500/20 text-cyan-100 hover:bg-jpc-vibrant-cyan-500/30 border border-jpc-vibrant-cyan-500/40'
                           }`}
                         >
                           {pageNum}
@@ -386,8 +464,8 @@ export default function Rep01TagsPage() {
                     disabled={currentPage === totalPages}
                     className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                       currentPage === totalPages
-                        ? 'bg-jpc-400/10 text-jpc-gold-500/40 cursor-not-allowed'
-                        : 'bg-jpc-400/20 text-jpc-gold-500 hover:bg-jpc-400/30'
+                        ? 'bg-muted/40 text-muted-foreground/40 cursor-not-allowed'
+                        : 'bg-jpc-vibrant-cyan-500/20 text-cyan-100 hover:bg-jpc-vibrant-cyan-500/30 border border-jpc-vibrant-cyan-500/40'
                     }`}
                   >
                     Next
@@ -397,8 +475,8 @@ export default function Rep01TagsPage() {
                     disabled={currentPage === totalPages}
                     className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                       currentPage === totalPages
-                        ? 'bg-jpc-400/10 text-jpc-gold-500/40 cursor-not-allowed'
-                        : 'bg-jpc-400/20 text-jpc-gold-500 hover:bg-jpc-400/30'
+                        ? 'bg-muted/40 text-muted-foreground/40 cursor-not-allowed'
+                        : 'bg-jpc-vibrant-cyan-500/20 text-cyan-100 hover:bg-jpc-vibrant-cyan-500/30 border border-jpc-vibrant-cyan-500/40'
                     }`}
                   >
                     Last

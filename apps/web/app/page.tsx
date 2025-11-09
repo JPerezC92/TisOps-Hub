@@ -1,130 +1,184 @@
-import { Button } from '@repo/ui/button';
-import Image, { type ImageProps } from 'next/image';
+'use client';
 
-type Props = Omit<ImageProps, 'src'> & {
-  srcLight: string;
-  srcDark: string;
-};
+import Link from 'next/link';
 
-const ThemeImage = (props: Props) => {
-  const { srcLight, srcDark, ...rest } = props;
+export default function Home() {
+  const quickLinks = [
+    {
+      href: '/imports',
+      title: 'File Imports',
+      description: 'Upload and manage data imports',
+      icon: '📂',
+      color: 'cyan',
+    },
+    {
+      href: '/rep01-tags',
+      title: 'REP01 Tags',
+      description: 'View and manage REP01 tag data',
+      icon: '🏷️',
+      color: 'purple',
+    },
+    {
+      href: '/error-categorization',
+      title: 'Error Categorization',
+      description: 'Categorize and analyze errors',
+      icon: '🔍',
+      color: 'emerald',
+    },
+    {
+      href: '/error-logs',
+      title: 'Error Logs',
+      description: 'Monitor system errors',
+      icon: '📝',
+      color: 'orange',
+    },
+  ];
+
+  const getColorClasses = (color: string) => {
+    switch (color) {
+      case 'cyan':
+        return 'border-jpc-vibrant-cyan-500/20 hover:border-jpc-vibrant-cyan-500/40 bg-gradient-to-br from-cyan-500/5 to-transparent';
+      case 'purple':
+        return 'border-jpc-vibrant-purple-500/20 hover:border-jpc-vibrant-purple-500/40 bg-gradient-to-br from-purple-500/5 to-transparent';
+      case 'emerald':
+        return 'border-jpc-vibrant-emerald-500/20 hover:border-jpc-vibrant-emerald-500/40 bg-gradient-to-br from-emerald-500/5 to-transparent';
+      case 'orange':
+        return 'border-jpc-vibrant-orange-500/20 hover:border-jpc-vibrant-orange-500/40 bg-gradient-to-br from-orange-500/5 to-transparent';
+      default:
+        return 'border-border/60 hover:border-border';
+    }
+  };
 
   return (
-    <>
-      <Image {...rest} src={srcLight} className="dark:hidden" />
-      <Image {...rest} src={srcDark} className="hidden dark:block" />
-    </>
-  );
-};
-
-export default async function Home() {
-
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-20 gap-16 sm:p-8 sm:pb-20">
-      <main className="flex flex-col gap-8 row-start-2 sm:items-center">
-        {/* Tailwind CSS Test Section */}
-        <div className="mb-6 rounded-lg border-2 border-blue-500 bg-blue-50 p-4 dark:bg-blue-950">
-          <h3 className="text-lg font-bold text-blue-900 dark:text-blue-100">
-            ✨ Tailwind CSS v4 is Working!
-          </h3>
-          <p className="mt-2 text-sm text-blue-700 dark:text-blue-300">
-            This card is styled with Tailwind utility classes.
+    <div className="min-h-screen bg-background">
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        {/* Hero Section */}
+        <div className="mb-12 text-center">
+          <h1 className="text-5xl font-bold text-foreground mb-4">
+            Welcome to TisOps Hub
+          </h1>
+          <p className="text-xl text-muted-foreground/90 max-w-2xl mx-auto">
+            Your centralized platform for operations management, data analysis, and system monitoring
           </p>
         </div>
 
-        <ThemeImage
-          className="dark:invert"
-          srcLight="turborepo-dark.svg"
-          srcDark="turborepo-light.svg"
-          alt="Turborepo logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono pl-0 m-0 text-sm leading-6 tracking-tighter list-inside sm:text-center">
-          <li className="mb-2 last:mb-0">
-            Get started by editing <code className="font-[inherit] bg-black/5 dark:bg-white/10 px-1 py-0.5 rounded font-semibold">apps/web/app/page.tsx</code>
-          </li>
-          <li className="mb-2 last:mb-0">Save and see your changes instantly.</li>
-          <li className="mb-2 last:mb-0">
-            <a href="/tasks" className="text-blue-600 dark:text-blue-400 underline hover:underline-offset-4">
-              Go to Tasks Manager →
-            </a>
-          </li>
-        </ol>
-
-        <div className="flex gap-4 sm:flex-col">
-          <a
-            className="appearance-none rounded-full h-12 px-5 border-none font-sans border border-transparent transition-all cursor-pointer flex items-center justify-center text-base leading-5 font-medium bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc]"
-            href="https://vercel.com/new/clone?demo-description=Learn+to+implement+a+monorepo+with+a+two+Next.js+sites+that+has+installed+three+local+packages.&demo-image=%2F%2Fimages.ctfassets.net%2Fe5382hct74si%2F4K8ZISWAzJ8X1504ca0zmC%2F0b21a1c6246add355e55816278ef54bc%2FBasic.png&demo-title=Monorepo+with+Turborepo&demo-url=https%3A%2F%2Fexamples-basic-web.vercel.sh%2F&from=templates&project-name=Monorepo+with+Turborepo&repository-name=monorepo-turborepo&repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fturborepo%2Ftree%2Fmain%2Fexamples%2Fbasic&root-directory=apps%2Fdocs&skippable-integrations=1&teamSlug=vercel&utm_source=create-turbo"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://turborepo.com/docs?utm_source"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="appearance-none rounded-full h-12 px-5 border-none font-sans transition-all cursor-pointer flex items-center justify-center text-base leading-5 font-medium bg-transparent border border-black/10 dark:border-white/20 min-w-[180px] sm:min-w-0 hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent"
-          >
-            Read our docs
-          </a>
+        {/* Statistics Grid */}
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 mb-12">
+          <div className="bg-card border border-border/60 rounded-xl p-6 shadow-xl">
+            <p className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">Data Sources</p>
+            <p className="text-4xl font-bold text-jpc-vibrant-cyan-400">4</p>
+          </div>
+          <div className="bg-card border border-border/60 rounded-xl p-6 shadow-xl">
+            <p className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">Active Modules</p>
+            <p className="text-4xl font-bold text-jpc-vibrant-purple-400">6</p>
+          </div>
+          <div className="bg-card border border-border/60 rounded-xl p-6 shadow-xl">
+            <p className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">Reports Available</p>
+            <p className="text-4xl font-bold text-jpc-vibrant-emerald-400">3</p>
+          </div>
+          <div className="bg-card border border-border/60 rounded-xl p-6 shadow-xl">
+            <p className="text-xs font-semibold text-muted-foreground/70 uppercase tracking-wider">System Status</p>
+            <p className="text-4xl font-bold text-jpc-vibrant-orange-400">✓</p>
+          </div>
         </div>
 
-        <Button appName="web" className="appearance-none rounded-full h-12 px-5 border-none font-sans transition-all cursor-pointer flex items-center justify-center text-base leading-5 font-medium bg-transparent border border-black/10 dark:border-white/20 min-w-[180px] hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent">
-          Open alert
-        </Button>
+        {/* Quick Links */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-foreground mb-6">Quick Access</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {quickLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`bg-card border rounded-xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 group ${getColorClasses(link.color)}`}
+              >
+                <div className="text-4xl mb-3">{link.icon}</div>
+                <h3 className="text-lg font-semibold text-foreground mb-2 group-hover:text-jpc-vibrant-cyan-400 transition-colors">
+                  {link.title}
+                </h3>
+                <p className="text-sm text-muted-foreground/80">
+                  {link.description}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </div>
 
-        <div className="flex gap-4 sm:flex-col">
-          <a
-            href="/tasks"
-            className="appearance-none rounded-full h-12 px-5 border-none font-sans transition-all cursor-pointer flex items-center justify-center text-base leading-5 font-medium bg-transparent border border-black/10 dark:border-white/20 min-w-[180px] sm:min-w-0 no-underline hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent"
-          >
-            View Tasks →
-          </a>
+        {/* Main Navigation */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-foreground mb-6">All Modules</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Link
+              href="/reports"
+              className="bg-card border border-border/60 rounded-xl p-8 shadow-xl hover:shadow-2xl hover:border-jpc-vibrant-cyan-500/30 transition-all duration-300 group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="text-5xl">📊</div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-jpc-vibrant-cyan-400 transition-colors">
+                    Reports & Analytics
+                  </h3>
+                  <p className="text-muted-foreground/80">
+                    Access all reporting tools and data management features
+                  </p>
+                </div>
+                <svg
+                  className="h-6 w-6 text-muted-foreground/50 group-hover:text-jpc-vibrant-cyan-400 group-hover:translate-x-1 transition-all flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </Link>
+
+            <Link
+              href="/tasks"
+              className="bg-card border border-border/60 rounded-xl p-8 shadow-xl hover:shadow-2xl hover:border-jpc-vibrant-purple-500/30 transition-all duration-300 group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="text-5xl">✅</div>
+                <div className="flex-1">
+                  <h3 className="text-2xl font-bold text-foreground mb-2 group-hover:text-jpc-vibrant-purple-400 transition-colors">
+                    Task Manager
+                  </h3>
+                  <p className="text-muted-foreground/80">
+                    Manage your tasks and track your progress
+                  </p>
+                </div>
+                <svg
+                  className="h-6 w-6 text-muted-foreground/50 group-hover:text-jpc-vibrant-purple-400 group-hover:translate-x-1 transition-all flex-shrink-0"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </Link>
+          </div>
+        </div>
+
+        {/* System Info */}
+        <div className="bg-card border border-border/60 rounded-xl p-6 shadow-xl">
+          <h3 className="text-lg font-semibold text-foreground mb-4">System Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div>
+              <p className="text-muted-foreground/70">Platform</p>
+              <p className="text-foreground font-medium">TisOps Hub v1.0</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground/70">Environment</p>
+              <p className="text-foreground font-medium">Development</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground/70">Framework</p>
+              <p className="text-foreground font-medium">Next.js with Turborepo</p>
+            </div>
+          </div>
         </div>
       </main>
-
-      <footer className="font-sans row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          href="https://vercel.com/templates?search=turborepo&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://turborepo.com?utm_source=create-turbo"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to turborepo.com →
-        </a>
-      </footer>
     </div>
   );
 }
