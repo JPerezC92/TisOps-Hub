@@ -1,4 +1,4 @@
-import { IRequestCategorizationRepository } from '../../domain/repositories/request-categorization.repository.interface';
+import { IRequestCategorizationRepository } from '@request-categorization/domain/repositories/request-categorization.repository.interface';
 
 export class GetAllRequestCategorizationsWithAdditionalInfoUseCase {
   constructor(

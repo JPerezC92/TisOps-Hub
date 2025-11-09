@@ -1,4 +1,4 @@
-import { IRequestTagRepository } from '../../domain/repositories/request-tag.repository.interface';
+import { IRequestTagRepository } from '@request-tags/domain/repositories/request-tag.repository.interface';
 
 export class DeleteAllRequestTagsUseCase {
   constructor(private readonly repository: IRequestTagRepository) {}

@@ -3,6 +3,7 @@ import { GetAllParentChildRequestsUseCase } from '@parent-child-requests/applica
 import { GetChildrenByParentUseCase } from '@parent-child-requests/application/use-cases/get-children-by-parent.use-case';
 import { GetStatsUseCase } from '@parent-child-requests/application/use-cases/get-stats.use-case';
 import { CreateManyParentChildRequestsUseCase } from '@parent-child-requests/application/use-cases/create-many.use-case';
+import { DeleteAllParentChildRequestsUseCase } from '@parent-child-requests/application/use-cases/delete-all.use-case';
 import { ParentChildRequest } from '@parent-child-requests/domain/entities/parent-child-request.entity';
 
 @Injectable()
@@ -12,6 +13,7 @@ export class ParentChildRequestsService {
     private readonly getChildrenByParentUseCase: GetChildrenByParentUseCase,
     private readonly getStatsUseCase: GetStatsUseCase,
     private readonly createManyParentChildRequestsUseCase: CreateManyParentChildRequestsUseCase,
+    private readonly deleteAllParentChildRequestsUseCase: DeleteAllParentChildRequestsUseCase,
   ) {}
 
   async findAll(
@@ -37,5 +39,9 @@ export class ParentChildRequestsService {
     data: Array<{ requestId: string; linkedRequestId: string }>,
   ): Promise<{ imported: number; skipped: number }> {
     return this.createManyParentChildRequestsUseCase.execute(data);
+  }
+
+  async deleteAll(): Promise<void> {
+    return this.deleteAllParentChildRequestsUseCase.execute();
   }
 }

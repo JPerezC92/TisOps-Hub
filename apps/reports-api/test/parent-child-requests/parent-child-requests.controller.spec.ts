@@ -16,6 +16,7 @@ import { GetAllParentChildRequestsUseCase } from '@parent-child-requests/applica
 import { GetChildrenByParentUseCase } from '@parent-child-requests/application/use-cases/get-children-by-parent.use-case';
 import { GetStatsUseCase } from '@parent-child-requests/application/use-cases/get-stats.use-case';
 import { CreateManyParentChildRequestsUseCase } from '@parent-child-requests/application/use-cases/create-many.use-case';
+import { DeleteAllParentChildRequestsUseCase } from '@parent-child-requests/application/use-cases/delete-all.use-case';
 import { ParentChildRequestFactory } from './helpers/parent-child-request.factory';
 
 describe('ParentChildRequestsController (Integration)', () => {
@@ -70,6 +71,13 @@ describe('ParentChildRequestsController (Integration)', () => {
           provide: CreateManyParentChildRequestsUseCase,
           useFactory: (repository: IParentChildRequestRepository) => {
             return new CreateManyParentChildRequestsUseCase(repository);
+          },
+          inject: [PARENT_CHILD_REQUEST_REPOSITORY],
+        },
+        {
+          provide: DeleteAllParentChildRequestsUseCase,
+          useFactory: (repository: IParentChildRequestRepository) => {
+            return new DeleteAllParentChildRequestsUseCase(repository);
           },
           inject: [PARENT_CHILD_REQUEST_REPOSITORY],
         },
@@ -290,6 +298,21 @@ describe('ParentChildRequestsController (Integration)', () => {
         statusCode: 400,
         message: expect.stringContaining('Failed to process file'),
       });
+    });
+  });
+
+  describe('DELETE /parent-child-requests', () => {
+    it('should delete all parent-child relationships', async () => {
+      mockRepository.deleteAll.mockResolvedValue(undefined);
+
+      const response = await request(app.getHttpServer())
+        .delete('/parent-child-requests')
+        .expect(200);
+
+      expect(response.body).toMatchObject({
+        message: 'All parent-child relationships deleted successfully',
+      });
+      expect(mockRepository.deleteAll).toHaveBeenCalledOnce();
     });
   });
 });

@@ -4,6 +4,7 @@ import {
   Param,
   Query,
   Post,
+  Delete,
   UseInterceptors,
   UploadedFile,
   BadRequestException,
@@ -134,5 +135,16 @@ export class ParentChildRequestsController {
         `Failed to process file: ${(error as Error).message}`,
       );
     }
+  }
+
+  @Delete()
+  @ApiOperation({ summary: 'Delete all parent-child request relationships' })
+  @ApiResponse({
+    status: 200,
+    description: 'All parent-child relationships deleted successfully',
+  })
+  async deleteAll() {
+    await this.parentChildRequestsService.deleteAll();
+    return { message: 'All parent-child relationships deleted successfully' };
   }
 }

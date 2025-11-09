@@ -1,5 +1,5 @@
-import { IRequestCategorizationRepository } from '../../domain/repositories/request-categorization.repository.interface';
-import { RequestCategorizationEntity } from '../../domain/entities/request-categorization.entity';
+import { IRequestCategorizationRepository } from '@request-categorization/domain/repositories/request-categorization.repository.interface';
+import { RequestCategorizationEntity } from '@request-categorization/domain/entities/request-categorization.entity';
 
 export class CreateManyRequestCategorizationsUseCase {
   constructor(

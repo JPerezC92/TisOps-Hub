@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { eq, sql, and, isNotNull, ne } from 'drizzle-orm';
 import { Database, requestCategorization, requestTags } from '@repo/database';
-import { IRequestCategorizationRepository } from '../../domain/repositories/request-categorization.repository.interface';
-import { RequestCategorizationEntity } from '../../domain/entities/request-categorization.entity';
+import { IRequestCategorizationRepository } from '@request-categorization/domain/repositories/request-categorization.repository.interface';
+import { RequestCategorizationEntity } from '@request-categorization/domain/entities/request-categorization.entity';
 
 @Injectable()
 export class RequestCategorizationRepository

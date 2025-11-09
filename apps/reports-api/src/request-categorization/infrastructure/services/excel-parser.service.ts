@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import * as XLSX from 'xlsx';
-import { RequestCategorizationEntity } from '../../domain/entities/request-categorization.entity';
+import { RequestCategorizationEntity } from '@request-categorization/domain/entities/request-categorization.entity';
 
 const CATEGORY_HEADERS = [
   'Error de Alcance',

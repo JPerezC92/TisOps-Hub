@@ -1,4 +1,4 @@
-import { ParentChildRequest } from '../entities/parent-child-request.entity';
+import { ParentChildRequest } from '@parent-child-requests/domain/entities/parent-child-request.entity';
 
 export interface IParentChildRequestRepository {
   findAll(limit?: number, offset?: number): Promise<ParentChildRequest[]>;

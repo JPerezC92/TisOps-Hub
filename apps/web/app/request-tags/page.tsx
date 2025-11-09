@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import type { RequestTag } from '@repo/reports';
 import { StatsGrid } from '@/components/stats-grid';
 import { UploadSectionDynamic } from '@/components/upload-section-dynamic';
@@ -187,19 +186,11 @@ export default function RequestTagsPage() {
   return (
     <div className="min-h-screen bg-background">
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mb-12 flex items-center justify-between">
-          <div>
-            <h1 className="text-4xl font-bold text-foreground">Request Tags</h1>
-            <p className="mt-3 text-base text-muted-foreground/90">
-              View and manage request tag data from REP01 XD TAG 2025 imports
-            </p>
-          </div>
-          <Link
-            href="/imports"
-            className="px-4 py-2 bg-card border border-border/60 hover:bg-accent rounded-lg text-foreground transition-colors"
-          >
-            ← Back to Imports
-          </Link>
+        <div className="mb-12">
+          <h1 className="text-4xl font-bold text-foreground">Request Tags</h1>
+          <p className="mt-3 text-base text-muted-foreground/90">
+            View and manage request tag data from REP01 XD TAG 2025 imports
+          </p>
         </div>
 
         {/* Upload Section */}

@@ -1,4 +1,4 @@
-import { RequestCategorizationEntity } from '../entities/request-categorization.entity';
+import { RequestCategorizationEntity } from '@request-categorization/domain/entities/request-categorization.entity';
 
 export const REQUEST_CATEGORIZATION_REPOSITORY = Symbol(
   'REQUEST_CATEGORIZATION_REPOSITORY',

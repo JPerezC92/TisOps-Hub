@@ -1,7 +1,7 @@
 import { eq, and, isNull, sql } from 'drizzle-orm';
 import { db, requestTags, parentChildRequests } from '@repo/database';
-import { IRequestTagRepository, RequestTagData } from '../../domain/repositories/request-tag.repository.interface';
-import { RequestTag } from '../../domain/entities/request-tag.entity';
+import { IRequestTagRepository, RequestTagData } from '@request-tags/domain/repositories/request-tag.repository.interface';
+import { RequestTag } from '@request-tags/domain/entities/request-tag.entity';
 
 export class RequestTagRepository implements IRequestTagRepository {
   async findAll(): Promise<RequestTag[]> {

@@ -1,4 +1,4 @@
-import { RequestTag } from '../entities/request-tag.entity';
+import { RequestTag } from '@request-tags/domain/entities/request-tag.entity';
 
 export const REQUEST_TAG_REPOSITORY = Symbol('REQUEST_TAG_REPOSITORY');
 
