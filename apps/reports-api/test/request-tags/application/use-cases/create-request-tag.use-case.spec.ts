@@ -13,7 +13,7 @@ describe('CreateRequestTagUseCase', () => {
     createRequestTagUseCase = new CreateRequestTagUseCase(mockRepository);
   });
 
-  it('should create new rep01 tag when request ID does not exist', async () => {
+  it('should create new request tag when request ID does not exist', async () => {
     const tagData: RequestTagData = {
       requestId: 'REQ001',
       requestIdLink: 'https://example.com/REQ001',

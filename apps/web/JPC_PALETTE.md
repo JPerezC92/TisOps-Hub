@@ -41,7 +41,7 @@ className="text-muted-foreground/70"   // Tertiary text (70% opacity)
 .text-cyan-400        /* Cyan stats, primary numbers, main icons */
 .text-emerald-400     /* Success stats, positive indicators */
 .text-orange-400      /* Warning stats, error counts */
-.text-purple-400      /* Special stats, REP01 tags */
+.text-purple-400      /* Special stats, Request tags */
 ```
 
 **Why -400 Variants?**

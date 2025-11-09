@@ -204,12 +204,18 @@ DATABASE_AUTH_TOKEN=eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9...
 
 ## File Locations
 
-### **Schema Files**
+### **Schema Files** (Centralized in Database Package)
 ```
-apps/reports-api/src/database/infrastructure/schemas/
-├── tasks.schema.ts    # Task table definition
-└── index.ts           # Export all schemas
+packages/database/src/schemas/
+├── tasks.schema.ts                     # Task table definition
+├── request-categorization.schema.ts    # Request categorization table
+├── parent-child-requests.schema.ts     # Parent-child relationships table
+├── request-tags.schema.ts              # Request tags table
+├── error-logs.schema.ts                # Error logs table
+└── index.ts                            # Export all schemas
 ```
+
+**Note:** All Drizzle schemas are now centralized in the `@repo/database` package for better organization and reusability across the monorepo.
 
 ### **Migration Files**
 ```

@@ -122,13 +122,13 @@ try {
 **✅ CORRECT WAY:**
 ```javascript
 // Import from the compiled database package
-const { rep01Tags, parentChildRequests, requestCategorization } = require('@repo/database');
+const { requestTags, parentChildRequests, requestCategorization } = require('@repo/database');
 ```
 
 **❌ WRONG WAY:**
 ```javascript
 // Don't import from TypeScript source files
-const { rep01Tags } = require('../src/database/infrastructure/schemas/rep01-tags.schema');
+const { requestTags } = require('../src/database/infrastructure/schemas/request-tags.schema');
 ```
 
 ### Using Drizzle Query Operators
@@ -139,11 +139,11 @@ const { eq, and, or, isNull, sql } = require('drizzle-orm');
 // Example query with filters
 const results = await db
   .select()
-  .from(rep01Tags)
+  .from(requestTags)
   .where(
     and(
-      eq(rep01Tags.informacionAdicional, 'No asignado'),
-      eq(rep01Tags.linkedRequestId, '91244')
+      eq(requestTags.informacionAdicional, 'No asignado'),
+      eq(requestTags.linkedRequestId, '91244')
     )
   );
 ```
@@ -166,7 +166,7 @@ Here's a complete template for a database test script:
 const { drizzle } = require('drizzle-orm/libsql');
 const { createClient } = require('@libsql/client');
 const { eq, and } = require('drizzle-orm');
-const { rep01Tags, parentChildRequests } = require('@repo/database');
+const { requestTags, parentChildRequests } = require('@repo/database');
 
 // ============================================
 // Configuration
@@ -211,8 +211,8 @@ async function runTests() {
     console.log('\n1️⃣  Test 1: [Description]');
     const results1 = await db
       .select()
-      .from(rep01Tags)
-      .where(eq(rep01Tags.linkedRequestId, TEST_PARAM_1))
+      .from(requestTags)
+      .where(eq(requestTags.linkedRequestId, TEST_PARAM_1))
       .limit(10);
 
     console.log(`   Found ${results1.length} records`);
@@ -300,7 +300,7 @@ console.log(process.env.DATABASE_URL); // undefined
 ### 2. ❌ Module Import Errors
 **Problem:**
 ```javascript
-const { rep01Tags } = require('@repo/database');
+const { requestTags } = require('@repo/database');
 // Error: Cannot find module '@repo/database'
 ```
 
@@ -357,7 +357,7 @@ require('dotenv').config({ path: '.env' });
 const { drizzle } = require('drizzle-orm/libsql');
 const { createClient } = require('@libsql/client');
 const { eq, and } = require('drizzle-orm');
-const { rep01Tags } = require('@repo/database');
+const { requestTags } = require('@repo/database');
 
 const client = createClient({
   url: process.env.DATABASE_URL,
@@ -368,11 +368,11 @@ const db = drizzle({ client });
 async function test() {
   const results = await db
     .select()
-    .from(rep01Tags)
+    .from(requestTags)
     .where(
       and(
-        eq(rep01Tags.informacionAdicional, 'No asignado'),
-        eq(rep01Tags.linkedRequestId, '91244')
+        eq(requestTags.informacionAdicional, 'No asignado'),
+        eq(requestTags.linkedRequestId, '91244')
       )
     );
 
@@ -392,7 +392,7 @@ test();
 const { drizzle } = require('drizzle-orm/libsql');
 const { createClient } = require('@libsql/client');
 const { eq, and, isNull } = require('drizzle-orm');
-const { rep01Tags, parentChildRequests } = require('@repo/database');
+const { requestTags, parentChildRequests } = require('@repo/database');
 
 const client = createClient({
   url: process.env.DATABASE_URL,
@@ -408,11 +408,11 @@ async function test() {
       requestIdLink: parentChildRequests.requestIdLink,
     })
     .from(parentChildRequests)
-    .leftJoin(rep01Tags, eq(parentChildRequests.requestId, rep01Tags.requestId))
+    .leftJoin(requestTags, eq(parentChildRequests.requestId, requestTags.requestId))
     .where(
       and(
         eq(parentChildRequests.linkedRequestId, '91244'),
-        isNull(rep01Tags.requestId)
+        isNull(requestTags.requestId)
       )
     );
 
@@ -432,7 +432,7 @@ test();
 const { drizzle } = require('drizzle-orm/libsql');
 const { createClient } = require('@libsql/client');
 const { eq } = require('drizzle-orm');
-const { rep01Tags } = require('@repo/database');
+const { requestTags } = require('@repo/database');
 
 const client = createClient({
   url: process.env.DATABASE_URL,
@@ -443,8 +443,8 @@ const db = drizzle({ client });
 async function test() {
   const allRecords = await db
     .select()
-    .from(rep01Tags)
-    .where(eq(rep01Tags.informacionAdicional, 'No asignado'));
+    .from(requestTags)
+    .where(eq(requestTags.informacionAdicional, 'No asignado'));
 
   // Group by linkedRequestId
   const grouped = {};

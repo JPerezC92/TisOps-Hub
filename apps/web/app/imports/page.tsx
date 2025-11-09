@@ -20,7 +20,7 @@ export default function ImportsPage() {
   useEffect(() => {
     const fetchImportData = async () => {
       try {
-        const [reqRelResponse, errorCatResponse, rep01Response] = await Promise.all([
+        const [reqRelResponse, errorCatResponse, requestTagsResponse] = await Promise.all([
           fetch('http://localhost:3000/parent-child-requests', { cache: 'no-store' }),
           fetch('http://localhost:3000/request-categorization', { cache: 'no-store' }),
           fetch('http://localhost:3000/request-tags', { cache: 'no-store' }),
@@ -65,16 +65,16 @@ export default function ImportsPage() {
         }
 
         // Request Tags
-        if (rep01Response.ok) {
-          const rep01Data = await rep01Response.json();
-          console.log('Request Tags data:', rep01Data);
+        if (requestTagsResponse.ok) {
+          const requestTagsData = await requestTagsResponse.json();
+          console.log('Request Tags data:', requestTagsData);
           // API returns { data: [], total: number }
-          if (rep01Data.data && rep01Data.data.length > 0) {
+          if (requestTagsData.data && requestTagsData.data.length > 0) {
             imports.push({
               id: '3',
               filename: 'REP01 XD TAG 2025.xlsx',
               uploadedAt: new Date().toISOString(),
-              recordCount: rep01Data.total || rep01Data.data.length,
+              recordCount: requestTagsData.total || requestTagsData.data.length,
               status: 'success',
               source: 'request-tags',
               sourceLabel: 'Request Tags',
@@ -98,17 +98,17 @@ export default function ImportsPage() {
 
   const [uploadingErrorCat, setUploadingErrorCat] = useState(false);
   const [uploadingReqRel, setUploadingReqRel] = useState(false);
-  const [uploadingRep01, setUploadingRep01] = useState(false);
+  const [uploadingRequestTags, setUploadingRequestTags] = useState(false);
 
   // Error states for each upload type
   const [errorCatError, setErrorCatError] = useState<string | null>(null);
   const [reqRelError, setReqRelError] = useState<string | null>(null);
-  const [rep01Error, setRep01Error] = useState<string | null>(null);
+  const [requestTagsError, setRequestTagsError] = useState<string | null>(null);
 
   // Success states for each upload type
   const [errorCatSuccess, setErrorCatSuccess] = useState<string | null>(null);
   const [reqRelSuccess, setReqRelSuccess] = useState<string | null>(null);
-  const [rep01Success, setRep01Success] = useState<string | null>(null);
+  const [requestTagsSuccess, setRequestTagsSuccess] = useState<string | null>(null);
 
   const copyFilenameWithoutExtension = (filename: string) => {
     const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
@@ -190,11 +190,11 @@ export default function ImportsPage() {
   const handleRequestTagsFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
-    setUploadingRep01(true);
-    setRep01Error(null);
-    setRep01Success(null);
-    
+
+    setUploadingRequestTags(true);
+    setRequestTagsError(null);
+    setRequestTagsSuccess(null);
+
     const formData = new FormData();
     formData.append('file', file);
 
@@ -208,21 +208,21 @@ export default function ImportsPage() {
         const errorData = await response.json().catch(() => ({ message: 'Upload failed' }));
         throw new Error(errorData.message || `Upload failed with status ${response.status}`);
       }
-      
+
       const result = await response.json();
-      setRep01Success(`File uploaded successfully! Imported: ${result.imported || 0} records, Skipped: ${result.skipped || 0} duplicates`);
+      setRequestTagsSuccess(`File uploaded successfully! Imported: ${result.imported || 0} records, Skipped: ${result.skipped || 0} duplicates`);
       // Reset the input
       e.target.value = '';
       // Auto-hide success after 5 seconds
-      setTimeout(() => setRep01Success(null), 5000);
+      setTimeout(() => setRequestTagsSuccess(null), 5000);
       // Refresh the page data
       setTimeout(() => window.location.reload(), 5000);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Upload failed. Please try again.';
-      setRep01Error(message);
+      setRequestTagsError(message);
       e.target.value = '';
     } finally {
-      setUploadingRep01(false);
+      setUploadingRequestTags(false);
     }
   };
 
@@ -537,22 +537,22 @@ export default function ImportsPage() {
               </div>
               <div className="relative shrink-0">
                 <label
-                  htmlFor="rep01-upload"
+                  htmlFor="request-tags-upload"
                   className={`cursor-pointer inline-flex items-center justify-center px-3 py-2 rounded-md text-xs font-medium transition-colors ${
-                    uploadingRep01
+                    uploadingRequestTags
                       ? 'bg-jpc-vibrant-purple-500/50 cursor-not-allowed'
                       : 'bg-jpc-vibrant-purple-500 hover:bg-jpc-vibrant-purple-500/80 text-white'
                   }`}
                 >
                   <input
                     type="file"
-                    id="rep01-upload"
+                    id="request-tags-upload"
                     accept=".xlsx,.xls"
                     onChange={handleRequestTagsFileChange}
-                    disabled={uploadingRep01}
+                    disabled={uploadingRequestTags}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
-                  {uploadingRep01 ? (
+                  {uploadingRequestTags ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   ) : (
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -564,7 +564,7 @@ export default function ImportsPage() {
             </div>
             
             {/* Error Message Box */}
-            {rep01Error && (
+            {requestTagsError && (
               <div className="mt-3 bg-red-500/10 border border-red-500/50 rounded-lg p-3">
                 <div className="flex items-start gap-2">
                   <svg className="h-5 w-5 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -572,10 +572,10 @@ export default function ImportsPage() {
                   </svg>
                   <div className="flex-1">
                     <p className="text-xs font-semibold text-red-500 mb-1">Upload Failed</p>
-                    <p className="text-xs text-red-400 break-words">{rep01Error}</p>
+                    <p className="text-xs text-red-400 break-words">{requestTagsError}</p>
                   </div>
                   <button
-                    onClick={() => setRep01Error(null)}
+                    onClick={() => setRequestTagsError(null)}
                     className="text-red-400 hover:text-red-300 shrink-0"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -587,17 +587,17 @@ export default function ImportsPage() {
             )}
             
             {/* Success Message Box */}
-            {rep01Success && (
+            {requestTagsSuccess && (
               <div className="mt-3 bg-green-500/10 border border-green-500/50 rounded-lg p-3">
                 <div className="flex items-start gap-2">
                   <svg className="h-5 w-5 text-green-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   <div className="flex-1">
-                    <p className="text-xs text-green-400">{rep01Success}</p>
+                    <p className="text-xs text-green-400">{requestTagsSuccess}</p>
                   </div>
                   <button
-                    onClick={() => setRep01Success(null)}
+                    onClick={() => setRequestTagsSuccess(null)}
                     className="text-green-400 hover:text-green-300 shrink-0"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

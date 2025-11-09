@@ -41,14 +41,6 @@ TisOps Hub/
 │   │   ├── src/
 │   │   │   ├── main.ts
 │   │   │   ├── app.module.ts
-│   │   │   ├── database/            # Database infrastructure (Turso + Drizzle)
-│   │   │   │   └── infrastructure/
-│   │   │   │       ├── database.config.ts
-│   │   │   │       ├── database.module.ts
-│   │   │   │       ├── schemas/     # All Drizzle schemas
-│   │   │   │       │   ├── tasks.schema.ts
-│   │   │   │       │   └── index.ts
-│   │   │   │       └── migrations/  # SQL migration files
 │   │   │   ├── tasks/               # ✅ STARTER EXAMPLE - Full Clean Architecture
 │   │   │   │   ├── domain/          # Business Logic Layer
 │   │   │   │   │   ├── entities/
@@ -88,39 +80,85 @@ TisOps Hub/
 │   │   │   │   ├── request-categorization.module.ts
 │   │   │   │   ├── request-categorization.service.ts
 │   │   │   │   └── request-categorization.controller.ts
-│   │   │   └── parent-child-requests/   # ✅ File Import Feature - Request Relationships
+│   │   │   ├── parent-child-requests/   # ✅ File Import Feature - Request Relationships
+│   │   │   │   ├── domain/
+│   │   │   │   │   ├── entities/
+│   │   │   │   │   │   └── parent-child-request.entity.ts
+│   │   │   │   │   └── repositories/
+│   │   │   │   │       └── parent-child-request.repository.interface.ts
+│   │   │   │   ├── application/
+│   │   │   │   │   └── use-cases/
+│   │   │   │   │       ├── get-all.use-case.ts
+│   │   │   │   │       ├── get-stats.use-case.ts
+│   │   │   │   │       ├── create-many.use-case.ts
+│   │   │   │   │       └── delete-all.use-case.ts
+│   │   │   │   ├── infrastructure/
+│   │   │   │   │   ├── repositories/
+│   │   │   │   │   │   └── parent-child-request.repository.ts
+│   │   │   │   │   └── services/
+│   │   │   │   │       └── excel-parser.service.ts  # Excel parsing logic
+│   │   │   │   ├── parent-child-requests.module.ts
+│   │   │   │   ├── parent-child-requests.service.ts
+│   │   │   │   └── parent-child-requests.controller.ts
+│   │   │   ├── request-tags/        # ✅ Request Tags Module - Excel Import (REP01)
+│   │   │   │   ├── domain/
+│   │   │   │   │   ├── entities/
+│   │   │   │   │   │   └── request-tag.entity.ts
+│   │   │   │   │   └── repositories/
+│   │   │   │   │       └── request-tag.repository.interface.ts
+│   │   │   │   ├── application/
+│   │   │   │   │   └── use-cases/
+│   │   │   │   │       ├── get-all-request-tags.use-case.ts
+│   │   │   │   │       ├── create-request-tag.use-case.ts
+│   │   │   │   │       ├── delete-all-request-tags.use-case.ts
+│   │   │   │   │       ├── import-request-tags.use-case.ts
+│   │   │   │   │       ├── get-missing-ids-by-linked-request.use-case.ts
+│   │   │   │   │       └── get-request-ids-by-additional-info.use-case.ts
+│   │   │   │   ├── infrastructure/
+│   │   │   │   │   └── repositories/
+│   │   │   │   │       └── request-tag.repository.ts
+│   │   │   │   ├── request-tags.module.ts
+│   │   │   │   ├── request-tags.service.ts
+│   │   │   │   └── request-tags.controller.ts
+│   │   │   └── error-logs/          # ✅ System-wide Error Tracking
 │   │   │       ├── domain/
 │   │   │       │   ├── entities/
-│   │   │       │   │   └── parent-child-request.entity.ts
+│   │   │       │   │   └── error-log.entity.ts
 │   │   │       │   └── repositories/
-│   │   │       │       └── parent-child-request.repository.interface.ts
+│   │   │       │       └── error-log.repository.interface.ts
 │   │   │       ├── application/
 │   │   │       │   └── use-cases/
-│   │   │       │       ├── get-all.use-case.ts
-│   │   │       │       ├── get-stats.use-case.ts
-│   │   │       │       ├── create-many.use-case.ts
-│   │   │       │       └── delete-all.use-case.ts
+│   │   │       │       ├── get-all-error-logs.use-case.ts
+│   │   │       │       ├── get-error-log-by-id.use-case.ts
+│   │   │       │       └── log-error.use-case.ts
 │   │   │       ├── infrastructure/
-│   │   │       │   ├── repositories/
-│   │   │       │   │   └── parent-child-request.repository.ts
-│   │   │       │   └── services/
-│   │   │       │       └── excel-parser.service.ts  # Excel parsing logic
-│   │   │       ├── parent-child-requests.module.ts
-│   │   │       ├── parent-child-requests.service.ts
-│   │   │       └── parent-child-requests.controller.ts
+│   │   │       │   └── repositories/
+│   │   │       │       └── error-log.repository.ts
+│   │   │       ├── error-logs.module.ts
+│   │   │       ├── error-logs.service.ts
+│   │   │       └── error-logs.controller.ts
 │   │   └── package.json
 │   │
 │   └── web/                          # Next.js App (Port 3001)
 │       ├── app/
 │       │   ├── layout.tsx
 │       │   ├── page.tsx
+│       │   ├── globals.css          # Global styling with Tailwind CSS
 │       │   ├── components/
 │       │   │   └── Navigation.tsx   # Site navigation
 │       │   ├── tasks/               # ✅ Tasks UI
 │       │   │   └── page.tsx
 │       │   ├── error-categorization/  # ✅ Error Categorization UI
 │       │   │   └── page.tsx
-│       │   └── request-relationships/  # ✅ Request Relationships UI
+│       │   ├── request-relationships/  # ✅ Request Relationships UI
+│       │   │   └── page.tsx
+│       │   ├── request-tags/        # ✅ Request Tags UI
+│       │   │   └── page.tsx
+│       │   ├── error-logs/          # ✅ Error Logs Dashboard
+│       │   │   └── page.tsx
+│       │   ├── imports/             # ✅ Unified Imports Page
+│       │   │   └── page.tsx
+│       │   └── reports/             # ✅ Reports Dashboard
 │       │       └── page.tsx
 │       └── package.json
 │
@@ -130,7 +168,19 @@ TisOps Hub/
 │   │       ├── tasks/                # Task DTOs
 │   │       ├── request-categorization/  # Error categorization DTOs
 │   │       ├── parent-child-requests/   # Request relationships DTOs
+│   │       ├── request-tags/         # Request tags DTOs
 │   │       └── entry.ts             # Exports all DTOs and entities
+│   ├── database/                    # ✅ Centralized Database Package
+│   │   └── src/
+│   │       ├── config.ts            # Turso connection and DATABASE_CONNECTION export
+│   │       ├── schemas/             # All Drizzle schemas
+│   │       │   ├── tasks.schema.ts
+│   │       │   ├── request-categorization.schema.ts
+│   │       │   ├── parent-child-requests.schema.ts
+│   │       │   ├── request-tags.schema.ts
+│   │       │   ├── error-logs.schema.ts
+│   │       │   └── index.ts
+│   │       └── entry.ts             # Central export file
 │   ├── ui/                          # ✅ Shared UI components
 │   │   └── src/
 │   │       ├── button.tsx
@@ -281,7 +331,7 @@ packages/
 2. **Setup Database Infrastructure** ✅
    - [x] Configure Turso database connection
    - [x] Implement Drizzle ORM with SQLite dialect
-   - [x] Create database module (infrastructure only)
+   - [x] Centralize database schemas into `@repo/database` package
    - [x] Setup migrations with drizzle-kit
    - [x] Document database commands
 
@@ -290,6 +340,7 @@ packages/
    - [x] Document database workflows (DATABASE_COMMANDS.md)
    - [x] Update Copilot instructions with patterns
    - [x] Create Navigation component for web app
+   - [x] Migrate to Tailwind CSS and establish design system
 
 4. **File Import Features** ✅
    - [x] Request Categorization Module (Error categorization reports)
@@ -297,12 +348,29 @@ packages/
      - [x] Domain entities with business logic
      - [x] Use cases for batch operations
      - [x] Category summary aggregation
-     - [x] Frontend UI with portfolio design
+     - [x] Frontend UI with Tailwind design
    - [x] Parent-Child Requests Module (Request relationships)
      - [x] Excel parser service for relationship data
      - [x] Domain entities for request relationships
      - [x] Statistics and summary use cases
      - [x] Frontend UI with relationship visualization
+
+5. **Request Tags Module** ✅
+   - [x] Implement clean architecture structure
+   - [x] Excel import with file upload endpoint
+   - [x] Domain entities for tag management
+   - [x] Use cases: get-all, create, delete-all, import, query operations
+   - [x] Repository implementation with Drizzle ORM
+   - [x] Frontend UI for tag management and imports
+   - [x] Query endpoints for missing IDs and additional info search
+
+6. **Error Logging System** ✅
+   - [x] System-wide error tracking module
+   - [x] Clean architecture implementation
+   - [x] Use cases for logging and retrieving errors
+   - [x] Database exception filter integration
+   - [x] Frontend error logs dashboard
+   - [x] Error aggregation and filtering capabilities
 
 ### 🔜 Phase 2: Belcorp Reports System (Future)
 4. **Implement Belcorp Reports Module**
@@ -380,29 +448,37 @@ All new modules should follow the **Tasks Module** pattern documented in `CLEAN_
    - HTTP controllers
 
 ### Database Organization
-- **Database module** = Infrastructure only (connection + all schemas)
+- **Database package** (`@repo/database`) = Centralized connection and all Drizzle schemas
 - **Feature modules** = Own their domain/application/infrastructure
-- **Schemas** = Centralized in `database/infrastructure/schemas/`
-- **Migrations** = Managed by drizzle-kit in `database/infrastructure/migrations/`
+- **Schemas** = Centralized in `packages/database/src/schemas/`
+- **Migrations** = Managed by drizzle-kit in `apps/reports-api/src/database/infrastructure/migrations/`
 
 ## Database Configuration Strategy with Drizzle
 
 ### Current Drizzle Setup ✅
 ```
+packages/
+└── database/                       # ✅ Centralized Database Package
+    └── src/
+        ├── config.ts               # Turso connection and DATABASE_CONNECTION export
+        ├── schemas/                # All Drizzle schemas
+        │   ├── tasks.schema.ts    # ✅ Implemented
+        │   ├── request-categorization.schema.ts  # ✅ Implemented
+        │   ├── parent-child-requests.schema.ts   # ✅ Implemented
+        │   ├── request-tags.schema.ts            # ✅ Implemented
+        │   ├── error-logs.schema.ts              # ✅ Implemented
+        │   ├── index.ts
+        │   └── [future-tables].schema.ts  # 🔜 Add here
+        └── entry.ts                # Central export file
+
 apps/reports-api/src/
 └── database/infrastructure/
-    ├── database.config.ts          # Turso connection
-    ├── database.module.ts          # Global DATABASE_CONNECTION export
-    ├── schemas/                    # All Drizzle schemas
-    │   ├── tasks.schema.ts         # ✅ Implemented
-    │   ├── request-categorization.schema.ts  # ✅ Implemented
-    │   ├── parent-child-requests.schema.ts   # ✅ Implemented
-    │   ├── index.ts
-    │   └── [future-tables].schema.ts  # 🔜 Add here
     └── migrations/                 # SQL migration files
         ├── 0000_same_vampiro.sql
         └── 0001_simple_princess_powerful.sql
 ```
+
+**Note:** Database schemas have been centralized into the `@repo/database` package for better code organization and reusability across the monorepo.
 
 ### Database Commands
 - `pnpm db:push` - Push schema changes (development)
@@ -412,7 +488,7 @@ apps/reports-api/src/
 - `pnpm db:reset` - Reset database (⚠️ destructive)
 
 ### Future Schemas (🔜 To Add)
-When implementing Belcorp Reports, add these schemas to `database/infrastructure/schemas/`:
+When implementing Belcorp Reports, add these schemas to `packages/database/src/schemas/`:
 - `weekly-reports.schema.ts`
 - `monthly-reports.schema.ts`
 - `templates.schema.ts`
@@ -499,12 +575,16 @@ When implementing Belcorp Reports, add these schemas to `database/infrastructure
 6. ~~Implement File Import Features~~ **DONE**
    - ~~Request Categorization (Error categorization reports with Excel parsing)~~ **DONE**
    - ~~Parent-Child Requests (Request relationships with Excel parsing)~~ **DONE**
+7. ~~Centralize database schemas into `@repo/database` package~~ **DONE**
+8. ~~Implement Request Tags Module (REP01)~~ **DONE**
+9. ~~Implement Error Logging System~~ **DONE**
+10. ~~Migrate to Tailwind CSS~~ **DONE**
 
 ### 🔜 Next Priorities
 1. **Implement Belcorp Reports Module**
    - Follow the Tasks module pattern documented in `CLEAN_ARCHITECTURE.md`
    - Create weekly-reports domain/application/infrastructure
-   - Add report schemas to `database/infrastructure/schemas/`
+   - Add report schemas to `packages/database/src/schemas/`
    - Build REST API endpoints
    - Implement UI
 
@@ -521,9 +601,10 @@ When implementing Belcorp Reports, add these schemas to `database/infrastructure
 
 4. **Refine and Scale**
    - Extract common patterns to @repo/shared
-   - Add comprehensive testing
+   - Add comprehensive testing (unit, integration, E2E)
    - Implement caching and optimization
    - Setup CI/CD pipeline
+   - Add authentication and authorization
 
 ---
 
