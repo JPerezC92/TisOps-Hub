@@ -1,4 +1,4 @@
-import { ErrorLog } from '../entities/error-log.entity';
+import { ErrorLog } from '@error-logs/domain/entities/error-log.entity';
 
 export const ERROR_LOG_REPOSITORY = Symbol('ERROR_LOG_REPOSITORY');
 

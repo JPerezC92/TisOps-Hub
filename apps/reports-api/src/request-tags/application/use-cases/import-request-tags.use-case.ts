@@ -1,5 +1,5 @@
-import { RequestTag } from '../../domain/entities/request-tag.entity';
-import { IRequestTagRepository, RequestTagData } from '../../domain/repositories/request-tag.repository.interface';
+import { RequestTag } from '@request-tags/domain/entities/request-tag.entity';
+import { IRequestTagRepository, RequestTagData } from '@request-tags/domain/repositories/request-tag.repository.interface';
 
 export class ImportRequestTagsUseCase {
   constructor(private readonly repository: IRequestTagRepository) {}
