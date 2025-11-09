@@ -15,6 +15,7 @@ This Turborepo includes the following packages & apps:
 │   └── web                      # Next.js frontend with App Router (port 3001)
 └── packages
     ├── @repo/reports            # Shared DTOs and TypeScript types
+    ├── @repo/database           # Centralized database schemas and config
     ├── @repo/ui                 # Shared React components
     ├── @repo/eslint-config      # ESLint configurations (includes Prettier)
     ├── @repo/jest-config        # Jest configurations
@@ -28,6 +29,26 @@ This Turborepo includes the following packages & apps:
   - Use cases for application logic
   - Repository pattern with Drizzle ORM
   - Shared DTOs via `@repo/reports`
+
+- ✅ **Request Categorization**: Error categorization reports with Excel import
+  - Excel file parsing and data transformation
+  - Category summary and aggregation
+  - Batch import operations
+
+- ✅ **Parent-Child Requests**: Request relationship tracking
+  - Excel import for relationship data
+  - Statistics and summary calculations
+  - Relationship visualization
+
+- ✅ **Request Tags**: Tag management with Excel import (REP01 XD TAG 2025)
+  - File upload and Excel parsing
+  - Query operations (missing IDs, additional info search)
+  - Tag management UI
+
+- ✅ **Error Logging**: System-wide error tracking
+  - Global error logging and tracking
+  - Error aggregation and filtering
+  - Error logs dashboard
 
 ### Planned Features
 

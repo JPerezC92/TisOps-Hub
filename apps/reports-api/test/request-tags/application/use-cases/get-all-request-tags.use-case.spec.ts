@@ -13,7 +13,7 @@ describe('GetAllRequestTagsUseCase', () => {
     getAllRequestTagsUseCase = new GetAllRequestTagsUseCase(mockRepository);
   });
 
-  it('should return all rep01 tags', async () => {
+  it('should return all request tags', async () => {
     const expectedTags = RequestTagFactory.createMany(5);
 
     mockRepository.findAll.mockResolvedValue(expectedTags);

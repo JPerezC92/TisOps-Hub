@@ -12,7 +12,7 @@ describe('DeleteAllRequestTagsUseCase', () => {
     deleteAllRequestTagsUseCase = new DeleteAllRequestTagsUseCase(mockRepository);
   });
 
-  it('should delete all rep01 tags and return count', async () => {
+  it('should delete all request tags and return count', async () => {
     mockRepository.count.mockResolvedValue(10);
     mockRepository.deleteAll.mockResolvedValue(undefined);
 

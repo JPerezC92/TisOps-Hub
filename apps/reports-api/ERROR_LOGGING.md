@@ -43,9 +43,9 @@ Returns list of error logs, sorted by timestamp (newest first).
     "id": 1,
     "timestamp": "2025-11-05T16:15:47.000Z",
     "errorType": "DatabaseError",
-    "errorMessage": "UNIQUE constraint failed: rep01_tags.request_id",
+    "errorMessage": "UNIQUE constraint failed: request_tags.request_id",
     "stackTrace": "LibsqlError: UNIQUE constraint failed...",
-    "endpoint": "/rep01-tags/upload",
+    "endpoint": "/request-tags/upload",
     "method": "POST",
     "userId": null,
     "metadata": {
@@ -80,7 +80,7 @@ The `DatabaseExceptionFilter` catches all exceptions and:
   "statusCode": 409,
   "message": "A record with this information already exists",
   "timestamp": "2025-11-05T16:15:47.000Z",
-  "path": "/rep01-tags/upload",
+  "path": "/request-tags/upload",
   "method": "POST"
 }
 ```
@@ -131,7 +131,7 @@ Visit http://localhost:3000/api and look for the `error-logs` tag
 
 Try uploading a duplicate file to trigger a UNIQUE constraint error:
 ```bash
-curl -X POST http://localhost:3000/rep01-tags/upload \
+curl -X POST http://localhost:3000/request-tags/upload \
   -F "file=@REP01 XD TAG 2025.xlsx"
 ```
 

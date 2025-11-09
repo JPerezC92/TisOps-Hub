@@ -231,7 +231,7 @@ function MissingIdsModal({ isOpen, onClose, linkedRequestId, requestIds, loading
               Linked Request: <span className="text-orange-300 font-semibold">{linkedRequestId}</span>
             </p>
             <p className="text-xs text-orange-300/60 mt-1">
-              IDs in parent_child_requests but missing from rep01_tags
+              IDs in parent_child_requests but missing from request_tags
             </p>
           </div>
           <button
@@ -254,7 +254,7 @@ function MissingIdsModal({ isOpen, onClose, linkedRequestId, requestIds, loading
             <div className="text-center py-12">
               <div className="text-6xl mb-4">✓</div>
               <p className="text-xl font-semibold text-orange-300 mb-2">No Missing IDs</p>
-              <p className="text-orange-300/70">All parent_child_requests are present in rep01_tags</p>
+              <p className="text-orange-300/70">All parent_child_requests are present in request_tags</p>
             </div>
           ) : (
             <div>
@@ -667,7 +667,7 @@ export default function RequestCategorizationPage() {
                         {/* Computed Column Indicator */}
                         <span
                           className="inline-flex items-center justify-center w-4 h-4 bg-jpc-vibrant-cyan-500/15 border border-jpc-vibrant-cyan-500/30 rounded text-[8px] font-bold text-jpc-vibrant-cyan-400"
-                          title="Computed Column: Calculated from REP01 Tags table"
+                          title="Computed Column: Calculated from Request Tags table"
                         >
                           ⚡
                         </span>
@@ -679,7 +679,7 @@ export default function RequestCategorizationPage() {
                         {/* Computed Column Indicator */}
                         <span
                           className="inline-flex items-center justify-center w-4 h-4 bg-jpc-vibrant-purple-500/15 border border-jpc-vibrant-purple-500/30 rounded text-[8px] font-bold text-purple-300"
-                          title="Computed Column: Calculated from REP01 Tags table"
+                          title="Computed Column: Calculated from Request Tags table"
                         >
                           ⚡
                         </span>
@@ -691,7 +691,7 @@ export default function RequestCategorizationPage() {
                         {/* Computed Column Indicator */}
                         <span
                           className="inline-flex items-center justify-center w-4 h-4 bg-jpc-vibrant-orange-500/15 border border-jpc-vibrant-orange-500/30 rounded text-[8px] font-bold text-orange-300"
-                          title="Computed Column: IDs in parent_child_requests but not in rep01_tags"
+                          title="Computed Column: IDs in parent_child_requests but not in request_tags"
                         >
                           ⚡
                         </span>

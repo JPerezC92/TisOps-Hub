@@ -41,7 +41,7 @@ This document defines the complete design system used in File Imports (`/imports
 - **Cyan-400**: Total counts, primary statistics, processing states, main icons
 - **Emerald-400**: Success counts, completed states, positive indicators
 - **Orange-400**: Failed counts, warning states, error indicators
-- **Purple-400**: Special categories, secondary stats, REP01 tags
+- **Purple-400**: Special categories, secondary stats, Request tags
 - **Foreground**: Main text content (headings, labels)
 - **Muted-foreground**: Secondary text, descriptions, captions
 

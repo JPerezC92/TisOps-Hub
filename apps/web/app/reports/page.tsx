@@ -18,8 +18,8 @@ export default function ReportsPage() {
         },
         {
           href: '/request-tags',
-          title: 'REP01 Tags',
-          description: 'Upload and view REP01 tag data',
+          title: 'Request Tags',
+          description: 'Upload and view request tag data (REP01)',
           icon: '🏷️',
           color: 'purple',
         },

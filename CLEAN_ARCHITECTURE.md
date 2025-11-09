@@ -88,17 +88,23 @@ packages/reports/src/tasks/
 │   └── task.entity.ts        # ✅ Task interface (NO business logic)
 └── index.ts                   # ✅ Barrel exports
 
+# Shared Database Package (packages/database/src/)
+packages/database/src/
+├── config.ts                        # Turso connection and DATABASE_CONNECTION export
+├── schemas/                         # All Drizzle schemas
+│   ├── tasks.schema.ts             # Task table schema
+│   ├── request-categorization.schema.ts
+│   ├── parent-child-requests.schema.ts
+│   ├── request-tags.schema.ts
+│   ├── error-logs.schema.ts
+│   └── index.ts
+└── entry.ts                         # Central export file
+
 # API Implementation (apps/reports-api/src/)
 apps/reports-api/src/
-├── database/                          # Shared database infrastructure
-│   └── infrastructure/
-│       ├── database.config.ts        # Turso connection
-│       ├── database.module.ts        # Exports DATABASE_CONNECTION
-│       ├── schemas/                  # All Drizzle schemas
-│       │   ├── tasks.schema.ts      # Task table schema
-│       │   └── index.ts
-│       └── migrations/               # SQL migrations
-└── tasks/                            # Tasks feature module
+├── database/infrastructure/
+│   └── migrations/                  # SQL migrations
+└── tasks/                          # Tasks feature module
     ├── domain/
     │   ├── entities/
     │   │   └── task.entity.ts       # ✅ Pure domain entity WITH business logic
@@ -374,30 +380,37 @@ export class TasksService {
 }
 ```
 
-## Database Module Structure
+## Database Package Structure
 
-The `database` module is purely infrastructure, providing shared database services:
+The `@repo/database` package is a centralized workspace package providing shared database services:
 
 ```
-apps/reports-api/src/database/
-└── infrastructure/
-    ├── database.config.ts      # Turso connection configuration
-    ├── database.module.ts      # Exports DATABASE_CONNECTION globally
-    ├── schemas/                # All Drizzle schemas (from all modules)
-    │   ├── tasks.schema.ts    # Tasks table
-    │   ├── reports.schema.ts  # Future: Reports table
-    │   └── index.ts
-    └── migrations/             # Generated SQL migrations
-        ├── 0000_*.sql
-        └── meta/
+packages/database/
+└── src/
+    ├── config.ts              # Turso connection configuration and DATABASE_CONNECTION export
+    ├── schemas/               # All Drizzle schemas (from all modules)
+    │   ├── tasks.schema.ts   # Tasks table
+    │   ├── request-categorization.schema.ts
+    │   ├── parent-child-requests.schema.ts
+    │   ├── request-tags.schema.ts
+    │   ├── error-logs.schema.ts
+    │   ├── index.ts
+    │   └── [future-tables].schema.ts  # Future schemas
+    └── entry.ts               # Central export file
+
+apps/reports-api/src/database/infrastructure/
+└── migrations/                # Generated SQL migrations
+    ├── 0000_*.sql
+    └── meta/
 ```
 
-**Database Module Responsibility:**
+**Database Package Responsibility:**
 - Provide database connection via `DATABASE_CONNECTION` token
-- Centralize all Drizzle schemas
-- Manage migrations
+- Centralize all Drizzle schemas for reusability
+- Export database configuration across the monorepo
+- Manage schema definitions
 
-**What Database Module Does NOT Do:**
+**What Database Package Does NOT Do:**
 - ❌ Contains domain logic
 - ❌ Contains use cases
 - ❌ Contains repository implementations
@@ -434,9 +447,9 @@ apps/reports-api/src/reports/
     └── report-response.dto.ts
 ```
 
-**Drizzle Schema (in database module):**
+**Drizzle Schema (in database package):**
 ```
-apps/reports-api/src/database/infrastructure/schemas/
+packages/database/src/schemas/
 ├── reports.schema.ts          # Report table
 ├── templates.schema.ts        # Template table
 └── index.ts                   # Export all schemas
@@ -504,15 +517,17 @@ export class GetAllMyEntitiesUseCase {
 }
 ```
 
-5. **Create Drizzle Schema (in database module):**
+5. **Create Drizzle Schema (in database package):**
 ```typescript
-// src/database/infrastructure/schemas/my-entities.schema.ts
+// packages/database/src/schemas/my-entities.schema.ts
 import { sqliteTable, integer, text } from 'drizzle-orm/sqlite-core';
 
 export const myEntities = sqliteTable('my_entities', {
   id: integer('id').primaryKey({ autoIncrement: true }),
   name: text('name').notNull(),
 });
+
+// Don't forget to export from packages/database/src/schemas/index.ts
 ```
 
 6. **Create Repository Implementation:**

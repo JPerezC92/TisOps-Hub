@@ -242,12 +242,15 @@ pnpm dev --filter=web
 
 3. **Create database schema**
    ```bash
-   # Create schema file
-   touch apps/reports-api/src/database/infrastructure/schemas/my-entities.schema.ts
-   
+   # Create schema file in centralized database package
+   touch packages/database/src/schemas/my-entities.schema.ts
+
+   # Export from index.ts
+   # Add export to packages/database/src/schemas/index.ts
+
    # Generate migration
    pnpm db:generate
-   
+
    # Apply migration
    pnpm db:migrate
    ```

@@ -31,7 +31,7 @@ export class RequestCategorizationRepository
       tagCategorizacion: string[];
     }>
   > {
-    // Execute single LEFT JOIN query to fetch all categorizations with their related rep01_tags
+    // Execute single LEFT JOIN query to fetch all categorizations with their related request_tags
     const results = await this.db
       .select({
         requestId: requestCategorization.requestId,

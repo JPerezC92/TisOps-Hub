@@ -25,7 +25,7 @@ export class RequestTagsController {
   ) {}
 
   @Get()
-  @ApiOperation({ summary: 'Get all REP01 tag records' })
+  @ApiOperation({ summary: 'Get all request tag records' })
   @ApiResponse({ status: 200, description: 'Returns all records' })
   async findAll() {
     return this.requestTagsService.findAll();
@@ -33,7 +33,7 @@ export class RequestTagsController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  @ApiOperation({ summary: 'Upload and parse Excel file (REP01 XD TAG format)' })
+  @ApiOperation({ summary: 'Upload and parse request tags Excel file (REP01 XD TAG 2025 format)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -67,7 +67,7 @@ export class RequestTagsController {
   }
 
   @Delete()
-  @ApiOperation({ summary: 'Delete all REP01 tag records' })
+  @ApiOperation({ summary: 'Delete all request tag records' })
   @ApiResponse({ status: 200, description: 'All records deleted' })
   async deleteAll() {
     return this.requestTagsService.deleteAll();
