@@ -1,0 +1,95 @@
+import { faker } from '@faker-js/faker';
+import type { WarRoom, InsertWarRoom } from '@repo/database';
+
+export class WarRoomsFactory {
+  static createWarRoom(overrides?: Partial<WarRoom>): WarRoom {
+    const incidentId = overrides?.incidentId ?? faker.number.int({ min: 1000, max: 9999 });
+    const priority = overrides?.initialPriority ?? faker.helpers.arrayElement([
+      'CRITICAL',
+      'HIGH',
+      'MEDIUM',
+      'LOW',
+    ]);
+    const status = overrides?.status ?? faker.helpers.arrayElement(['Closed', 'Open']);
+
+    // Excel date serial number (days since 1900-01-01)
+    const excelDate = overrides?.date ?? faker.number.int({ min: 44000, max: 46000 });
+
+    // Excel time serial (fraction of day, 0.0 to 1.0)
+    const startTime = overrides?.startTime ?? faker.number.float({ min: 0, max: 1, fractionDigits: 6 });
+    const durationMinutes = overrides?.durationMinutes ?? faker.number.int({ min: 30, max: 480 });
+    const durationFraction = durationMinutes / (24 * 60); // Convert minutes to fraction of day
+    const endTime = overrides?.endTime ?? Math.min(startTime + durationFraction, 1.0);
+
+    return {
+      incidentId,
+      application: overrides?.application ?? faker.helpers.arrayElement([
+        'FFVV',
+        'Somos Belcorp',
+        'B2B',
+        'MDM',
+        'Portal Consultoras',
+      ]),
+      date: excelDate,
+      summary: overrides?.summary ?? faker.lorem.sentence(),
+      initialPriority: priority,
+      startTime,
+      durationMinutes,
+      endTime,
+      participants: overrides?.participants ?? faker.number.int({ min: 3, max: 20 }),
+      status,
+      priorityChanged: overrides?.priorityChanged ?? faker.helpers.arrayElement(['Yes', 'No']),
+      resolutionTeamChanged: overrides?.resolutionTeamChanged ?? faker.helpers.arrayElement(['Yes', 'No']),
+      notes: overrides?.notes ?? faker.lorem.paragraph(),
+      rcaStatus: overrides?.rcaStatus ?? faker.helpers.arrayElement([
+        'Completed',
+        'In Progress',
+        'Pending',
+        'Not Required',
+      ]),
+      urlRca: overrides?.urlRca ?? (faker.datatype.boolean()
+        ? faker.internet.url()
+        : 'No asignado'),
+    };
+  }
+
+  static createManyWarRooms(
+    count: number,
+    overrides?: Partial<WarRoom>,
+  ): WarRoom[] {
+    return Array.from({ length: count }, (_, index) =>
+      this.createWarRoom({ ...overrides, incidentId: overrides?.incidentId ?? 1000 + index + 1 }),
+    );
+  }
+
+  static createInsertWarRoom(overrides?: Partial<InsertWarRoom>): InsertWarRoom {
+    const warRoom = this.createWarRoom(overrides as Partial<WarRoom>);
+    return warRoom;
+  }
+
+  static createUploadResponse(overrides?: {
+    imported?: number;
+    total?: number;
+  }) {
+    return {
+      message: 'File uploaded and parsed successfully',
+      imported: overrides?.imported ?? faker.number.int({ min: 20, max: 100 }),
+      total: overrides?.total ?? faker.number.int({ min: 20, max: 100 }),
+    };
+  }
+
+  static createDeleteResponse(overrides?: { deleted?: number }) {
+    return {
+      message: 'All war rooms deleted successfully',
+      deleted: overrides?.deleted ?? faker.number.int({ min: 0, max: 500 }),
+    };
+  }
+
+  static createFindAllResponse(overrides?: { count?: number }) {
+    const data = this.createManyWarRooms(overrides?.count ?? 5);
+    return {
+      data,
+      total: data.length,
+    };
+  }
+}

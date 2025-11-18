@@ -49,3 +49,22 @@ export type {
   RequestTagResponse,
 } from './request-tags';
 
+// War Rooms Types (re-export from database)
+export type { WarRoom, InsertWarRoom } from '@repo/database';
+
+// Sessions Orders Types (re-export from database)
+export type {
+  SessionsOrder,
+  InsertSessionsOrder,
+  SessionsOrdersRelease,
+  InsertSessionsOrdersRelease
+} from '@repo/database';
+
+// Monthly Report Types (re-export from database)
+export type { MonthlyReport, InsertMonthlyReport } from '@repo/database';
+
+// Weekly Corrective Types (re-export from database)
+export type { WeeklyCorrective, InsertWeeklyCorrective } from '@repo/database';
+
+// Problems Types (re-export from database)
+export type { Problem, InsertProblem } from '@repo/database';
