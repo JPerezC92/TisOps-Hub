@@ -8,6 +8,27 @@
       "when": 1762722461050,
       "tag": "0000_military_retro_girl",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1762737334895,
+      "tag": "0001_chilly_baron_strucker",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1762794341175,
+      "tag": "0002_sticky_rawhide_kid",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1762795389372,
+      "tag": "0003_bitter_sleeper",
+      "breakpoints": true
     }
   ]
 }

@@ -11,7 +11,9 @@
       "mcp__chrome-devtools__list_network_requests",
       "Bash(pnpm build:*)",
       "Bash(pnpm test:e2e:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(curl:*)",
+      "Bash(pnpm exec dotenv:*)"
     ],
     "deny": [],
     "ask": []

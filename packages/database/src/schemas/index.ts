@@ -3,3 +3,8 @@ export * from './parent-child-requests.schema';
 export * from './request-categorization.schema';
 export * from './request-tags.schema';
 export * from './error-logs.schema';
+export * from './war-rooms.schema';
+export * from './sessions-orders.schema';
+export * from './monthly-report.schema';
+export * from './weekly-corrective.schema';
+export * from './problems.schema';

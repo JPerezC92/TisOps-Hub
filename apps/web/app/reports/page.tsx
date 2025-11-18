@@ -33,6 +33,48 @@ export default function ReportsPage() {
       ],
     },
     {
+      title: 'Incident Reports',
+      description: 'Track and manage incident data',
+      icon: '🚨',
+      links: [
+        {
+          href: '/war-rooms',
+          title: 'War Rooms',
+          description: 'View and manage war room incident records',
+          icon: '⚔️',
+          color: 'orange',
+        },
+        {
+          href: '/monthly-report',
+          title: 'Monthly Report',
+          description: 'Monthly incident reports and tracking',
+          icon: '📅',
+          color: 'cyan',
+        },
+        {
+          href: '/weekly-corrective',
+          title: 'Weekly Corrective',
+          description: 'Weekly corrective action reports',
+          icon: '🔧',
+          color: 'emerald',
+        },
+        {
+          href: '/sessions-orders',
+          title: 'Sessions & Orders',
+          description: 'View incidents, sessions, and orders data',
+          icon: '📦',
+          color: 'purple',
+        },
+        {
+          href: '/problems',
+          title: 'Problems',
+          description: 'Track and manage reported problems',
+          icon: '🔴',
+          color: 'orange',
+        },
+      ],
+    },
+    {
       title: 'System Monitoring',
       description: 'Monitor system health and errors',
       icon: '🐛',

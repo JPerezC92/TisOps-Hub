@@ -31,5 +31,27 @@ export type {
 export { errorLogs } from './schemas/error-logs.schema';
 export type { ErrorLog, InsertErrorLog } from './schemas/error-logs.schema';
 
+// War Rooms schema and types
+export { warRooms } from './schemas/war-rooms.schema';
+export type { WarRoom, InsertWarRoom } from './schemas/war-rooms.schema';
 
+// Sessions Orders schema and types
+export { sessionsOrders, sessionsOrdersReleases } from './schemas/sessions-orders.schema';
+export type {
+  SessionsOrder,
+  InsertSessionsOrder,
+  SessionsOrdersRelease,
+  InsertSessionsOrdersRelease,
+} from './schemas/sessions-orders.schema';
 
+// Monthly Report schema and types
+export { monthlyReports } from './schemas/monthly-report.schema';
+export type { MonthlyReport, InsertMonthlyReport } from './schemas/monthly-report.schema';
+
+// Weekly Corrective schema and types
+export { weeklyCorrectives } from './schemas/weekly-corrective.schema';
+export type { WeeklyCorrective, InsertWeeklyCorrective } from './schemas/weekly-corrective.schema';
+
+// Problems schema and types
+export { problems } from './schemas/problems.schema';
+export type { Problem, InsertProblem } from './schemas/problems.schema';

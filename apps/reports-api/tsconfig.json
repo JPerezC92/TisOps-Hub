@@ -11,6 +11,11 @@
       "@request-tags/*": ["src/request-tags/*"],
       "@database/*": ["src/database/*"],
       "@common/*": ["src/common/*"],
+      "@monthly-report/*": ["src/monthly-report/*"],
+      "@sessions-orders/*": ["src/sessions-orders/*"],
+      "@war-rooms/*": ["src/war-rooms/*"],
+      "@weekly-corrective/*": ["src/weekly-corrective/*"],
+      "@problems/*": ["src/problems/*"],
       "@src/*": ["src/*"]
     }
   }

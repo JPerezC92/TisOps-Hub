@@ -1,0 +1,141 @@
+// ============================================
+// Test Script: Test Monthly Report Batch Insert
+// ============================================
+// Purpose: Test different batch sizes for monthly report inserts
+// Usage: pnpm exec dotenv -e .env -- node scripts/test-monthly-report-batch-insert.js
+// ============================================
+
+const { createClient } = require('@libsql/client');
+const { drizzle } = require('drizzle-orm/libsql');
+const { monthlyReports } = require('@repo/database');
+const XLSX = require('xlsx');
+const path = require('path');
+
+const FILE_PATH = path.join(__dirname, '../files/XD 2025 DATA INFORME MENSUAL - Current Month.xlsx');
+const BATCH_SIZES_TO_TEST = [5, 10, 15, 20, 25];
+
+const dbUrl = process.env.DATABASE_URL;
+const dbToken = process.env.DATABASE_AUTH_TOKEN;
+
+if (!dbUrl || !dbToken) {
+  console.error('Error: DATABASE_URL or DATABASE_AUTH_TOKEN not set');
+  process.exit(1);
+}
+
+const client = createClient({ url: dbUrl, authToken: dbToken });
+const db = drizzle({ client });
+
+async function parseExcelFile() {
+  const workbook = XLSX.readFile(FILE_PATH);
+  const sheetName = workbook.SheetNames[0];
+  const worksheet = workbook.Sheets[sheetName];
+  const data = XLSX.utils.sheet_to_json(worksheet);
+
+  return data.map((row) => ({
+    requestId: Number(row['Request ID']) || 0,
+    aplicativos: String(row['Aplicativos'] || ''),
+    categorizacion: String(row['Categorización'] || ''),
+    createdTime: String(row['Created Time'] || ''),
+    requestStatus: String(row['Request Status'] || ''),
+    modulo: String(row['Modulo.'] || ''),
+    subject: String(row['Subject'] || ''),
+    priority: String(row['Priority'] || ''),
+    eta: String(row['ETA'] || ''),
+    informacionAdicional: String(row['Información Adicional'] || ''),
+    resolvedTime: String(row['Resolved Time'] || ''),
+    paisesAfectados: String(row['Países Afectados'] || ''),
+    recurrencia: String(row['Recurrencia'] || ''),
+    technician: String(row['Technician'] || ''),
+    jira: String(row['Jira'] || ''),
+    problemId: String(row['Problem ID'] || ''),
+    linkedRequestId: String(row['Linked Request Id'] || ''),
+    requestOlaStatus: String(row['Request OLA Status'] || ''),
+    grupoEscalamiento: String(row['Grupo Escalamiento'] || ''),
+    aplicactivosAfectados: String(row['Aplicactivos Afectados'] || ''),
+    nivelUno: String(row['¿Este Incidente se debió Resolver en Nivel 1?'] || ''),
+    campana: String(row['Campaña'] || ''),
+    cuv: String(row['CUV_1'] || ''),
+    release: String(row['Release'] || ''),
+    rca: String(row['RCA'] || ''),
+  }));
+}
+
+async function testBatchInsert(records, batchSize) {
+  console.log(`\n🧪 Testing batch size: ${batchSize}`);
+  console.log('='.repeat(60));
+
+  try {
+    await db.delete(monthlyReports).execute();
+
+    const startTime = Date.now();
+    let imported = 0;
+
+    for (let i = 0; i < records.length; i += batchSize) {
+      const batch = records.slice(i, i + batchSize);
+      try {
+        const result = await db.insert(monthlyReports).values(batch).execute();
+        imported += result.rowsAffected || batch.length;
+      } catch (error) {
+        console.log(`   ❌ Batch ${Math.floor(i / batchSize) + 1} failed: ${error.message.substring(0, 80)}...`);
+        for (const record of batch) {
+          try {
+            await db.insert(monthlyReports).values(record).execute();
+            imported++;
+          } catch (err) {}
+        }
+      }
+    }
+
+    const endTime = Date.now();
+    const duration = ((endTime - startTime) / 1000).toFixed(2);
+
+    console.log(`   ✅ Imported: ${imported}`);
+    console.log(`   ⏱️  Time: ${duration}s`);
+    console.log(`   📊 Speed: ${(imported / duration).toFixed(1)} records/sec`);
+
+    return {
+      batchSize,
+      imported,
+      duration: parseFloat(duration),
+      speed: parseFloat((imported / duration).toFixed(1)),
+    };
+  } catch (error) {
+    console.error(`   💥 Fatal error: ${error.message}`);
+    return { batchSize, imported: 0, duration: 0, speed: 0, error: error.message };
+  }
+}
+
+async function runTests() {
+  console.log('🔬 Monthly Report Batch Insert Performance Test');
+  console.log('='.repeat(80));
+
+  try {
+    console.log('\n📄 Parsing Excel file...');
+    const records = await parseExcelFile();
+    console.log(`   Found ${records.length} records`);
+
+    const results = [];
+    for (const batchSize of BATCH_SIZES_TO_TEST) {
+      const result = await testBatchInsert(records, batchSize);
+      results.push(result);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    console.log('\n📊 RESULTS SUMMARY');
+    console.log('='.repeat(80));
+    console.table(results);
+
+    const successful = results.filter(r => r.imported > 0 && !r.error);
+    if (successful.length > 0) {
+      const best = successful.reduce((a, b) => a.speed > b.speed ? a : b);
+      console.log(`\n🏆 Best performing batch size: ${best.batchSize} (${best.speed} records/sec)`);
+    }
+
+    console.log('\n✅ TESTS COMPLETED');
+  } catch (error) {
+    console.error('❌ Error:', error.message);
+    process.exit(1);
+  }
+}
+
+runTests();

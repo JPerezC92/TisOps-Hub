@@ -7,6 +7,11 @@ import { ParentChildRequestsModule } from './parent-child-requests/parent-child-
 import { RequestCategorizationModule } from './request-categorization/request-categorization.module';
 import { RequestTagsModule } from './request-tags/request-tags.module';
 import { ErrorLogsModule } from './error-logs/error-logs.module';
+import { WarRoomsModule } from './war-rooms/war-rooms.module';
+import { SessionsOrdersModule } from './sessions-orders/sessions-orders.module';
+import { MonthlyReportModule } from './monthly-report/monthly-report.module';
+import { WeeklyCorrectiveModule } from './weekly-corrective/weekly-corrective.module';
+import { ProblemsModule } from './problems/problems.module';
 import { DatabaseModule } from './database/infrastructure/database.module';
 
 import { AppService } from './app.service';
@@ -20,6 +25,11 @@ import { AppController } from './app.controller';
     RequestCategorizationModule,
     RequestTagsModule,
     ErrorLogsModule,
+    WarRoomsModule,
+    SessionsOrdersModule,
+    MonthlyReportModule,
+    WeeklyCorrectiveModule,
+    ProblemsModule,
   ],
   controllers: [AppController],
   providers: [
