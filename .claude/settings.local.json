@@ -13,7 +13,11 @@
       "Bash(pnpm test:e2e:*)",
       "Bash(dir:*)",
       "Bash(curl:*)",
-      "Bash(pnpm exec dotenv:*)"
+      "Bash(pnpm exec dotenv:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "mcp__chrome-devtools__click",
+      "Bash(pnpm --filter @repo/database build:*)"
     ],
     "deny": [],
     "ask": []

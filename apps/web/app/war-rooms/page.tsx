@@ -1,10 +1,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { DateTime } from 'luxon';
 import type { WarRoom } from '@repo/reports';
 import { StatsGrid } from '@/components/stats-grid';
 import { UploadSectionDynamic } from '@/components/upload-section-dynamic';
 import { Badge } from '@/components/ui/badge';
+
+// Date formatting utility using Luxon
+function formatExcelDate(timestamp: number | Date | string): string {
+  if (!timestamp) return 'N/A';
+
+  // Handle different timestamp formats
+  let date: DateTime;
+  if (timestamp instanceof Date) {
+    date = DateTime.fromJSDate(timestamp);
+  } else if (typeof timestamp === 'string') {
+    date = DateTime.fromISO(timestamp);
+  } else {
+    // Assume it's a Unix timestamp in milliseconds
+    date = DateTime.fromMillis(timestamp);
+  }
+
+  return date.toFormat('MMM d, yyyy'); // e.g., "Nov 4, 2024"
+}
 
 export default function WarRoomsPage() {
   const [warRooms, setWarRooms] = useState<WarRoom[]>([]);
@@ -135,7 +154,7 @@ export default function WarRoomsPage() {
   // Filter war rooms
   const filteredWarRooms = warRooms.filter(warRoom => {
     const matchesSearch =
-      warRoom.incidentId.toString().includes(searchTerm.toLowerCase()) ||
+      warRoom.requestId.toString().includes(searchTerm.toLowerCase()) ||
       warRoom.application.toLowerCase().includes(searchTerm.toLowerCase()) ||
       warRoom.summary.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -226,7 +245,7 @@ export default function WarRoomsPage() {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Incident ID, Application, Summary..."
+                placeholder="Request ID, Application, Summary..."
                 className="w-full px-4 py-2 bg-background border border-border/60 rounded-lg text-foreground placeholder-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-jpc-vibrant-cyan-500/50 focus:border-jpc-vibrant-cyan-500/50"
               />
             </div>
@@ -316,7 +335,7 @@ export default function WarRoomsPage() {
                 <thead>
                   <tr className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-transparent">
                     <th className="h-12 text-xs font-bold text-cyan-100 bg-jpc-vibrant-cyan-500/5 uppercase tracking-wider text-left py-4 px-6">
-                      Incident ID
+                      Request ID
                     </th>
                     <th className="h-12 text-xs font-bold text-cyan-100 bg-jpc-vibrant-cyan-500/5 uppercase tracking-wider text-left py-4 px-6">
                       Application
@@ -343,9 +362,20 @@ export default function WarRoomsPage() {
                 </thead>
                 <tbody>
                   {paginatedWarRooms.map((warRoom) => (
-                    <tr key={warRoom.incidentId} className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-jpc-vibrant-cyan-500/10 transition-all duration-300 group">
+                    <tr key={warRoom.requestId} className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-jpc-vibrant-cyan-500/10 transition-all duration-300 group">
                       <td className="px-6 py-4 text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors font-medium">
-                        {warRoom.incidentId}
+                        {warRoom.requestIdLink ? (
+                          <a
+                            href={warRoom.requestIdLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-jpc-vibrant-cyan-500 hover:text-jpc-vibrant-cyan-400 underline decoration-jpc-vibrant-cyan-500/30 hover:decoration-jpc-vibrant-cyan-400 transition-colors"
+                          >
+                            {warRoom.requestId}
+                          </a>
+                        ) : (
+                          warRoom.requestId
+                        )}
                       </td>
                       <td className="px-6 py-4 text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
                         <div className="max-w-xs truncate" title={warRoom.application}>
@@ -353,7 +383,7 @@ export default function WarRoomsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-xs text-muted-foreground/80">
-                        {warRoom.date}
+                        {formatExcelDate(warRoom.date)}
                       </td>
                       <td className="px-6 py-4 text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
                         <div className="max-w-xs truncate" title={warRoom.summary}>

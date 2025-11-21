@@ -4,6 +4,8 @@ import { INestApplication } from '@nestjs/common';
 import { describe, it, beforeEach } from 'vitest';
 import request from 'supertest';
 import { AppModule } from './../src/app.module';
+import { DatabaseModule } from '@database/infrastructure/database.module';
+import { TestDatabaseModule } from '@database/infrastructure/test-database.module';
 
 describe('AppController (e2e)', () => {
   let app: INestApplication;
@@ -11,7 +13,10 @@ describe('AppController (e2e)', () => {
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideModule(DatabaseModule)
+      .useModule(TestDatabaseModule)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();

@@ -8,3 +8,5 @@ export * from './sessions-orders.schema';
 export * from './monthly-report.schema';
 export * from './weekly-corrective.schema';
 export * from './problems.schema';
+export * from './application-registry.schema';
+export * from './application-patterns.schema';

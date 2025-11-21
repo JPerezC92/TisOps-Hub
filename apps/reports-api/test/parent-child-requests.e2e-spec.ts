@@ -6,6 +6,8 @@ import request from 'supertest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { AppModule } from '../src/app.module';
+import { DatabaseModule } from '@database/infrastructure/database.module';
+import { TestDatabaseModule } from '@database/infrastructure/test-database.module';
 
 describe('Parent Child Requests (E2E)', () => {
   let app: INestApplication;
@@ -13,7 +15,10 @@ describe('Parent Child Requests (E2E)', () => {
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideModule(DatabaseModule)
+      .useModule(TestDatabaseModule)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -34,8 +39,17 @@ describe('Parent Child Requests (E2E)', () => {
         .attach('file', fileBuffer, {
           filename: 'REP02 padre hijo.xlsx',
           contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        })
-        .expect(201);
+        });
+
+      // Debug: Log the actual response
+      console.log('Upload status:', uploadResponse.status);
+      console.log('Upload response body:', JSON.stringify(uploadResponse.body, null, 2));
+
+      if (uploadResponse.status !== 201) {
+        console.error('Upload failed!', uploadResponse.body);
+      }
+
+      expect(uploadResponse.status).toBe(201);
 
       // Verify upload response
       expect(uploadResponse.body).toMatchObject({

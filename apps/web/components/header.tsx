@@ -6,6 +6,8 @@ export function Header() {
     { label: "Tasks", href: "/tasks" },
     { label: "File Imports", href: "/imports" },
     { label: "Reports", href: "/reports" },
+    { label: "Application Registry", href: "/application-registry" },
+    { label: "Analytics Dashboard", href: "/analytics-dashboard" },
   ]
 
   return (

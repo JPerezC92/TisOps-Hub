@@ -2,6 +2,9 @@
 export { db, DATABASE_CONNECTION } from './config';
 export type { Database } from './config';
 
+// Test utilities
+export { createTestDatabase, migrateTestDatabase } from './test-utils';
+
 // Task schema and Drizzle types
 export { tasks } from './schemas/tasks.schema';
 export type { DbTask, NewDbTask } from './schemas/tasks.schema';
@@ -55,3 +58,17 @@ export type { WeeklyCorrective, InsertWeeklyCorrective } from './schemas/weekly-
 // Problems schema and types
 export { problems } from './schemas/problems.schema';
 export type { Problem, InsertProblem } from './schemas/problems.schema';
+
+// Application Registry schema and types
+export { applicationRegistry } from './schemas/application-registry.schema';
+export type {
+  ApplicationRegistry,
+  InsertApplicationRegistry,
+} from './schemas/application-registry.schema';
+
+// Application Patterns schema and types
+export { applicationPatterns } from './schemas/application-patterns.schema';
+export type {
+  ApplicationPattern,
+  InsertApplicationPattern,
+} from './schemas/application-patterns.schema';

@@ -12,6 +12,7 @@ import { SessionsOrdersModule } from './sessions-orders/sessions-orders.module';
 import { MonthlyReportModule } from './monthly-report/monthly-report.module';
 import { WeeklyCorrectiveModule } from './weekly-corrective/weekly-corrective.module';
 import { ProblemsModule } from './problems/problems.module';
+import { ApplicationRegistryModule } from './application-registry/application-registry.module';
 import { DatabaseModule } from './database/infrastructure/database.module';
 
 import { AppService } from './app.service';
@@ -30,6 +31,7 @@ import { AppController } from './app.controller';
     MonthlyReportModule,
     WeeklyCorrectiveModule,
     ProblemsModule,
+    ApplicationRegistryModule,
   ],
   controllers: [AppController],
   providers: [
