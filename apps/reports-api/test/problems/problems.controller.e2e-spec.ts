@@ -1,16 +1,24 @@
+import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { ProblemsModule } from '@problems/problems.module';
-import { DatabaseModule } from '@database/database.module';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import request from 'supertest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { AppModule } from '../../src/app.module';
+import { DatabaseModule } from '@database/infrastructure/database.module';
+import { TestDatabaseModule } from '@database/infrastructure/test-database.module';
 
 describe('ProblemsController (e2e)', () => {
   let app: INestApplication;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [ProblemsModule, DatabaseModule],
-    }).compile();
+      imports: [AppModule],
+    })
+      .overrideModule(DatabaseModule)
+      .useModule(TestDatabaseModule)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -35,17 +43,22 @@ describe('ProblemsController (e2e)', () => {
 
   describe('POST /problems/upload', () => {
     it('should upload and parse Excel file successfully', async () => {
-      // Create a mock Excel file buffer
-      const mockExcelBuffer = Buffer.from('mock excel data');
+      // Use the real Excel file from the project
+      const filePath = join(__dirname, '../../files/XD PROBLEMAS NUEVOS.xlsx');
+      const fileBuffer = readFileSync(filePath);
 
       const response = await request(app.getHttpServer())
         .post('/problems/upload')
-        .attach('file', mockExcelBuffer, 'test.xlsx')
+        .attach('file', fileBuffer, {
+          filename: 'XD PROBLEMAS NUEVOS.xlsx',
+          contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
         .expect(201);
 
       expect(response.body).toHaveProperty('message');
       expect(response.body).toHaveProperty('imported');
       expect(response.body).toHaveProperty('total');
+      expect(response.body.imported).toBeGreaterThan(0);
     });
 
     it('should return 400 when no file is uploaded', async () => {
@@ -69,15 +82,21 @@ describe('ProblemsController (e2e)', () => {
       expect(response.body.message).toContain('Invalid file type');
     });
 
-    it('should accept .xls files', async () => {
-      const mockExcelBuffer = Buffer.from('mock excel data');
+    it('should accept .xlsx files', async () => {
+      // Use the real Excel file
+      const filePath = join(__dirname, '../../files/XD PROBLEMAS NUEVOS.xlsx');
+      const fileBuffer = readFileSync(filePath);
 
       const response = await request(app.getHttpServer())
         .post('/problems/upload')
-        .attach('file', mockExcelBuffer, 'test.xls')
+        .attach('file', fileBuffer, {
+          filename: 'test.xlsx',
+          contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
         .expect(201);
 
       expect(response.body).toHaveProperty('message');
+      expect(response.body.imported).toBeGreaterThan(0);
     });
   });
 
@@ -95,14 +114,19 @@ describe('ProblemsController (e2e)', () => {
 
   describe('Integration flow', () => {
     it('should upload, retrieve, and delete problems', async () => {
-      // 1. Upload problems
-      const mockExcelBuffer = Buffer.from('mock excel data');
+      // 1. Upload problems - use real Excel file
+      const filePath = join(__dirname, '../../files/XD PROBLEMAS NUEVOS.xlsx');
+      const fileBuffer = readFileSync(filePath);
+
       const uploadResponse = await request(app.getHttpServer())
         .post('/problems/upload')
-        .attach('file', mockExcelBuffer, 'test.xlsx')
+        .attach('file', fileBuffer, {
+          filename: 'XD PROBLEMAS NUEVOS.xlsx',
+          contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        })
         .expect(201);
 
-      expect(uploadResponse.body.imported).toBeGreaterThanOrEqual(0);
+      expect(uploadResponse.body.imported).toBeGreaterThan(0);
 
       // 2. Retrieve problems
       const getResponse = await request(app.getHttpServer())

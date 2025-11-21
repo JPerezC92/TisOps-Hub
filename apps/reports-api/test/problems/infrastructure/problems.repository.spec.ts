@@ -1,29 +1,25 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { ProblemsRepository } from '@problems/infrastructure/repositories/problems.repository';
-import type { LibSQLDatabase } from 'drizzle-orm/libsql';
 import type { InsertProblem, Problem } from '@repo/database';
-import { eq } from 'drizzle-orm';
-
-// Mock drizzle-orm/libsql
-vi.mock('drizzle-orm/libsql', () => ({
-  drizzle: vi.fn(),
-}));
 
 describe('ProblemsRepository', () => {
   let repository: ProblemsRepository;
   let mockDb: any;
 
   beforeEach(() => {
+    // Create a mock database instance
     mockDb = {
       select: vi.fn().mockReturnThis(),
       from: vi.fn().mockReturnThis(),
       insert: vi.fn().mockReturnThis(),
       values: vi.fn().mockReturnThis(),
       delete: vi.fn().mockReturnThis(),
-      returning: vi.fn().mockReturnThis(),
+      all: vi.fn(),
       execute: vi.fn(),
     };
-    repository = new ProblemsRepository(mockDb as unknown as LibSQLDatabase<any>);
+
+    // Inject the mock database
+    repository = new ProblemsRepository(mockDb);
   });
 
   afterEach(() => {
@@ -61,46 +57,43 @@ describe('ProblemsRepository', () => {
         },
       ];
 
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockResolvedValue(mockProblems),
-      });
+      mockDb.all.mockResolvedValue(mockProblems);
 
       const result = await repository.findAll();
 
       expect(result).toEqual(mockProblems);
-      expect(mockDb.select).toHaveBeenCalledTimes(1);
+      expect(mockDb.select).toHaveBeenCalled();
+      expect(mockDb.from).toHaveBeenCalled();
+      expect(mockDb.all).toHaveBeenCalled();
     });
 
     it('should return empty array when no problems exist', async () => {
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockResolvedValue([]),
-      });
+      mockDb.all.mockResolvedValue([]);
 
       const result = await repository.findAll();
 
       expect(result).toEqual([]);
-      expect(mockDb.select).toHaveBeenCalledTimes(1);
+      expect(mockDb.select).toHaveBeenCalled();
+      expect(mockDb.from).toHaveBeenCalled();
+      expect(mockDb.all).toHaveBeenCalled();
     });
   });
 
   describe('countAll', () => {
     it('should return count of all problems', async () => {
-      const mockCount = [{ count: 42 }];
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockResolvedValue(mockCount),
-      });
+      const mockProblems = new Array(42).fill({});
+      mockDb.all.mockResolvedValue(mockProblems);
 
       const result = await repository.countAll();
 
       expect(result).toBe(42);
-      expect(mockDb.select).toHaveBeenCalledTimes(1);
+      expect(mockDb.select).toHaveBeenCalled();
+      expect(mockDb.from).toHaveBeenCalled();
+      expect(mockDb.all).toHaveBeenCalled();
     });
 
     it('should return 0 when no problems exist', async () => {
-      const mockCount = [{ count: 0 }];
-      mockDb.select.mockReturnValue({
-        from: vi.fn().mockResolvedValue(mockCount),
-      });
+      mockDb.all.mockResolvedValue([]);
 
       const result = await repository.countAll();
 
@@ -137,53 +130,50 @@ describe('ProblemsRepository', () => {
         },
       ];
 
-      mockDb.insert.mockReturnValue({
-        values: vi.fn().mockResolvedValue(undefined),
-      });
+      mockDb.execute.mockResolvedValue(undefined);
 
       await repository.bulkCreate(records);
 
-      expect(mockDb.insert).toHaveBeenCalledTimes(1);
+      expect(mockDb.insert).toHaveBeenCalled();
+      expect(mockDb.values).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     it('should handle empty array gracefully', async () => {
-      mockDb.insert.mockReturnValue({
-        values: vi.fn().mockResolvedValue(undefined),
-      });
-
       await repository.bulkCreate([]);
 
-      expect(mockDb.insert).toHaveBeenCalledTimes(1);
+      // Should not call any db methods for empty array
+      expect(mockDb.insert).not.toHaveBeenCalled();
     });
   });
 
   describe('deleteAll', () => {
     it('should delete all problems and return count', async () => {
-      const mockDeleted = [
-        { requestId: 131205 },
-        { requestId: 129476 },
-        { requestId: 126953 },
-      ];
-
-      mockDb.delete.mockReturnValue({
-        returning: vi.fn().mockResolvedValue(mockDeleted),
-      });
+      mockDb.execute.mockResolvedValue({ rowsAffected: 3 });
 
       const result = await repository.deleteAll();
 
       expect(result).toBe(3);
-      expect(mockDb.delete).toHaveBeenCalledTimes(1);
+      expect(mockDb.delete).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
     });
 
     it('should return 0 when no problems exist to delete', async () => {
-      mockDb.delete.mockReturnValue({
-        returning: vi.fn().mockResolvedValue([]),
-      });
+      mockDb.execute.mockResolvedValue({ rowsAffected: 0 });
 
       const result = await repository.deleteAll();
 
       expect(result).toBe(0);
-      expect(mockDb.delete).toHaveBeenCalledTimes(1);
+      expect(mockDb.delete).toHaveBeenCalled();
+      expect(mockDb.execute).toHaveBeenCalled();
+    });
+
+    it('should handle undefined rowsAffected', async () => {
+      mockDb.execute.mockResolvedValue({});
+
+      const result = await repository.deleteAll();
+
+      expect(result).toBe(0);
     });
   });
 });

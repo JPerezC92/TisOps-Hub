@@ -84,7 +84,7 @@ describe('WarRoomsController (Integration)', () => {
 
       if (response.body.data.length > 0) {
         const record = response.body.data[0];
-        expect(record).toHaveProperty('incidentId');
+        expect(record).toHaveProperty('requestId');
         expect(record).toHaveProperty('application');
         expect(record).toHaveProperty('date');
         expect(record).toHaveProperty('summary');
@@ -269,6 +269,143 @@ describe('WarRoomsController (Integration)', () => {
         .expect(HttpStatus.OK);
 
       expect(response.body.deleted).toBe(0);
+    });
+  });
+
+  describe('GET /war-rooms/analytics', () => {
+    it('should return filtered war rooms by app', async () => {
+      const mockResponse = WarRoomsFactory.createAnalyticsResponse({
+        count: 3,
+        app: { id: 1, code: 'FFVV', name: 'FFVV Application' },
+      });
+
+      mockService.getAnalytics.mockResolvedValue(mockResponse);
+
+      const response = await request(app.getHttpServer())
+        .get('/war-rooms/analytics?app=FFVV')
+        .expect(HttpStatus.OK);
+
+      expect(response.body.data).toHaveLength(3);
+      expect(response.body.total).toBe(3);
+      expect(mockService.getAnalytics).toHaveBeenCalledWith('FFVV', undefined);
+    });
+
+    it('should return filtered war rooms by month', async () => {
+      const mockResponse = WarRoomsFactory.createAnalyticsResponse({ count: 5 });
+
+      mockService.getAnalytics.mockResolvedValue(mockResponse);
+
+      const response = await request(app.getHttpServer())
+        .get('/war-rooms/analytics?month=2025-01')
+        .expect(HttpStatus.OK);
+
+      expect(response.body.data).toHaveLength(5);
+      expect(response.body.total).toBe(5);
+      expect(mockService.getAnalytics).toHaveBeenCalledWith(undefined, '2025-01');
+    });
+
+    it('should return filtered war rooms by both app and month', async () => {
+      const mockResponse = WarRoomsFactory.createAnalyticsResponse({
+        count: 2,
+        app: { id: 2, code: 'B2B', name: 'B2B Application' },
+      });
+
+      mockService.getAnalytics.mockResolvedValue(mockResponse);
+
+      const response = await request(app.getHttpServer())
+        .get('/war-rooms/analytics?app=B2B&month=2025-02')
+        .expect(HttpStatus.OK);
+
+      expect(response.body.data).toHaveLength(2);
+      expect(response.body.total).toBe(2);
+      expect(mockService.getAnalytics).toHaveBeenCalledWith('B2B', '2025-02');
+    });
+
+    it('should handle no filters', async () => {
+      const mockResponse = WarRoomsFactory.createAnalyticsResponse({ count: 10 });
+
+      mockService.getAnalytics.mockResolvedValue(mockResponse);
+
+      const response = await request(app.getHttpServer())
+        .get('/war-rooms/analytics')
+        .expect(HttpStatus.OK);
+
+      expect(response.body.data).toHaveLength(10);
+      expect(response.body.total).toBe(10);
+      expect(mockService.getAnalytics).toHaveBeenCalledWith(undefined, undefined);
+    });
+
+    it('should validate response structure', async () => {
+      const mockResponse = WarRoomsFactory.createAnalyticsResponse({
+        count: 1,
+        app: { id: 1, code: 'FFVV', name: 'FFVV Application' },
+      });
+
+      mockService.getAnalytics.mockResolvedValue(mockResponse);
+
+      const response = await request(app.getHttpServer())
+        .get('/war-rooms/analytics?app=FFVV')
+        .expect(HttpStatus.OK);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('total');
+      expect(Array.isArray(response.body.data)).toBe(true);
+
+      if (response.body.data.length > 0) {
+        const record = response.body.data[0];
+        expect(record).toHaveProperty('requestId');
+        expect(record).toHaveProperty('application');
+        expect(record).toHaveProperty('app');
+
+        if (record.app) {
+          expect(record.app).toHaveProperty('id');
+          expect(record.app).toHaveProperty('code');
+          expect(record.app).toHaveProperty('name');
+        }
+      }
+    });
+
+    it('should handle app="all" filter', async () => {
+      const mockResponse = WarRoomsFactory.createAnalyticsResponse({ count: 10 });
+
+      mockService.getAnalytics.mockResolvedValue(mockResponse);
+
+      const response = await request(app.getHttpServer())
+        .get('/war-rooms/analytics?app=all')
+        .expect(HttpStatus.OK);
+
+      expect(mockService.getAnalytics).toHaveBeenCalledWith('all', undefined);
+    });
+
+    it('should return empty array when no matches found', async () => {
+      const mockResponse = { data: [], total: 0 };
+
+      mockService.getAnalytics.mockResolvedValue(mockResponse);
+
+      const response = await request(app.getHttpServer())
+        .get('/war-rooms/analytics?app=UNKNOWN&month=2025-12')
+        .expect(HttpStatus.OK);
+
+      expect(response.body.data).toEqual([]);
+      expect(response.body.total).toBe(0);
+    });
+
+    it('should handle war rooms with null app', async () => {
+      const mockResponse = WarRoomsFactory.createAnalyticsResponse({
+        count: 2,
+        app: null,
+      });
+
+      mockService.getAnalytics.mockResolvedValue(mockResponse);
+
+      const response = await request(app.getHttpServer())
+        .get('/war-rooms/analytics?month=2025-03')
+        .expect(HttpStatus.OK);
+
+      expect(response.body.data).toHaveLength(2);
+      if (response.body.data.length > 0) {
+        expect(response.body.data[0].app).toBeNull();
+      }
     });
   });
 

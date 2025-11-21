@@ -11,21 +11,21 @@ export class UploadAndParseWarRoomsUseCase {
   }> {
     // Validate required fields - BUSINESS LOGIC
     const invalidRecords = records.filter(
-      (record) => !record.incidentId || !record.application,
+      (record) => !record.requestId || !record.application,
     );
 
     if (invalidRecords.length > 0) {
       throw new Error(
-        'Some records are missing required fields (Incident ID, Application)',
+        'Some records are missing required fields (Request ID, Application)',
       );
     }
 
-    // Remove duplicates by incidentId - BUSINESS LOGIC
+    // Remove duplicates by requestId - BUSINESS LOGIC
     const uniqueRecords = [];
     const seenIds = new Set();
     for (const record of records) {
-      if (!seenIds.has(record.incidentId)) {
-        seenIds.add(record.incidentId);
+      if (!seenIds.has(record.requestId)) {
+        seenIds.add(record.requestId);
         uniqueRecords.push(record);
       }
     }

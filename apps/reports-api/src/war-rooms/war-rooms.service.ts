@@ -20,6 +20,10 @@ export class WarRoomsService {
     return this.getAllUseCase.execute();
   }
 
+  async getAnalytics(app?: string, month?: string) {
+    return this.getAllUseCase.executeWithFilters(app, month);
+  }
+
   async deleteAll() {
     return this.deleteAllUseCase.execute();
   }

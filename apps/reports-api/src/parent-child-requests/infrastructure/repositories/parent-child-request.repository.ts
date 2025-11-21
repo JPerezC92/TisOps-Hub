@@ -128,7 +128,7 @@ export class ParentChildRequestRepository
     // Drop the table
     await this.db.run(sql`DROP TABLE IF EXISTS ${parentChildRequests}`);
 
-    // Recreate the table
+    // Recreate the table (matching the Drizzle schema exactly)
     await this.db.run(sql`
       CREATE TABLE parent_child_requests (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -136,8 +136,8 @@ export class ParentChildRequestRepository
         linked_request_id TEXT NOT NULL,
         request_id_link TEXT,
         linked_request_id_link TEXT,
-        created_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
-        updated_at INTEGER NOT NULL DEFAULT (strftime('%s', 'now') * 1000),
+        created_at INTEGER,
+        updated_at INTEGER,
         UNIQUE(request_id, linked_request_id)
       )
     `);

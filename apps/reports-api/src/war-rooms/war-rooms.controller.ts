@@ -7,6 +7,7 @@ import {
   UploadedFile,
   HttpException,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
@@ -22,6 +23,16 @@ export class WarRoomsController {
   @ApiResponse({ status: 200, description: 'Returns all records' })
   async findAll() {
     return this.warRoomsService.findAll();
+  }
+
+  @Get('analytics')
+  @ApiOperation({ summary: 'Get filtered war rooms records for analytics dashboard' })
+  @ApiResponse({ status: 200, description: 'Returns filtered records' })
+  async getAnalytics(
+    @Query('app') app?: string,
+    @Query('month') month?: string,
+  ) {
+    return this.warRoomsService.getAnalytics(app, month);
   }
 
   @Post('upload')

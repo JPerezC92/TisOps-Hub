@@ -63,6 +63,38 @@ async function parseExcelFile() {
       console.table(jsonData.slice(0, 3));
       console.log('');
 
+      // Display last 10 rows (most recent data)
+      console.log(`   📝 Recent Data (Last 10 rows):`);
+      console.table(jsonData.slice(-10));
+      console.log('');
+
+      // Check for hyperlinks in the worksheet
+      console.log('   🔗 Checking for Hyperlinks in Incident ID column:');
+      const incidentIdColumnLetter = 'C'; // Column C is "Incident ID"
+      let hyperlinksFound = 0;
+
+      // Check first 5 and last 5 rows for hyperlinks
+      const rowsToCheck = [2, 3, 4, 5, 6, ...Array.from({ length: 5 }, (_, i) => jsonData.length - 4 + i)];
+
+      rowsToCheck.forEach(rowIndex => {
+        const cellAddress = `${incidentIdColumnLetter}${rowIndex}`;
+        const cell = worksheet[cellAddress];
+
+        if (cell && cell.l && cell.l.Target) {
+          hyperlinksFound++;
+          const incidentId = cell.v;
+          const hyperlinkUrl = cell.l.Target;
+          console.log(`      Row ${rowIndex} - Incident ${incidentId}: ${hyperlinkUrl}`);
+        }
+      });
+
+      if (hyperlinksFound === 0) {
+        console.log('      ❌ No hyperlinks found in Incident ID column');
+      } else {
+        console.log(`      ✅ Found ${hyperlinksFound} hyperlinks in Incident ID column`);
+      }
+      console.log('');
+
       // Analyze data types for each column
       console.log('   🔍 Data Type Analysis:');
       const sampleRow = jsonData[0];

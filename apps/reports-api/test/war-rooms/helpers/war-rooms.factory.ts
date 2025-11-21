@@ -1,9 +1,10 @@
 import { faker } from '@faker-js/faker';
 import type { WarRoom, InsertWarRoom } from '@repo/database';
+import type { WarRoomWithApp } from '../../../src/war-rooms/domain/repositories/war-rooms.repository.interface';
 
 export class WarRoomsFactory {
   static createWarRoom(overrides?: Partial<WarRoom>): WarRoom {
-    const incidentId = overrides?.incidentId ?? faker.number.int({ min: 1000, max: 9999 });
+    const requestId = overrides?.requestId ?? faker.number.int({ min: 1000, max: 9999 });
     const priority = overrides?.initialPriority ?? faker.helpers.arrayElement([
       'CRITICAL',
       'HIGH',
@@ -22,7 +23,8 @@ export class WarRoomsFactory {
     const endTime = overrides?.endTime ?? Math.min(startTime + durationFraction, 1.0);
 
     return {
-      incidentId,
+      requestId,
+      requestIdLink: overrides?.requestIdLink ?? `https://sdp.belcorp.biz/WorkOrder.do?woMode=viewWO&woID=${requestId}`,
       application: overrides?.application ?? faker.helpers.arrayElement([
         'FFVV',
         'Somos Belcorp',
@@ -58,7 +60,7 @@ export class WarRoomsFactory {
     overrides?: Partial<WarRoom>,
   ): WarRoom[] {
     return Array.from({ length: count }, (_, index) =>
-      this.createWarRoom({ ...overrides, incidentId: overrides?.incidentId ?? 1000 + index + 1 }),
+      this.createWarRoom({ ...overrides, requestId: overrides?.requestId ?? 1000 + index + 1 }),
     );
   }
 
@@ -87,6 +89,50 @@ export class WarRoomsFactory {
 
   static createFindAllResponse(overrides?: { count?: number }) {
     const data = this.createManyWarRooms(overrides?.count ?? 5);
+    return {
+      data,
+      total: data.length,
+    };
+  }
+
+  static createWarRoomWithApp(overrides?: Partial<WarRoomWithApp>): WarRoomWithApp {
+    const warRoom = this.createWarRoom(overrides as Partial<WarRoom>);
+
+    // Handle app override: if explicitly provided (including null), use it; otherwise random
+    const app = overrides && 'app' in overrides
+      ? overrides.app
+      : (faker.datatype.boolean() ? {
+          id: faker.number.int({ min: 1, max: 100 }),
+          code: faker.helpers.arrayElement(['FFVV', 'SB', 'B2B', 'MDM', 'PORTAL']),
+          name: faker.company.name(),
+        } : null);
+
+    return {
+      ...warRoom,
+      app,
+    };
+  }
+
+  static createManyWarRoomsWithApp(
+    count: number,
+    overrides?: Partial<WarRoomWithApp>,
+  ): WarRoomWithApp[] {
+    return Array.from({ length: count }, (_, index) =>
+      this.createWarRoomWithApp({
+        ...overrides,
+        requestId: overrides?.requestId ?? 1000 + index + 1
+      }),
+    );
+  }
+
+  static createAnalyticsResponse(overrides?: {
+    count?: number;
+    app?: { id: number; code: string; name: string } | null;
+  }) {
+    const data = this.createManyWarRoomsWithApp(overrides?.count ?? 5, {
+      app: overrides?.app,
+    });
+
     return {
       data,
       total: data.length,

@@ -1,4 +1,4 @@
-import { int, sqliteTable, text, index, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { int, sqliteTable, text, index, uniqueIndex, integer } from 'drizzle-orm/sqlite-core';
 
 /**
  * Schema for parent-child request relationships from ManageEngine
@@ -11,6 +11,8 @@ export const parentChildRequests = sqliteTable(
     linkedRequestId: text('linked_request_id').notNull(),
     requestIdLink: text('request_id_link'),
     linkedRequestIdLink: text('linked_request_id_link'),
+    createdAt: integer('created_at', { mode: 'timestamp' }),
+    updatedAt: integer('updated_at', { mode: 'timestamp' }),
   },
   (table) => [
     // Indexes for faster queries
