@@ -1,24 +1,26 @@
-import { Injectable } from '@nestjs/common';
-import { db, sessionsOrders, sessionsOrdersReleases, SessionsOrder, SessionsOrdersRelease, InsertSessionsOrder, InsertSessionsOrdersRelease } from '@repo/database';
+import { Injectable, Inject } from '@nestjs/common';
+import { Database, DATABASE_CONNECTION, sessionsOrders, sessionsOrdersReleases, SessionsOrder, SessionsOrdersRelease, InsertSessionsOrder, InsertSessionsOrdersRelease } from '@repo/database';
 import type { ISessionsOrdersRepository } from '@sessions-orders/domain/repositories/sessions-orders.repository.interface';
 
 @Injectable()
 export class SessionsOrdersRepository implements ISessionsOrdersRepository {
+  constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
+
   async findAllMain(): Promise<SessionsOrder[]> {
-    return db.select().from(sessionsOrders).all();
+    return this.db.select().from(sessionsOrders).all();
   }
 
   async findAllReleases(): Promise<SessionsOrdersRelease[]> {
-    return db.select().from(sessionsOrdersReleases).all();
+    return this.db.select().from(sessionsOrdersReleases).all();
   }
 
   async countMain(): Promise<number> {
-    const result = await db.select().from(sessionsOrders).all();
+    const result = await this.db.select().from(sessionsOrders).all();
     return result.length;
   }
 
   async countReleases(): Promise<number> {
-    const result = await db.select().from(sessionsOrdersReleases).all();
+    const result = await this.db.select().from(sessionsOrdersReleases).all();
     return result.length;
   }
 
@@ -30,7 +32,7 @@ export class SessionsOrdersRepository implements ISessionsOrdersRepository {
 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
-      await db.insert(sessionsOrders).values(batch).execute();
+      await this.db.insert(sessionsOrders).values(batch).execute();
     }
   }
 
@@ -42,17 +44,17 @@ export class SessionsOrdersRepository implements ISessionsOrdersRepository {
 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
-      await db.insert(sessionsOrdersReleases).values(batch).execute();
+      await this.db.insert(sessionsOrdersReleases).values(batch).execute();
     }
   }
 
   async deleteAllMain(): Promise<number> {
-    const result = await db.delete(sessionsOrders).execute();
+    const result = await this.db.delete(sessionsOrders).execute();
     return result.rowsAffected || 0;
   }
 
   async deleteAllReleases(): Promise<number> {
-    const result = await db.delete(sessionsOrdersReleases).execute();
+    const result = await this.db.delete(sessionsOrdersReleases).execute();
     return result.rowsAffected || 0;
   }
 }

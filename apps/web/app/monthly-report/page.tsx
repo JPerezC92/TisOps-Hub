@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import type { MonthlyReport } from '@repo/reports';
+import { Priority } from '@repo/reports/common';
 import { StatsGrid } from '@/components/stats-grid';
 import { UploadSectionDynamic } from '@/components/upload-section-dynamic';
 import { Badge } from '@/components/ui/badge';
+import { getPriorityColorClasses } from '@/lib/utils/priority-colors';
 
 export default function MonthlyReportPage() {
   const [monthlyReports, setMonthlyReports] = useState<MonthlyReport[]>([]);
@@ -159,7 +161,7 @@ export default function MonthlyReportPage() {
 
   // Statistics
   const totalRecords = monthlyReports.length;
-  const altaPriority = monthlyReports.filter(r => r.priority === 'Alta').length;
+  const altaPriority = monthlyReports.filter(r => r.priority === Priority.High).length;
 
   // Count by categorization
   const categorizationCounts = monthlyReports.reduce((acc, r) => {
@@ -373,13 +375,7 @@ export default function MonthlyReportPage() {
                       <td className="px-6 py-4">
                         <Badge
                           variant="outline"
-                          className={`${
-                            report.priority === 'Alta'
-                              ? 'bg-jpc-vibrant-orange-500/20 text-jpc-vibrant-orange-400 border-jpc-vibrant-orange-500/40 hover:bg-jpc-vibrant-orange-500/30'
-                              : report.priority === 'Media'
-                              ? 'bg-jpc-vibrant-cyan-500/20 text-cyan-100 border-jpc-vibrant-cyan-500/40 hover:bg-jpc-vibrant-cyan-500/30'
-                              : 'bg-gray-500/20 text-gray-100 border-gray-500/40'
-                          } border font-medium transition-all duration-300`}
+                          className={`${getPriorityColorClasses(report.priority)} border font-medium transition-all duration-300`}
                         >
                           {report.priority}
                         </Badge>

@@ -7,4 +7,5 @@ export interface IMonthlyReportRepository {
   countAll(): Promise<number>;
   bulkCreate(records: InsertMonthlyReport[]): Promise<void>;
   deleteAll(): Promise<number>;
+  findCriticalIncidentsFiltered(app?: string, month?: string): Promise<MonthlyReport[]>;
 }

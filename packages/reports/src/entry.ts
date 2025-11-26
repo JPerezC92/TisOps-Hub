@@ -1,3 +1,14 @@
+// Common enums and types
+export {
+  Priority,
+  PrioritySpanish,
+} from './common';
+
+export type {
+  PriorityValue,
+  PrioritySpanishValue,
+} from './common';
+
 // Task validation schemas, DTOs and Types
 export {
   insertTaskSchema,

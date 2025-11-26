@@ -1,21 +1,25 @@
-import { eq, and, isNull, sql } from 'drizzle-orm';
-import { db, requestTags, parentChildRequests } from '@repo/database';
+import { Inject, Injectable } from '@nestjs/common';
+import { eq, and, isNull } from 'drizzle-orm';
+import { Database, DATABASE_CONNECTION, requestTags, parentChildRequests } from '@repo/database';
 import { IRequestTagRepository, RequestTagData } from '@request-tags/domain/repositories/request-tag.repository.interface';
 import { RequestTag } from '@request-tags/domain/entities/request-tag.entity';
 
+@Injectable()
 export class RequestTagRepository implements IRequestTagRepository {
+  constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
+
   async findAll(): Promise<RequestTag[]> {
-    const records = await db.select().from(requestTags);
+    const records = await this.db.select().from(requestTags);
     return records.map(record => RequestTag.create(record));
   }
 
   async findById(requestId: string): Promise<RequestTag | null> {
-    const [record] = await db.select().from(requestTags).where(eq(requestTags.requestId, requestId));
+    const [record] = await this.db.select().from(requestTags).where(eq(requestTags.requestId, requestId));
     return record ? RequestTag.create(record) : null;
   }
 
   async findByRequestId(requestId: string): Promise<RequestTag | null> {
-    const [record] = await db
+    const [record] = await this.db
       .select()
       .from(requestTags)
       .where(eq(requestTags.requestId, requestId));
@@ -23,7 +27,7 @@ export class RequestTagRepository implements IRequestTagRepository {
   }
 
   async findByLinkedRequestId(linkedRequestId: string): Promise<RequestTag[]> {
-    const records = await db
+    const records = await this.db
       .select()
       .from(requestTags)
       .where(eq(requestTags.linkedRequestId, linkedRequestId));
@@ -32,7 +36,7 @@ export class RequestTagRepository implements IRequestTagRepository {
 
   async findRequestIdsByAdditionalInfo(informacionAdicional: string, linkedRequestId: string): Promise<Array<{ requestId: string; requestIdLink?: string }>> {
     // Get all Request IDs with the specified informacion_adicional AND linkedRequestId
-    const records = await db
+    const records = await this.db
       .select({
         requestId: requestTags.requestId,
         requestIdLink: requestTags.requestIdLink,
@@ -62,7 +66,7 @@ export class RequestTagRepository implements IRequestTagRepository {
   }
 
   async create(data: RequestTagData): Promise<RequestTag> {
-    const [inserted] = await db
+    const [inserted] = await this.db
       .insert(requestTags)
       .values({
         createdTime: data.createdTime,
@@ -91,7 +95,7 @@ export class RequestTagRepository implements IRequestTagRepository {
 
     for (let i = 0; i < data.length; i += batchSize) {
       const batch = data.slice(i, i + batchSize);
-      
+
       const values = batch.map(item => ({
         createdTime: item.createdTime,
         requestId: item.requestId,
@@ -107,13 +111,13 @@ export class RequestTagRepository implements IRequestTagRepository {
       }));
 
       try {
-        const result = await db.insert(requestTags).values(values);
+        const result = await this.db.insert(requestTags).values(values);
         totalInserted += result.rowsAffected;
       } catch (error) {
         // If batch insert fails due to duplicates, try one by one
         for (const item of batch) {
           try {
-            await db.insert(requestTags).values({
+            await this.db.insert(requestTags).values({
               createdTime: item.createdTime,
               requestId: item.requestId,
               requestIdLink: item.requestIdLink,
@@ -138,17 +142,17 @@ export class RequestTagRepository implements IRequestTagRepository {
   }
 
   async deleteAll(): Promise<void> {
-    await db.delete(requestTags);
+    await this.db.delete(requestTags);
   }
 
   async count(): Promise<number> {
-    const records = await db.select().from(requestTags);
+    const records = await this.db.select().from(requestTags);
     return records.length;
   }
 
   async findMissingIdsByLinkedRequestId(linkedRequestId: string): Promise<Array<{ requestId: string; requestIdLink?: string }>> {
     // Find Request IDs that exist in parent_child_requests but NOT in request_tags
-    const results = await db
+    const results = await this.db
       .select({
         requestId: parentChildRequests.requestId,
         requestIdLink: parentChildRequests.requestIdLink,

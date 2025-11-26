@@ -21,6 +21,11 @@
       "import": "./dist/entry.js",
       "require": "./dist/entry.js"
     },
+    "./common": {
+      "import": "./dist/common/index.js",
+      "require": "./dist/common/index.js",
+      "types": "./dist/common/index.d.ts"
+    },
     "./*": {
       "import": "./dist/*.js",
       "require": "./dist/*.js"

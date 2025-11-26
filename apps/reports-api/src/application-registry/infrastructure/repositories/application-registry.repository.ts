@@ -1,12 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import {
-  db,
+  Database,
+  DATABASE_CONNECTION,
   applicationRegistry,
   applicationPatterns,
   InsertApplicationRegistry,
   InsertApplicationPattern,
 } from '@repo/database';
-import { eq, and, desc, sql, like } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import type {
   IApplicationRegistryRepository,
   CreateApplicationDto,
@@ -21,8 +22,10 @@ import { ApplicationPattern } from '../../domain/entities/application-pattern.en
 export class ApplicationRegistryRepository
   implements IApplicationRegistryRepository
 {
+  constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
+
   async findAll(): Promise<Application[]> {
-    const results = await db
+    const results = await this.db
       .select()
       .from(applicationRegistry)
       .where(eq(applicationRegistry.isActive, true))
@@ -44,7 +47,7 @@ export class ApplicationRegistryRepository
   }
 
   async findById(id: number): Promise<Application | null> {
-    const result = await db
+    const result = await this.db
       .select()
       .from(applicationRegistry)
       .where(eq(applicationRegistry.id, id))
@@ -67,7 +70,7 @@ export class ApplicationRegistryRepository
 
   async findByPattern(applicationName: string): Promise<Application | null> {
     // Join with patterns table and find first match by priority
-    const result = await db
+    const result = await this.db
       .select({
         id: applicationRegistry.id,
         code: applicationRegistry.code,
@@ -109,7 +112,7 @@ export class ApplicationRegistryRepository
   }
 
   async findAllWithPatterns(): Promise<ApplicationWithPatterns[]> {
-    const apps = await db
+    const apps = await this.db
       .select()
       .from(applicationRegistry)
       .where(eq(applicationRegistry.isActive, true))
@@ -119,7 +122,7 @@ export class ApplicationRegistryRepository
     const appsWithPatterns: ApplicationWithPatterns[] = [];
 
     for (const app of apps) {
-      const patterns = await db
+      const patterns = await this.db
         .select()
         .from(applicationPatterns)
         .where(eq(applicationPatterns.applicationId, app.id))
@@ -165,7 +168,7 @@ export class ApplicationRegistryRepository
       isActive: data.isActive ?? true,
     };
 
-    const result = await db
+    const result = await this.db
       .insert(applicationRegistry)
       .values(insertData)
       .returning()
@@ -191,7 +194,7 @@ export class ApplicationRegistryRepository
       throw new NotFoundException(`Application with ID ${id} not found`);
     }
 
-    const result = await db
+    const result = await this.db
       .update(applicationRegistry)
       .set({
         ...data,
@@ -219,7 +222,7 @@ export class ApplicationRegistryRepository
     }
 
     // Soft delete by setting isActive to false
-    await db
+    await this.db
       .update(applicationRegistry)
       .set({ isActive: false, updatedAt: new Date() })
       .where(eq(applicationRegistry.id, id))
@@ -235,7 +238,7 @@ export class ApplicationRegistryRepository
       isActive: data.isActive ?? true,
     };
 
-    const result = await db
+    const result = await this.db
       .insert(applicationPatterns)
       .values(insertData)
       .returning()
@@ -252,7 +255,7 @@ export class ApplicationRegistryRepository
   }
 
   async deletePattern(id: number): Promise<void> {
-    const result = await db
+    const result = await this.db
       .delete(applicationPatterns)
       .where(eq(applicationPatterns.id, id))
       .execute();

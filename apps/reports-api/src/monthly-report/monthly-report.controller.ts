@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Delete,
+  Query,
   UseInterceptors,
   UploadedFile,
   HttpException,
@@ -22,6 +23,16 @@ export class MonthlyReportController {
   @ApiResponse({ status: 200, description: 'Returns all records' })
   async findAll() {
     return this.monthlyReportService.findAll();
+  }
+
+  @Get('analytics')
+  @ApiOperation({ summary: 'Get critical incidents analytics with filters' })
+  @ApiResponse({ status: 200, description: 'Returns filtered critical incidents' })
+  async getCriticalIncidentsAnalytics(
+    @Query('app') app?: string,
+    @Query('month') month?: string,
+  ) {
+    return this.monthlyReportService.getCriticalIncidentsAnalytics(app, month);
   }
 
   @Post('upload')
