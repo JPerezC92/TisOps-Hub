@@ -1,10 +1,16 @@
 import { faker } from '@faker-js/faker';
 import type { MonthlyReport, InsertMonthlyReport } from '@repo/database';
+import { Priority } from '@repo/reports';
 
 export class MonthlyReportFactory {
   static createMonthlyReport(overrides?: Partial<MonthlyReport>): MonthlyReport {
     const requestId = overrides?.requestId ?? faker.number.int({ min: 100000, max: 200000 });
-    const priority = overrides?.priority ?? faker.helpers.arrayElement(['Alta', 'Media', 'Baja']);
+    const priority = overrides?.priority ?? faker.helpers.arrayElement([
+      Priority.Low,
+      Priority.Medium,
+      Priority.High,
+      Priority.Critical,
+    ]);
     const status = overrides?.requestStatus ?? faker.helpers.arrayElement([
       'Nivel 2',
       'Validado',

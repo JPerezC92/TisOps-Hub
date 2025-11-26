@@ -8,6 +8,7 @@ import { MONTHLY_REPORT_REPOSITORY } from './domain/repositories/monthly-report.
 import { GetAllMonthlyReportsUseCase } from './application/use-cases/get-all-monthly-reports.use-case';
 import { DeleteAllMonthlyReportsUseCase } from './application/use-cases/delete-all-monthly-reports.use-case';
 import { UploadAndParseMonthlyReportUseCase } from './application/use-cases/upload-and-parse-monthly-report.use-case';
+import { GetCriticalIncidentsAnalyticsUseCase } from './application/use-cases/get-critical-incidents-analytics.use-case';
 
 @Module({
   imports: [DatabaseModule],
@@ -32,6 +33,11 @@ import { UploadAndParseMonthlyReportUseCase } from './application/use-cases/uplo
     {
       provide: UploadAndParseMonthlyReportUseCase,
       useFactory: (repository: any) => new UploadAndParseMonthlyReportUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetCriticalIncidentsAnalyticsUseCase,
+      useFactory: (repository: any) => new GetCriticalIncidentsAnalyticsUseCase(repository),
       inject: [MONTHLY_REPORT_REPOSITORY],
     },
   ],

@@ -20,6 +20,36 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
+import { Priority } from '@repo/reports/common';
+import { getPriorityColorClasses } from '@/lib/utils/priority-colors';
+
+interface MonthlyReport {
+  requestId: number;
+  aplicativos: string;
+  categorizacion: string;
+  createdTime: string;
+  requestStatus: string;
+  modulo: string;
+  subject: string;
+  priority: string;
+  eta: string;
+  informacionAdicional: string;
+  resolvedTime: string;
+  paisesAfectados: string;
+  recurrencia: string;
+  technician: string;
+  jira: string;
+  problemId: string;
+  linkedRequestId: string;
+  requestOlaStatus: string;
+  grupoEscalamiento: string;
+  aplicactivosAfectados: string;
+  nivelUno: string;
+  campana: string;
+  cuv: string;
+  release: string;
+  rca: string;
+}
 
 interface WarRoom {
   requestId: number;
@@ -82,8 +112,10 @@ function AnalyticsDashboardContent() {
   const pathname = usePathname();
 
   const [data, setData] = useState<WarRoom[]>([]);
+  const [criticalIncidents, setCriticalIncidents] = useState<MonthlyReport[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
+  const [criticalIncidentsLoading, setCriticalIncidentsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(50);
@@ -144,12 +176,36 @@ function AnalyticsDashboardContent() {
     }
   };
 
+  // Fetch critical incidents from monthly reports
+  const fetchCriticalIncidents = async () => {
+    setCriticalIncidentsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedApp !== 'all') params.set('app', selectedApp);
+      if (selectedMonth) params.set('month', selectedMonth);
+
+      const response = await fetch(
+        `http://localhost:3000/monthly-report/analytics?${params.toString()}`,
+        { cache: 'no-store' }
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setCriticalIncidents(result || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch critical incidents:', error);
+    } finally {
+      setCriticalIncidentsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchApplications();
   }, []);
 
   useEffect(() => {
     fetchData();
+    fetchCriticalIncidents();
   }, [selectedApp, selectedMonth]);
 
   // Filter data by search term (client-side filtering on top of backend filtering)
@@ -489,6 +545,107 @@ function AnalyticsDashboardContent() {
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* Critical Incidents Section */}
+        <div className="mt-8 rounded-2xl border border-jpc-vibrant-orange-500/20 bg-card/60 overflow-hidden shadow-2xl shadow-jpc-vibrant-orange-500/10 backdrop-blur-sm hover:border-jpc-vibrant-orange-500/30 transition-all duration-300">
+          <div className="px-6 py-6 border-b border-jpc-vibrant-orange-500/20 bg-gradient-to-r from-jpc-vibrant-orange-500/10 to-jpc-vibrant-purple-500/5">
+            <h3 className="text-sm font-bold text-foreground">
+              Critical Incidents
+              <span className="ml-3 text-xs font-normal text-muted-foreground/70">
+                Showing {criticalIncidents.length} critical priority incidents from monthly reports
+              </span>
+            </h3>
+          </div>
+
+          {criticalIncidentsLoading ? (
+            <div className="p-8 space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : criticalIncidents.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              No critical incidents found for the selected filters
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-jpc-vibrant-orange-500/20 hover:bg-jpc-vibrant-orange-500/5">
+                    <TableHead className="font-semibold text-foreground/90">Request ID</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Application</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Status</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Module</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Subject</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Priority</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Categorization</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">RCA</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {criticalIncidents.map((incident) => (
+                    <TableRow
+                      key={incident.requestId}
+                      className="border-b border-jpc-vibrant-orange-500/10 hover:bg-jpc-vibrant-orange-500/5 transition-colors group"
+                    >
+                      <TableCell className="font-medium text-jpc-vibrant-orange-400">
+                        {incident.requestId}
+                      </TableCell>
+                      <TableCell className="text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
+                        <div className="max-w-xs truncate" title={incident.aplicativos}>
+                          {incident.aplicativos}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        <Badge
+                          variant="outline"
+                          className="bg-jpc-vibrant-purple-500/20 text-purple-100 border-jpc-vibrant-purple-500/40 hover:bg-jpc-vibrant-purple-500/30 font-medium transition-all duration-300"
+                        >
+                          {incident.requestStatus}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
+                        <div className="max-w-xs truncate" title={incident.modulo}>
+                          {incident.modulo}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
+                        <div className="max-w-md truncate" title={incident.subject}>
+                          {incident.subject}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={`${getPriorityColorClasses(incident.priority)} border font-medium transition-all duration-300`}
+                        >
+                          {incident.priority}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
+                        {incident.categorizacion}
+                      </TableCell>
+                      <TableCell className="text-xs">
+                        {incident.rca && incident.rca !== 'No asignado' ? (
+                          <a
+                            href={incident.rca}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-jpc-vibrant-cyan-400 hover:text-jpc-vibrant-cyan-300 underline"
+                          >
+                            View RCA
+                          </a>
+                        ) : (
+                          <span className="text-muted-foreground/50">N/A</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
         </div>

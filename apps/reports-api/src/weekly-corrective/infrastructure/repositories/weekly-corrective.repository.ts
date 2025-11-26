@@ -1,15 +1,17 @@
-import { Injectable } from '@nestjs/common';
-import { db, weeklyCorrectives, InsertWeeklyCorrective } from '@repo/database';
+import { Injectable, Inject } from '@nestjs/common';
+import { Database, DATABASE_CONNECTION, weeklyCorrectives, InsertWeeklyCorrective } from '@repo/database';
 import type { IWeeklyCorrectiveRepository } from '@weekly-corrective/domain/repositories/weekly-corrective.repository.interface';
 
 @Injectable()
 export class WeeklyCorrectiveRepository implements IWeeklyCorrectiveRepository {
+  constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
+
   async findAll() {
-    return db.select().from(weeklyCorrectives).all();
+    return this.db.select().from(weeklyCorrectives).all();
   }
 
   async countAll(): Promise<number> {
-    const records = await db.select().from(weeklyCorrectives).all();
+    const records = await this.db.select().from(weeklyCorrectives).all();
     return records.length;
   }
 
@@ -19,12 +21,12 @@ export class WeeklyCorrectiveRepository implements IWeeklyCorrectiveRepository {
 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
-      await db.insert(weeklyCorrectives).values(batch).execute();
+      await this.db.insert(weeklyCorrectives).values(batch).execute();
     }
   }
 
   async deleteAll(): Promise<number> {
-    const result = await db.delete(weeklyCorrectives).execute();
+    const result = await this.db.delete(weeklyCorrectives).execute();
     return result.rowsAffected || 0;
   }
 }

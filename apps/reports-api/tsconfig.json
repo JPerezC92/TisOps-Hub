@@ -16,6 +16,7 @@
       "@war-rooms/*": ["src/war-rooms/*"],
       "@weekly-corrective/*": ["src/weekly-corrective/*"],
       "@problems/*": ["src/problems/*"],
+      "@application-registry/*": ["src/application-registry/*"],
       "@src/*": ["src/*"]
     }
   }

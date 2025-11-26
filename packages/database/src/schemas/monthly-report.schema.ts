@@ -10,7 +10,7 @@ export const monthlyReports = sqliteTable(
     requestStatus: text('request_status').notNull(), // Status (Nivel 2, Validado, Dev in Progress, etc.)
     modulo: text('modulo').notNull(), // Module
     subject: text('subject').notNull(), // Subject/description
-    priority: text('priority').notNull(), // Alta, Baja, Media
+    priority: text('priority').notNull(), // Low, Medium, High, Critical
     eta: text('eta').notNull(), // ETA date/time or "No asignado"
     informacionAdicional: text('informacion_adicional').notNull(), // Additional information
     resolvedTime: text('resolved_time').notNull(), // Resolved date/time or "No asignado"

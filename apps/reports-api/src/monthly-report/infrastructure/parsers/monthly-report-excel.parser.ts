@@ -1,9 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import * as XLSX from 'xlsx';
 import type { InsertMonthlyReport } from '@repo/database';
+import { Priority, PrioritySpanish } from '@repo/reports';
 
 @Injectable()
 export class MonthlyReportExcelParser {
+  private translatePriorityToEnglish(
+    spanishPriority: string,
+    rowIndex: number,
+  ): string {
+    const normalized = spanishPriority?.trim().toLowerCase();
+
+    const priorityMap: Record<string, string> = {
+      baja: Priority.Low,
+      media: Priority.Medium,
+      alta: Priority.High,
+      crítica: Priority.Critical,
+      critica: Priority.Critical, // Handle without accent
+    };
+
+    const englishPriority = priorityMap[normalized];
+
+    if (!englishPriority) {
+      throw new Error(
+        `Invalid priority value '${spanishPriority}' in row ${rowIndex}. Valid values are: ${PrioritySpanish.Baja}, ${PrioritySpanish.Media}, ${PrioritySpanish.Alta}, ${PrioritySpanish.Critica}`,
+      );
+    }
+
+    return englishPriority;
+  }
+
   parse(buffer: Buffer): InsertMonthlyReport[] {
     // Parse Excel file
     const workbook = XLSX.read(buffer, { type: 'buffer' });
@@ -16,7 +42,7 @@ export class MonthlyReportExcelParser {
     }
 
     // Map Excel rows to database format
-    const records: InsertMonthlyReport[] = data.map((row: any) => ({
+    const records: InsertMonthlyReport[] = data.map((row: any, index: number) => ({
       requestId: Number(row['Request ID']) || 0,
       aplicativos: String(row['Aplicativos'] || ''),
       categorizacion: String(row['Categorización'] || ''),
@@ -24,7 +50,10 @@ export class MonthlyReportExcelParser {
       requestStatus: String(row['Request Status'] || ''),
       modulo: String(row['Modulo.'] || ''),
       subject: String(row['Subject'] || ''),
-      priority: String(row['Priority'] || ''),
+      priority: this.translatePriorityToEnglish(
+        String(row['Priority'] || ''),
+        index + 2, // +2 because Excel rows start at 1 and header is row 1
+      ),
       eta: String(row['ETA'] || ''),
       informacionAdicional: String(row['Información Adicional'] || ''),
       resolvedTime: String(row['Resolved Time'] || ''),

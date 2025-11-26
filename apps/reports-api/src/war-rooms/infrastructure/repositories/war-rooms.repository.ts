@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import {
-  db,
+  Database,
+  DATABASE_CONNECTION,
   warRooms,
   InsertWarRoom,
   applicationRegistry,
@@ -14,8 +15,10 @@ import type {
 
 @Injectable()
 export class WarRoomsRepository implements IWarRoomsRepository {
+  constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
+
   async findAll() {
-    return db
+    return this.db
       .select()
       .from(warRooms)
       .orderBy(desc(warRooms.date), desc(warRooms.startTime))
@@ -24,7 +27,7 @@ export class WarRoomsRepository implements IWarRoomsRepository {
 
   async findAllWithApplication(): Promise<WarRoomWithApp[]> {
     // Single optimized query with LEFT JOIN - eliminates N+1 query problem
-    const results = await db
+    const results = await this.db
       .select({
         // War room fields
         requestId: warRooms.requestId,
@@ -109,7 +112,7 @@ export class WarRoomsRepository implements IWarRoomsRepository {
 
   async findAllWithApplicationFiltered(app?: string, month?: string): Promise<WarRoomWithApp[]> {
     // Start with base query
-    const query = db
+    const query = this.db
       .select({
         // War room fields
         requestId: warRooms.requestId,
@@ -213,7 +216,7 @@ export class WarRoomsRepository implements IWarRoomsRepository {
   }
 
   async countAll(): Promise<number> {
-    const result = await db
+    const result = await this.db
       .select({ count: sql<number>`COUNT(*)` })
       .from(warRooms)
       .get();
@@ -221,7 +224,7 @@ export class WarRoomsRepository implements IWarRoomsRepository {
   }
 
   async countFiltered(app?: string, month?: string): Promise<number> {
-    let query: any = db
+    let query: any = this.db
       .select({ count: sql<number>`COUNT(DISTINCT ${warRooms.requestId})` })
       .from(warRooms);
 
@@ -262,12 +265,12 @@ export class WarRoomsRepository implements IWarRoomsRepository {
 
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
-      await db.insert(warRooms).values(batch).execute();
+      await this.db.insert(warRooms).values(batch).execute();
     }
   }
 
   async deleteAll(): Promise<number> {
-    const result = await db.delete(warRooms).execute();
+    const result = await this.db.delete(warRooms).execute();
     return result.rowsAffected || 0;
   }
 }
