@@ -4,9 +4,10 @@ export const monthlyReports = sqliteTable(
   'monthly_reports',
   {
     requestId: integer('request_id').primaryKey(), // Request ID as primary key
+    requestIdLink: text('request_id_link'), // Hyperlink to Request ID (from Excel cell)
     aplicativos: text('aplicativos').notNull(), // Application name
     categorizacion: text('categorizacion').notNull(), // Categorization
-    createdTime: text('created_time').notNull(), // "06/11/2025 13:38"
+    createdTime: integer('created_time', { mode: 'timestamp' }).notNull(), // Parsed from "06/11/2025 13:38"
     requestStatus: text('request_status').notNull(), // Status (Nivel 2, Validado, Dev in Progress, etc.)
     modulo: text('modulo').notNull(), // Module
     subject: text('subject').notNull(), // Subject/description
@@ -20,6 +21,7 @@ export const monthlyReports = sqliteTable(
     jira: text('jira').notNull(), // Jira ticket
     problemId: text('problem_id').notNull(), // Problem ID
     linkedRequestId: text('linked_request_id').notNull(), // Linked request
+    linkedRequestIdLink: text('linked_request_id_link'), // Hyperlink to Linked Request (from Excel cell)
     requestOlaStatus: text('request_ola_status').notNull(), // OLA status (Violated, Not Violated)
     grupoEscalamiento: text('grupo_escalamiento').notNull(), // Escalation group
     aplicactivosAfectados: text('aplicactivos_afectados').notNull(), // Affected applications

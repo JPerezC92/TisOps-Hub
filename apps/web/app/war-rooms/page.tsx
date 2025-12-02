@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { DateTime } from 'luxon';
-import type { WarRoom } from '@repo/reports';
+import type { WarRoom } from '@repo/reports/frontend';
 import { StatsGrid } from '@/components/stats-grid';
 import { UploadSectionDynamic } from '@/components/upload-section-dynamic';
 import { Badge } from '@/components/ui/badge';

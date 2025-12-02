@@ -2,11 +2,26 @@
 export {
   Priority,
   PrioritySpanish,
+  DisplayStatus,
+  DEFAULT_DISPLAY_STATUS,
+  Recurrency,
+  RecurrencySpanish,
+  RECURRENCY_MAP,
+  mapRecurrency,
+  CorrectiveStatus,
+  CorrectiveStatusSpanish,
+  InBacklogByPriority,
+  L3TicketsStatusColumns,
 } from './common';
 
 export type {
   PriorityValue,
   PrioritySpanishValue,
+  DisplayStatusValue,
+  RecurrencyType,
+  CorrectiveStatusValue,
+  CorrectiveStatusSpanishValue,
+  InBacklogByPriorityValue,
 } from './common';
 
 // Task validation schemas, DTOs and Types

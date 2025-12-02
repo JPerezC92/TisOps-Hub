@@ -18,6 +18,8 @@ export default defineConfig({
       '@war-rooms': resolve(__dirname, './src/war-rooms'),
       '@weekly-corrective': resolve(__dirname, './src/weekly-corrective'),
       '@problems': resolve(__dirname, './src/problems'),
+      '@application-registry': resolve(__dirname, './src/application-registry'),
+      '@monthly-report-status-registry': resolve(__dirname, './src/monthly-report-status-registry'),
       '@src': resolve(__dirname, './src'),
     },
   },

@@ -17,6 +17,7 @@
       "@weekly-corrective/*": ["src/weekly-corrective/*"],
       "@problems/*": ["src/problems/*"],
       "@application-registry/*": ["src/application-registry/*"],
+      "@monthly-report-status-registry/*": ["src/monthly-report-status-registry/*"],
       "@src/*": ["src/*"]
     }
   }

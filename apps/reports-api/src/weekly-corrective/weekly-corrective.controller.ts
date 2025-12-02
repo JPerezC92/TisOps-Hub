@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Delete,
+  Query,
   UseInterceptors,
   UploadedFile,
   HttpException,
@@ -64,5 +65,15 @@ export class WeeklyCorrectiveController {
   @ApiResponse({ status: 200, description: 'All records deleted' })
   async deleteAll() {
     return this.weeklyCorrectiveService.deleteAll();
+  }
+
+  @Get('l3-tickets-by-status')
+  @ApiOperation({ summary: 'Get L3 ticket counts by status grouped by application' })
+  @ApiResponse({ status: 200, description: 'Returns L3 tickets grouped by status and application' })
+  async getL3TicketsByStatus(
+    @Query('app') app?: string,
+    @Query('month') month?: string,
+  ) {
+    return this.weeklyCorrectiveService.getL3TicketsByStatus(app, month);
   }
 }

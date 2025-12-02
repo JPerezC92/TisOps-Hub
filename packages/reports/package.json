@@ -21,6 +21,11 @@
       "import": "./dist/entry.js",
       "require": "./dist/entry.js"
     },
+    "./frontend": {
+      "import": "./dist/frontend.js",
+      "require": "./dist/frontend.js",
+      "types": "./dist/frontend.d.ts"
+    },
     "./common": {
       "import": "./dist/common/index.js",
       "require": "./dist/common/index.js",

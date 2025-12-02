@@ -1,4 +1,4 @@
-import { Priority } from '@repo/reports/common';
+import { Priority } from '@repo/reports/frontend';
 
 /**
  * Returns Tailwind CSS classes for priority-based badge styling

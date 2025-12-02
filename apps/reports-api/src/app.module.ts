@@ -13,6 +13,7 @@ import { MonthlyReportModule } from './monthly-report/monthly-report.module';
 import { WeeklyCorrectiveModule } from './weekly-corrective/weekly-corrective.module';
 import { ProblemsModule } from './problems/problems.module';
 import { ApplicationRegistryModule } from './application-registry/application-registry.module';
+import { MonthlyReportStatusRegistryModule } from './monthly-report-status-registry/monthly-report-status-registry.module';
 import { DatabaseModule } from './database/infrastructure/database.module';
 
 import { AppService } from './app.service';
@@ -32,6 +33,7 @@ import { AppController } from './app.controller';
     WeeklyCorrectiveModule,
     ProblemsModule,
     ApplicationRegistryModule,
+    MonthlyReportStatusRegistryModule,
   ],
   controllers: [AppController],
   providers: [

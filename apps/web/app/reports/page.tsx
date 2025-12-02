@@ -88,6 +88,27 @@ export default function ReportsPage() {
         },
       ],
     },
+    {
+      title: 'Configuration',
+      description: 'Manage application settings and mappings',
+      icon: '⚙️',
+      links: [
+        {
+          href: '/application-registry',
+          title: 'Application Registry',
+          description: 'Manage application names and pattern matching rules',
+          icon: '📱',
+          color: 'cyan',
+        },
+        {
+          href: '/request-status-registry',
+          title: 'Request Status Registry',
+          description: 'Manage status mappings from raw values to display statuses',
+          icon: '🏷️',
+          color: 'purple',
+        },
+      ],
+    },
   ];
 
   const getColorClasses = (color: string) => {

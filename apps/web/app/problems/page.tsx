@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Problem } from '@repo/reports';
+import type { Problem } from '@repo/reports/frontend';
 import { StatsGrid } from '@/components/stats-grid';
 import { UploadSectionDynamic } from '@/components/upload-section-dynamic';
 import { Badge } from '@/components/ui/badge';

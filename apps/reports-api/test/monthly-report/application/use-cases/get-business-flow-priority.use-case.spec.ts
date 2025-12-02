@@ -1,0 +1,115 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { GetBusinessFlowPriorityUseCase } from '@monthly-report/application/use-cases/get-business-flow-priority.use-case';
+import type {
+  IMonthlyReportRepository,
+  BusinessFlowPriorityResult,
+} from '@monthly-report/domain/repositories/monthly-report.repository.interface';
+
+describe('GetBusinessFlowPriorityUseCase', () => {
+  let useCase: GetBusinessFlowPriorityUseCase;
+  let mockRepository: IMonthlyReportRepository;
+
+  beforeEach(() => {
+    mockRepository = {
+      findAll: vi.fn(),
+      countAll: vi.fn(),
+      bulkCreate: vi.fn(),
+      deleteAll: vi.fn(),
+      findCriticalIncidentsFiltered: vi.fn(),
+      findModuleEvolution: vi.fn(),
+      findStabilityIndicators: vi.fn(),
+      findCategoryDistribution: vi.fn(),
+      findBusinessFlowByPriority: vi.fn(),
+      findPriorityByApp: vi.fn(),
+      findIncidentsByWeek: vi.fn(),
+    };
+
+    useCase = new GetBusinessFlowPriorityUseCase(mockRepository);
+  });
+
+  const createMockResult = (overrides?: Partial<BusinessFlowPriorityResult>): BusinessFlowPriorityResult => ({
+    data: [
+      {
+        priority: 'Critical',
+        totalCount: 10,
+        modules: [
+          { module: 'Module A', count: 6 },
+          { module: 'Module B', count: 4 },
+        ],
+      },
+      {
+        priority: 'High',
+        totalCount: 15,
+        modules: [
+          { module: 'Module A', count: 8 },
+          { module: 'Module C', count: 7 },
+        ],
+      },
+    ],
+    monthName: 'October 2024',
+    totalIncidents: 25,
+    ...overrides,
+  });
+
+  it('should return business flow priority data without filters', async () => {
+    const expectedResult = createMockResult();
+
+    vi.spyOn(mockRepository, 'findBusinessFlowByPriority').mockResolvedValue(expectedResult);
+
+    const result = await useCase.execute();
+
+    expect(mockRepository.findBusinessFlowByPriority).toHaveBeenCalledWith(undefined, undefined);
+    expect(result).toEqual(expectedResult);
+    expect(result.data).toHaveLength(2);
+    expect(result.totalIncidents).toBe(25);
+  });
+
+  it('should return business flow priority filtered by app', async () => {
+    const expectedResult = createMockResult({ totalIncidents: 15 });
+
+    vi.spyOn(mockRepository, 'findBusinessFlowByPriority').mockResolvedValue(expectedResult);
+
+    const result = await useCase.execute('SB');
+
+    expect(mockRepository.findBusinessFlowByPriority).toHaveBeenCalledWith('SB', undefined);
+    expect(result).toEqual(expectedResult);
+  });
+
+  it('should return business flow priority filtered by month', async () => {
+    const expectedResult = createMockResult({ monthName: 'November 2024' });
+
+    vi.spyOn(mockRepository, 'findBusinessFlowByPriority').mockResolvedValue(expectedResult);
+
+    const result = await useCase.execute(undefined, '2024-11');
+
+    expect(mockRepository.findBusinessFlowByPriority).toHaveBeenCalledWith(undefined, '2024-11');
+    expect(result.monthName).toBe('November 2024');
+  });
+
+  it('should return business flow priority filtered by both app and month', async () => {
+    const expectedResult = createMockResult({ monthName: 'December 2024', totalIncidents: 5 });
+
+    vi.spyOn(mockRepository, 'findBusinessFlowByPriority').mockResolvedValue(expectedResult);
+
+    const result = await useCase.execute('FF', '2024-12');
+
+    expect(mockRepository.findBusinessFlowByPriority).toHaveBeenCalledWith('FF', '2024-12');
+    expect(result).toEqual(expectedResult);
+  });
+
+  it('should return empty data array when no incidents exist', async () => {
+    const emptyResult: BusinessFlowPriorityResult = {
+      data: [],
+      monthName: 'October 2024',
+      totalIncidents: 0,
+    };
+
+    vi.spyOn(mockRepository, 'findBusinessFlowByPriority').mockResolvedValue(emptyResult);
+
+    const result = await useCase.execute();
+
+    expect(mockRepository.findBusinessFlowByPriority).toHaveBeenCalledWith(undefined, undefined);
+    expect(result.data).toEqual([]);
+    expect(result.totalIncidents).toBe(0);
+  });
+});

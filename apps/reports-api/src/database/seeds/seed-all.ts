@@ -1,5 +1,6 @@
-import { db, applicationRegistry, applicationPatterns } from '@repo/database';
+import { db, applicationRegistry, applicationPatterns, monthlyReportStatusRegistry, correctiveStatusRegistry } from '@repo/database';
 import { seed } from 'drizzle-seed';
+import { DisplayStatus, CorrectiveStatus, CorrectiveStatusSpanish } from '@repo/reports';
 
 /**
  * Seed script for all database tables
@@ -13,6 +14,16 @@ async function seedAll() {
     console.log('📋 Seeding Application Registry...');
     await seedApplicationRegistry();
     console.log('✅ Application Registry seeded successfully\n');
+
+    // Seed Monthly Report Status Registry
+    console.log('📋 Seeding Monthly Report Status Registry...');
+    await seedMonthlyReportStatusRegistry();
+    console.log('✅ Monthly Report Status Registry seeded successfully\n');
+
+    // Seed Corrective Status Registry
+    console.log('📋 Seeding Corrective Status Registry...');
+    await seedCorrectiveStatusRegistry();
+    console.log('✅ Corrective Status Registry seeded successfully\n');
 
     console.log('🎉 All seeding completed successfully!');
   } catch (error) {
@@ -35,7 +46,7 @@ async function seedApplicationRegistry() {
       patterns: [
         { pattern: 'FFVV', priority: 10 },
         { pattern: 'APP - Crecer es Ganar (FFVV)', priority: 20 },
-        { pattern: 'Force de Vente', priority: 30 },
+        { pattern: 'Gestiona tu Negocio', priority: 30 },
       ],
     },
     {
@@ -51,19 +62,28 @@ async function seedApplicationRegistry() {
       code: 'UB-3',
       name: 'Unete Belcorp 3.0',
       description: 'Unete Belcorp versión 3.0',
-      patterns: [{ pattern: 'Unete Belcorp 3.0', priority: 10 }],
+      patterns: [
+        { pattern: 'Unete Belcorp 3.0', priority: 10 },
+        { pattern: 'Unete 3.0', priority: 20 },
+      ],
     },
     {
       code: 'UN-2',
       name: 'Unete Belcorp 2.0',
       description: 'Unete Belcorp versión 2.0',
-      patterns: [{ pattern: 'Unete Belcorp 2.0', priority: 10 }],
+      patterns: [
+        { pattern: 'Unete Belcorp 2.0', priority: 10 },
+        { pattern: 'Unete 2.0', priority: 20 },
+      ],
     },
     {
       code: 'CD',
       name: 'Catalogo Digital',
       description: 'Plataforma Catalogo Digital',
-      patterns: [{ pattern: 'Catalogo Digital', priority: 10 }],
+      patterns: [
+        { pattern: 'Catalogo Digital', priority: 10 },
+        { pattern: 'Catálogo Digital', priority: 20 },
+      ],
     },
     {
       code: 'PROL',
@@ -77,8 +97,8 @@ async function seedApplicationRegistry() {
   for (const app of applications) {
     console.log(`  → Creating application: ${app.name} (${app.code})`);
 
-    // Insert application
-    const [insertedApp] = await db
+    // Insert application (skip if already exists)
+    const result = await db
       .insert(applicationRegistry)
       .values({
         code: app.code,
@@ -86,7 +106,16 @@ async function seedApplicationRegistry() {
         description: app.description,
         isActive: true,
       })
+      .onConflictDoNothing()
       .returning();
+
+    // Skip if application already exists
+    if (result.length === 0) {
+      console.log(`     Already exists, skipping...`);
+      continue;
+    }
+
+    const insertedApp = result[0];
 
     // Insert patterns for this application
     for (const pattern of app.patterns) {
@@ -103,6 +132,64 @@ async function seedApplicationRegistry() {
   }
 
   console.log(`  ✓ Created ${applications.length} applications with patterns`);
+}
+
+/**
+ * Seeds the monthly report status registry with default status mappings
+ */
+async function seedMonthlyReportStatusRegistry() {
+  const statusMappings = [
+    { rawStatus: 'Closed', displayStatus: DisplayStatus.Closed },
+    { rawStatus: 'Validado', displayStatus: DisplayStatus.Closed },
+    { rawStatus: 'Nivel 2', displayStatus: DisplayStatus.OnGoingL2 },
+    { rawStatus: 'Nivel 3', displayStatus: DisplayStatus.OnGoingL3 },
+    { rawStatus: 'En Mantenimiento Correctivo', displayStatus: DisplayStatus.InL3Backlog },
+    { rawStatus: 'En Pruebas', displayStatus: DisplayStatus.InL3Backlog },
+    { rawStatus: 'Dev in Progress', displayStatus: DisplayStatus.InL3Backlog },
+  ];
+
+  for (const mapping of statusMappings) {
+    console.log(`  → Creating mapping: ${mapping.rawStatus} → ${mapping.displayStatus}`);
+
+    await db
+      .insert(monthlyReportStatusRegistry)
+      .values({
+        rawStatus: mapping.rawStatus,
+        displayStatus: mapping.displayStatus,
+        isActive: true,
+      })
+      .onConflictDoNothing();
+  }
+
+  console.log(`  ✓ Created ${statusMappings.length} status mappings`);
+}
+
+/**
+ * Seeds the corrective status registry with L3 status mappings (Spanish → English)
+ */
+async function seedCorrectiveStatusRegistry() {
+  const statusMappings = [
+    { rawStatus: CorrectiveStatusSpanish.PrdDeployment, displayStatus: CorrectiveStatus.PrdDeployment },
+    { rawStatus: CorrectiveStatusSpanish.EnPruebas, displayStatus: CorrectiveStatus.InTesting },
+    { rawStatus: CorrectiveStatusSpanish.EnMantenimientoCorrectivo, displayStatus: CorrectiveStatus.InBacklog },
+    { rawStatus: CorrectiveStatusSpanish.DevInProgress, displayStatus: CorrectiveStatus.DevInProgress },
+    { rawStatus: CorrectiveStatusSpanish.Nivel3, displayStatus: CorrectiveStatus.InBacklog },
+  ];
+
+  for (const mapping of statusMappings) {
+    console.log(`  → Creating mapping: ${mapping.rawStatus} → ${mapping.displayStatus}`);
+
+    await db
+      .insert(correctiveStatusRegistry)
+      .values({
+        rawStatus: mapping.rawStatus,
+        displayStatus: mapping.displayStatus,
+        isActive: true,
+      })
+      .onConflictDoNothing();
+  }
+
+  console.log(`  ✓ Created ${statusMappings.length} corrective status mappings`);
 }
 
 // Execute seeding

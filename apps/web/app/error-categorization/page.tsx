@@ -7,7 +7,7 @@ import { UploadSectionDynamic } from '@/components/upload-section-dynamic';
 import type {
   CategorySummary,
   RequestCategorization,
-} from '@repo/reports';
+} from '@repo/reports/frontend';
 import { useEffect, useState } from 'react';
 
 interface RequestCategorizationWithInfo extends RequestCategorization {

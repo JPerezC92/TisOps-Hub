@@ -10,3 +10,5 @@ export * from './weekly-corrective.schema';
 export * from './problems.schema';
 export * from './application-registry.schema';
 export * from './application-patterns.schema';
+export * from './monthly-report-status-registry.schema';
+export * from './corrective-status-registry.schema';
