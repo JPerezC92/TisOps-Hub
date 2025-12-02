@@ -92,6 +92,50 @@ describe('WeeklyCorrectiveController (E2E)', () => {
     });
   });
 
+  describe('GET /weekly-corrective/l3-tickets-by-status', () => {
+    it('should return L3 tickets by status data', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/weekly-corrective/l3-tickets-by-status')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('statusColumns');
+      expect(response.body).toHaveProperty('monthName');
+      expect(response.body).toHaveProperty('totalL3Tickets');
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(Array.isArray(response.body.statusColumns)).toBe(true);
+    });
+
+    it('should return L3 tickets by status with app filter', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/weekly-corrective/l3-tickets-by-status?app=SB')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('statusColumns');
+    });
+
+    it('should return L3 tickets by status with month filter', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/weekly-corrective/l3-tickets-by-status?month=2024-10')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('monthName');
+    });
+
+    it('should return L3 tickets by status with both filters', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/weekly-corrective/l3-tickets-by-status?app=SB&month=2024-10')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('statusColumns');
+      expect(response.body).toHaveProperty('monthName');
+      expect(response.body).toHaveProperty('totalL3Tickets');
+    });
+  });
+
   describe('Integration flow', () => {
     it('should upload, retrieve, and delete weekly-corrective records', async () => {
       // 1. Upload weekly-corrective

@@ -2,6 +2,7 @@ import { Injectable, Inject, HttpException, HttpStatus } from '@nestjs/common';
 import { GetAllWeeklyCorrectivesUseCase } from './application/use-cases/get-all-weekly-correctives.use-case';
 import { DeleteAllWeeklyCorrectivesUseCase } from './application/use-cases/delete-all-weekly-correctives.use-case';
 import { UploadAndParseWeeklyCorrectiveUseCase } from './application/use-cases/upload-and-parse-weekly-corrective.use-case';
+import { GetL3TicketsByStatusUseCase } from './application/use-cases/get-l3-tickets-by-status.use-case';
 import { WeeklyCorrectiveExcelParser } from './infrastructure/parsers/weekly-corrective-excel.parser';
 
 @Injectable()
@@ -13,6 +14,8 @@ export class WeeklyCorrectiveService {
     private readonly deleteAllUseCase: DeleteAllWeeklyCorrectivesUseCase,
     @Inject(UploadAndParseWeeklyCorrectiveUseCase)
     private readonly uploadAndParseUseCase: UploadAndParseWeeklyCorrectiveUseCase,
+    @Inject(GetL3TicketsByStatusUseCase)
+    private readonly getL3TicketsByStatusUseCase: GetL3TicketsByStatusUseCase,
     private readonly excelParser: WeeklyCorrectiveExcelParser,
   ) {}
 
@@ -38,5 +41,9 @@ export class WeeklyCorrectiveService {
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  async getL3TicketsByStatus(app?: string, month?: string) {
+    return this.getL3TicketsByStatusUseCase.execute(app, month);
   }
 }

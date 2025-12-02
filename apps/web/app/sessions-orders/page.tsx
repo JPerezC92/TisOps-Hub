@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { SessionsOrder, SessionsOrdersRelease } from '@repo/reports';
+import type { SessionsOrder, SessionsOrdersRelease } from '@repo/reports/frontend';
 import { StatsGrid } from '@/components/stats-grid';
 import { UploadSectionDynamic } from '@/components/upload-section-dynamic';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';

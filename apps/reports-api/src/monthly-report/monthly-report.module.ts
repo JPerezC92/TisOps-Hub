@@ -9,6 +9,12 @@ import { GetAllMonthlyReportsUseCase } from './application/use-cases/get-all-mon
 import { DeleteAllMonthlyReportsUseCase } from './application/use-cases/delete-all-monthly-reports.use-case';
 import { UploadAndParseMonthlyReportUseCase } from './application/use-cases/upload-and-parse-monthly-report.use-case';
 import { GetCriticalIncidentsAnalyticsUseCase } from './application/use-cases/get-critical-incidents-analytics.use-case';
+import { GetModuleEvolutionUseCase } from './application/use-cases/get-module-evolution.use-case';
+import { GetStabilityIndicatorsUseCase } from './application/use-cases/get-stability-indicators.use-case';
+import { GetCategoryDistributionUseCase } from './application/use-cases/get-category-distribution.use-case';
+import { GetBusinessFlowPriorityUseCase } from './application/use-cases/get-business-flow-priority.use-case';
+import { GetPriorityByAppUseCase } from './application/use-cases/get-priority-by-app.use-case';
+import { GetIncidentsByWeekUseCase } from './application/use-cases/get-incidents-by-week.use-case';
 
 @Module({
   imports: [DatabaseModule],
@@ -38,6 +44,36 @@ import { GetCriticalIncidentsAnalyticsUseCase } from './application/use-cases/ge
     {
       provide: GetCriticalIncidentsAnalyticsUseCase,
       useFactory: (repository: any) => new GetCriticalIncidentsAnalyticsUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetModuleEvolutionUseCase,
+      useFactory: (repository: any) => new GetModuleEvolutionUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetStabilityIndicatorsUseCase,
+      useFactory: (repository: any) => new GetStabilityIndicatorsUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetCategoryDistributionUseCase,
+      useFactory: (repository: any) => new GetCategoryDistributionUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetBusinessFlowPriorityUseCase,
+      useFactory: (repository: any) => new GetBusinessFlowPriorityUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetPriorityByAppUseCase,
+      useFactory: (repository: any) => new GetPriorityByAppUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetIncidentsByWeekUseCase,
+      useFactory: (repository: any) => new GetIncidentsByWeekUseCase(repository),
       inject: [MONTHLY_REPORT_REPOSITORY],
     },
   ],

@@ -8,6 +8,7 @@ import { WEEKLY_CORRECTIVE_REPOSITORY } from './domain/repositories/weekly-corre
 import { GetAllWeeklyCorrectivesUseCase } from './application/use-cases/get-all-weekly-correctives.use-case';
 import { DeleteAllWeeklyCorrectivesUseCase } from './application/use-cases/delete-all-weekly-correctives.use-case';
 import { UploadAndParseWeeklyCorrectiveUseCase } from './application/use-cases/upload-and-parse-weekly-corrective.use-case';
+import { GetL3TicketsByStatusUseCase } from './application/use-cases/get-l3-tickets-by-status.use-case';
 
 @Module({
   imports: [DatabaseModule],
@@ -32,6 +33,11 @@ import { UploadAndParseWeeklyCorrectiveUseCase } from './application/use-cases/u
     {
       provide: UploadAndParseWeeklyCorrectiveUseCase,
       useFactory: (repository: any) => new UploadAndParseWeeklyCorrectiveUseCase(repository),
+      inject: [WEEKLY_CORRECTIVE_REPOSITORY],
+    },
+    {
+      provide: GetL3TicketsByStatusUseCase,
+      useFactory: (repository: any) => new GetL3TicketsByStatusUseCase(repository),
       inject: [WEEKLY_CORRECTIVE_REPOSITORY],
     },
   ],

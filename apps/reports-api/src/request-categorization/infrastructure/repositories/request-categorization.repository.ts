@@ -58,7 +58,7 @@ export class RequestCategorizationRepository
           ne(requestCategorization.linkedRequestId, ''),
         ),
       )
-      .orderBy(requestCategorization.requestId);
+      .orderBy(requestCategorization.linkedRequestId);
 
     // Group rows by requestId (primary key) and collect distinct informacion_adicional values
     const groupedResults = new Map<

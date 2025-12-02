@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { Task } from '@repo/reports';
+import type { Task } from '@repo/reports/frontend';
 import { Badge } from '@/components/ui/badge';
 
 export default function TasksPage() {

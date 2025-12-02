@@ -72,3 +72,17 @@ export type {
   ApplicationPattern,
   InsertApplicationPattern,
 } from './schemas/application-patterns.schema';
+
+// Monthly Report Status Registry schema and types
+export { monthlyReportStatusRegistry } from './schemas/monthly-report-status-registry.schema';
+export type {
+  MonthlyReportStatusRegistry,
+  InsertMonthlyReportStatusRegistry,
+} from './schemas/monthly-report-status-registry.schema';
+
+// Corrective Status Registry schema and types
+export { correctiveStatusRegistry } from './schemas/corrective-status-registry.schema';
+export type {
+  CorrectiveStatusRegistry,
+  InsertCorrectiveStatusRegistry,
+} from './schemas/corrective-status-registry.schema';

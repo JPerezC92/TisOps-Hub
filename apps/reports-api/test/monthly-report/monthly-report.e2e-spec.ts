@@ -74,6 +74,136 @@ describe('MonthlyReportController (E2E)', () => {
     });
   });
 
+  describe('GET /monthly-report/module-evolution', () => {
+    it('should return module evolution data', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/monthly-report/module-evolution')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('total');
+      expect(Array.isArray(response.body.data)).toBe(true);
+    });
+
+    it('should return module evolution with filters', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/monthly-report/module-evolution?app=SB&startDate=2024-10-01&endDate=2024-10-31')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('total');
+    });
+  });
+
+  describe('GET /monthly-report/stability-indicators', () => {
+    it('should return stability indicators data', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/monthly-report/stability-indicators')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('hasUnmappedStatuses');
+      expect(Array.isArray(response.body.data)).toBe(true);
+    });
+
+    it('should return stability indicators with filters', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/monthly-report/stability-indicators?app=SB&month=2024-10')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('hasUnmappedStatuses');
+    });
+  });
+
+  describe('GET /monthly-report/category-distribution', () => {
+    it('should return category distribution data', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/monthly-report/category-distribution')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('monthName');
+      expect(response.body).toHaveProperty('totalIncidents');
+      expect(Array.isArray(response.body.data)).toBe(true);
+    });
+
+    it('should return category distribution with filters', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/monthly-report/category-distribution?app=SB&month=2024-10')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('monthName');
+    });
+  });
+
+  describe('GET /monthly-report/business-flow-priority', () => {
+    it('should return business flow priority data', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/monthly-report/business-flow-priority')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('monthName');
+      expect(response.body).toHaveProperty('totalIncidents');
+      expect(Array.isArray(response.body.data)).toBe(true);
+    });
+
+    it('should return business flow priority with filters', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/monthly-report/business-flow-priority?app=SB&month=2024-10')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('monthName');
+    });
+  });
+
+  describe('GET /monthly-report/priority-by-app', () => {
+    it('should return priority by app data', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/monthly-report/priority-by-app')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('monthName');
+      expect(response.body).toHaveProperty('totalIncidents');
+      expect(Array.isArray(response.body.data)).toBe(true);
+    });
+
+    it('should return priority by app with filters', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/monthly-report/priority-by-app?app=SB&month=2024-10')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('monthName');
+    });
+  });
+
+  describe('GET /monthly-report/incidents-by-week', () => {
+    it('should return incidents by week data', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/monthly-report/incidents-by-week')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('year');
+      expect(response.body).toHaveProperty('totalIncidents');
+      expect(Array.isArray(response.body.data)).toBe(true);
+    });
+
+    it('should return incidents by week with filters', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/monthly-report/incidents-by-week?app=SB&year=2024')
+        .expect(200);
+
+      expect(response.body).toHaveProperty('data');
+      expect(response.body).toHaveProperty('year');
+    });
+  });
+
   describe('POST /monthly-report/upload', () => {
     it('should upload and parse Excel file successfully', async () => {
       const filePath = join(__dirname, '../../files/XD 2025 DATA INFORME MENSUAL - Current Month.xlsx');

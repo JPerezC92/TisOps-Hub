@@ -1,15 +1,36 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import type { MonthlyReport } from '@repo/reports';
-import { Priority } from '@repo/reports/common';
+import type { MonthlyReport } from '@repo/reports/frontend';
+import { Priority, DisplayStatus, type DisplayStatusValue } from '@repo/reports/frontend';
 import { StatsGrid } from '@/components/stats-grid';
 import { UploadSectionDynamic } from '@/components/upload-section-dynamic';
 import { Badge } from '@/components/ui/badge';
 import { getPriorityColorClasses } from '@/lib/utils/priority-colors';
 
+// Extended type with computed displayStatus column
+interface MonthlyReportWithDisplayStatus extends MonthlyReport {
+  displayStatus: DisplayStatusValue;
+}
+
+// Get color classes for display status badges
+const getDisplayStatusColor = (displayStatus: DisplayStatusValue) => {
+  switch (displayStatus) {
+    case DisplayStatus.Closed:
+      return 'bg-jpc-vibrant-emerald-500/20 text-jpc-vibrant-emerald-400 border-jpc-vibrant-emerald-500/40';
+    case DisplayStatus.OnGoingL2:
+      return 'bg-jpc-vibrant-cyan-500/20 text-jpc-vibrant-cyan-400 border-jpc-vibrant-cyan-500/40';
+    case DisplayStatus.OnGoingL3:
+      return 'bg-jpc-vibrant-purple-500/20 text-jpc-vibrant-purple-400 border-jpc-vibrant-purple-500/40';
+    case DisplayStatus.InL3Backlog:
+      return 'bg-jpc-vibrant-orange-500/20 text-jpc-vibrant-orange-400 border-jpc-vibrant-orange-500/40';
+    default:
+      return 'bg-gray-500/20 text-gray-400 border-gray-500/40';
+  }
+};
+
 export default function MonthlyReportPage() {
-  const [monthlyReports, setMonthlyReports] = useState<MonthlyReport[]>([]);
+  const [monthlyReports, setMonthlyReports] = useState<MonthlyReportWithDisplayStatus[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategorization, setFilterCategorization] = useState<string>('all');
@@ -336,6 +357,17 @@ export default function MonthlyReportPage() {
                       Status
                     </th>
                     <th className="h-12 text-xs font-bold text-cyan-100 bg-jpc-vibrant-cyan-500/5 uppercase tracking-wider text-left py-4 px-6">
+                      <div className="flex items-center gap-2">
+                        <span>Display Status</span>
+                        <span
+                          className="inline-flex items-center justify-center w-4 h-4 bg-jpc-vibrant-emerald-500/15 border border-jpc-vibrant-emerald-500/30 rounded text-[8px] font-bold text-emerald-300"
+                          title="Computed Column: Mapped from Request Status Registry"
+                        >
+                          ⚡
+                        </span>
+                      </div>
+                    </th>
+                    <th className="h-12 text-xs font-bold text-cyan-100 bg-jpc-vibrant-cyan-500/5 uppercase tracking-wider text-left py-4 px-6">
                       Priority
                     </th>
                     <th className="h-12 text-xs font-bold text-cyan-100 bg-jpc-vibrant-cyan-500/5 uppercase tracking-wider text-left py-4 px-6">
@@ -371,6 +403,14 @@ export default function MonthlyReportPage() {
                         <div className="max-w-xs truncate" title={report.requestStatus}>
                           {report.requestStatus}
                         </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <Badge
+                          variant="outline"
+                          className={`${getDisplayStatusColor(report.displayStatus)} border font-medium transition-all duration-300`}
+                        >
+                          {report.displayStatus}
+                        </Badge>
                       </td>
                       <td className="px-6 py-4">
                         <Badge

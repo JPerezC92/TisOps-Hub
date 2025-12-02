@@ -15,6 +15,8 @@ describe('GetCriticalIncidentsAnalyticsUseCase', () => {
       bulkCreate: vi.fn(),
       deleteAll: vi.fn(),
       findCriticalIncidentsFiltered: vi.fn(),
+      findModuleEvolution: vi.fn(),
+      findStabilityIndicators: vi.fn(),
     };
 
     useCase = new GetCriticalIncidentsAnalyticsUseCase(mockRepository);
