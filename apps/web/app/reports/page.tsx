@@ -107,6 +107,20 @@ export default function ReportsPage() {
           icon: '🏷️',
           color: 'purple',
         },
+        {
+          href: '/categorization-registry',
+          title: 'Categorization Registry',
+          description: 'Manage categorization mappings from source values to display values',
+          icon: '🗂️',
+          color: 'emerald',
+        },
+        {
+          href: '/module-registry',
+          title: 'Module Registry',
+          description: 'Manage module mappings with application indicators (CD, FFVV, SB, UNETE)',
+          icon: '📦',
+          color: 'orange',
+        },
       ],
     },
   ];

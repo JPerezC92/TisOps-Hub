@@ -426,7 +426,7 @@ export default function MonthlyReportPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 text-xs text-muted-foreground/80">
-                        {report.createdTime}
+                        {report.createdTime instanceof Date ? report.createdTime.toLocaleString() : String(report.createdTime)}
                       </td>
                     </tr>
                   ))}

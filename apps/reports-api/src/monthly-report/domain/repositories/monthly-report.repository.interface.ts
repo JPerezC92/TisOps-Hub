@@ -14,14 +14,16 @@ export interface TicketDetail {
 }
 
 export interface CategorizationDetail {
-  categorization: string;
+  categorizationSourceValue: string;        // Original value from data
+  categorizationDisplayValue: string | null; // Mapped display value
   count: number;
   percentage: number;
   tickets: TicketDetail[];
 }
 
 export interface ModuleEvolutionResult {
-  module: string;
+  moduleSourceValue: string;        // Original value from data
+  moduleDisplayValue: string | null; // Mapped display value
   count: number;
   percentage: number;
   categorizations: CategorizationDetail[];
@@ -54,7 +56,8 @@ export interface UnassignedRecurrencyRequest {
 }
 
 export interface CategoryDistributionRow {
-  category: string;
+  categorySourceValue: string;        // Original value from data (e.g., "Error de codificación (Bug)")
+  categoryDisplayValue: string | null; // Mapped display value (e.g., "Bugs")
   recurringCount: number;
   newCount: number;
   unassignedCount: number;
@@ -70,7 +73,8 @@ export interface CategoryDistributionResult {
 }
 
 export interface ModuleCount {
-  module: string;
+  moduleSourceValue: string;        // Original value from data
+  moduleDisplayValue: string | null; // Mapped display value
   count: number;
 }
 

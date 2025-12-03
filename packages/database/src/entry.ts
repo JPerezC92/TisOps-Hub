@@ -86,3 +86,17 @@ export type {
   CorrectiveStatusRegistry,
   InsertCorrectiveStatusRegistry,
 } from './schemas/corrective-status-registry.schema';
+
+// Categorization Registry schema and types
+export { categorizationRegistry } from './schemas/categorization-registry.schema';
+export type {
+  CategorizationRegistry,
+  InsertCategorizationRegistry,
+} from './schemas/categorization-registry.schema';
+
+// Module Registry schema and types
+export { moduleRegistry } from './schemas/module-registry.schema';
+export type {
+  ModuleRegistry,
+  InsertModuleRegistry,
+} from './schemas/module-registry.schema';

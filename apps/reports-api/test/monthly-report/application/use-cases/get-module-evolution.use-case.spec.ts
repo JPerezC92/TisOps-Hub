@@ -29,12 +29,14 @@ describe('GetModuleEvolutionUseCase', () => {
 
   const createMockModules = (): ModuleEvolutionResult[] => [
     {
-      module: 'Module A',
+      moduleSourceValue: 'SB2 Pase de Pedidos',
+      moduleDisplayValue: 'Order Placement',
       count: 30,
       percentage: 50,
       categorizations: [
         {
-          categorization: 'Bug Fix',
+          categorizationSourceValue: 'Error de codificación (Bug)',
+          categorizationDisplayValue: 'Bugs',
           count: 20,
           percentage: 66.67,
           tickets: [
@@ -53,7 +55,8 @@ describe('GetModuleEvolutionUseCase', () => {
       ],
     },
     {
-      module: 'Module B',
+      moduleSourceValue: 'SB2 Reserva de Pedidos',
+      moduleDisplayValue: 'Order Reservation',
       count: 30,
       percentage: 50,
       categorizations: [],
@@ -118,10 +121,10 @@ describe('GetModuleEvolutionUseCase', () => {
 
   it('should correctly sum counts from multiple modules', async () => {
     const mockModules: ModuleEvolutionResult[] = [
-      { module: 'A', count: 10, percentage: 25, categorizations: [] },
-      { module: 'B', count: 15, percentage: 37.5, categorizations: [] },
-      { module: 'C', count: 5, percentage: 12.5, categorizations: [] },
-      { module: 'D', count: 10, percentage: 25, categorizations: [] },
+      { moduleSourceValue: 'Module A', moduleDisplayValue: 'Mapped A', count: 10, percentage: 25, categorizations: [] },
+      { moduleSourceValue: 'Module B', moduleDisplayValue: 'Mapped B', count: 15, percentage: 37.5, categorizations: [] },
+      { moduleSourceValue: 'Module C', moduleDisplayValue: null, count: 5, percentage: 12.5, categorizations: [] },
+      { moduleSourceValue: 'Module D', moduleDisplayValue: null, count: 10, percentage: 25, categorizations: [] },
     ];
 
     vi.spyOn(mockRepository, 'findModuleEvolution').mockResolvedValue(mockModules);
@@ -130,5 +133,63 @@ describe('GetModuleEvolutionUseCase', () => {
 
     expect(result.total).toBe(40); // 10 + 15 + 5 + 10
     expect(result.data).toHaveLength(4);
+  });
+
+  it('should handle modules with null display values (unmapped)', async () => {
+    const mockModules: ModuleEvolutionResult[] = [
+      {
+        moduleSourceValue: 'Unknown Module',
+        moduleDisplayValue: null,
+        count: 10,
+        percentage: 100,
+        categorizations: [
+          {
+            categorizationSourceValue: 'Unknown Category',
+            categorizationDisplayValue: null,
+            count: 10,
+            percentage: 100,
+            tickets: [],
+          },
+        ],
+      },
+    ];
+
+    vi.spyOn(mockRepository, 'findModuleEvolution').mockResolvedValue(mockModules);
+
+    const result = await useCase.execute();
+
+    expect(result.data[0].moduleDisplayValue).toBeNull();
+    expect(result.data[0].moduleSourceValue).toBe('Unknown Module');
+    expect(result.data[0].categorizations[0].categorizationDisplayValue).toBeNull();
+    expect(result.data[0].categorizations[0].categorizationSourceValue).toBe('Unknown Category');
+  });
+
+  it('should return both source and display values for mapped modules', async () => {
+    const mockModules: ModuleEvolutionResult[] = [
+      {
+        moduleSourceValue: 'SB2 Ofertas Gana+',
+        moduleDisplayValue: 'Gana+ Offers',
+        count: 5,
+        percentage: 100,
+        categorizations: [
+          {
+            categorizationSourceValue: 'Error de datos (Data Source)',
+            categorizationDisplayValue: 'Data Source',
+            count: 5,
+            percentage: 100,
+            tickets: [],
+          },
+        ],
+      },
+    ];
+
+    vi.spyOn(mockRepository, 'findModuleEvolution').mockResolvedValue(mockModules);
+
+    const result = await useCase.execute();
+
+    expect(result.data[0].moduleSourceValue).toBe('SB2 Ofertas Gana+');
+    expect(result.data[0].moduleDisplayValue).toBe('Gana+ Offers');
+    expect(result.data[0].categorizations[0].categorizationSourceValue).toBe('Error de datos (Data Source)');
+    expect(result.data[0].categorizations[0].categorizationDisplayValue).toBe('Data Source');
   });
 });

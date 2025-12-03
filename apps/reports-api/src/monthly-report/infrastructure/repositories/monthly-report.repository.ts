@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { Database, DATABASE_CONNECTION, monthlyReports, InsertMonthlyReport, applicationRegistry, applicationPatterns, MonthlyReport, parentChildRequests, monthlyReportStatusRegistry } from '@repo/database';
+import { Database, DATABASE_CONNECTION, monthlyReports, InsertMonthlyReport, applicationRegistry, applicationPatterns, MonthlyReport, parentChildRequests, monthlyReportStatusRegistry, categorizationRegistry, moduleRegistry } from '@repo/database';
 import { and, eq, sql } from 'drizzle-orm';
 import { DEFAULT_DISPLAY_STATUS, DisplayStatus, Recurrency, mapRecurrency } from '@repo/reports';
 import { DateTime } from 'luxon';
@@ -163,40 +163,75 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     startDate?: string,
     endDate?: string,
   ): Promise<ModuleEvolutionResult[]> {
-    let records: MonthlyReport[];
+    // Query with LEFT JOINs for module and categorization registry mappings
+    const baseQuery = this.db
+      .select({
+        monthlyReport: monthlyReports,
+        registeredAppCode: applicationRegistry.code,
+        mappedModuleDisplayValue: moduleRegistry.displayValue,
+        mappedCategoryDisplayValue: categorizationRegistry.displayValue,
+      })
+      .from(monthlyReports)
+      .leftJoin(
+        applicationPatterns,
+        sql`LOWER(${monthlyReports.aplicativos}) LIKE '%' || LOWER(${applicationPatterns.pattern}) || '%'`,
+      )
+      .leftJoin(
+        applicationRegistry,
+        eq(applicationPatterns.applicationId, applicationRegistry.id),
+      )
+      .leftJoin(
+        moduleRegistry,
+        and(
+          eq(monthlyReports.modulo, moduleRegistry.sourceValue),
+          eq(moduleRegistry.isActive, true),
+        ),
+      )
+      .leftJoin(
+        categorizationRegistry,
+        and(
+          eq(monthlyReports.categorizacion, categorizationRegistry.sourceValue),
+          eq(categorizationRegistry.isActive, true),
+        ),
+      );
+
+    let queryResults: {
+      monthlyReport: MonthlyReport;
+      registeredAppCode: string | null;
+      mappedModuleDisplayValue: string | null;
+      mappedCategoryDisplayValue: string | null;
+    }[];
 
     if (app && app !== 'all') {
-      // Filter by application using JOIN with pattern matching
-      const queryResults = await this.db
-        .selectDistinct({ monthlyReport: monthlyReports })
-        .from(monthlyReports)
-        .leftJoin(
-          applicationPatterns,
-          sql`LOWER(${monthlyReports.aplicativos}) LIKE '%' || LOWER(${applicationPatterns.pattern}) || '%'`,
-        )
-        .leftJoin(
-          applicationRegistry,
-          eq(applicationPatterns.applicationId, applicationRegistry.id),
-        )
+      queryResults = await baseQuery
         .where(eq(applicationRegistry.code, app))
         .all();
-
-      records = queryResults.map((r) => r.monthlyReport);
     } else {
-      records = await this.db.select().from(monthlyReports).all();
+      queryResults = await baseQuery.all();
     }
 
+    // Deduplicate by requestId (JOINs can create duplicates)
+    const seenRequestIds = new Set<number>();
+    const uniqueResults = queryResults.filter((r) => {
+      if (seenRequestIds.has(r.monthlyReport.requestId)) {
+        return false;
+      }
+      seenRequestIds.add(r.monthlyReport.requestId);
+      return true;
+    });
+
     // Filter by date range if provided
+    let filteredResults = uniqueResults;
     if (startDate || endDate) {
       const start = startDate
         ? DateTime.fromISO(startDate).startOf('day')
         : null;
       const end = endDate ? DateTime.fromISO(endDate).endOf('day') : null;
 
-      records = records.filter((record) => {
+      filteredResults = uniqueResults.filter((result) => {
         try {
           // createdTime is now a Date object
-          const createdDate = DateTime.fromJSDate(record.createdTime);
+          const createdDate = DateTime.fromJSDate(result.monthlyReport.createdTime);
           if (!createdDate.isValid) return false;
 
           if (start && createdDate < start) return false;
@@ -235,25 +270,38 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       statusMappings.map((r) => [r.rawStatus, r.displayStatus]),
     );
 
+    // Store display mappings for modules and categorizations
+    const moduleDisplayMap = new Map<string, string | null>();
+    const categoryDisplayMap = new Map<string, string | null>();
+
     // Group by Module → Categorization (no subject grouping - individual tickets)
     const moduleMap = new Map<
       string,
       Map<string, TicketDetail[]>
     >();
 
-    for (const record of records) {
-      const module = record.modulo || 'Unknown';
-      const categorization = record.categorizacion || 'Unknown';
+    for (const result of filteredResults) {
+      const record = result.monthlyReport;
+      const moduleSourceValue = record.modulo || 'Unknown';
+      const categorySourceValue = record.categorizacion || 'Unknown';
 
-      if (!moduleMap.has(module)) {
-        moduleMap.set(module, new Map());
+      // Track display mappings
+      if (!moduleDisplayMap.has(moduleSourceValue)) {
+        moduleDisplayMap.set(moduleSourceValue, result.mappedModuleDisplayValue);
       }
-      const catMap = moduleMap.get(module)!;
+      if (!categoryDisplayMap.has(categorySourceValue)) {
+        categoryDisplayMap.set(categorySourceValue, result.mappedCategoryDisplayValue);
+      }
 
-      if (!catMap.has(categorization)) {
-        catMap.set(categorization, []);
+      if (!moduleMap.has(moduleSourceValue)) {
+        moduleMap.set(moduleSourceValue, new Map());
       }
-      const ticketsList = catMap.get(categorization)!;
+      const catMap = moduleMap.get(moduleSourceValue)!;
+
+      if (!catMap.has(categorySourceValue)) {
+        catMap.set(categorySourceValue, []);
+      }
+      const ticketsList = catMap.get(categorySourceValue)!;
 
       // Get linked count from parent_child_requests table
       const parentId = record.linkedRequestId || '';
@@ -277,14 +325,14 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     }
 
     // Calculate totals and percentages
-    const total = records.length;
+    const total = filteredResults.length;
     const results: ModuleEvolutionResult[] = [];
 
-    for (const [module, catMap] of moduleMap) {
+    for (const [moduleSourceValue, catMap] of moduleMap) {
       let moduleCount = 0;
       const categorizations: CategorizationDetail[] = [];
 
-      for (const [cat, tickets] of catMap) {
+      for (const [categorySourceValue, tickets] of catMap) {
         const catCount = tickets.length;
 
         // Sort tickets by requestId descending (most recent first)
@@ -292,7 +340,8 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
 
         moduleCount += catCount;
         categorizations.push({
-          categorization: cat,
+          categorizationSourceValue: categorySourceValue,
+          categorizationDisplayValue: categoryDisplayMap.get(categorySourceValue) || null,
           count: catCount,
           percentage:
             total > 0 ? Math.round((catCount / total) * 10000) / 100 : 0,
@@ -304,7 +353,8 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       categorizations.sort((a, b) => b.count - a.count);
 
       results.push({
-        module,
+        moduleSourceValue,
+        moduleDisplayValue: moduleDisplayMap.get(moduleSourceValue) || null,
         count: moduleCount,
         percentage:
           total > 0 ? Math.round((moduleCount / total) * 10000) / 100 : 0,
@@ -459,11 +509,12 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     app?: string,
     month?: string,
   ): Promise<CategoryDistributionResult> {
-    // Query all records with application mapping
+    // Query all records with application mapping and categorization display value
     const queryResults = await this.db
       .select({
         monthlyReport: monthlyReports,
         registeredAppCode: applicationRegistry.code,
+        mappedCategoryDisplayValue: categorizationRegistry.displayValue,
       })
       .from(monthlyReports)
       .leftJoin(
@@ -473,6 +524,13 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       .leftJoin(
         applicationRegistry,
         eq(applicationPatterns.applicationId, applicationRegistry.id),
+      )
+      .leftJoin(
+        categorizationRegistry,
+        and(
+          eq(monthlyReports.categorizacion, categorizationRegistry.sourceValue),
+          eq(categorizationRegistry.isActive, true),
+        ),
       )
       .all();
 
@@ -518,6 +576,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     const categoryMap = new Map<
       string,
       {
+        categoryDisplayValue: string | null;
         recurringCount: number;
         newCount: number;
         unassignedCount: number;
@@ -527,10 +586,12 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
 
     for (const result of filteredResults) {
       const record = result.monthlyReport;
-      const category = record.categorizacion || 'Unknown';
+      const categorySourceValue = record.categorizacion || 'Unknown';
+      const categoryDisplayValue = result.mappedCategoryDisplayValue || null;
 
-      if (!categoryMap.has(category)) {
-        categoryMap.set(category, {
+      if (!categoryMap.has(categorySourceValue)) {
+        categoryMap.set(categorySourceValue, {
+          categoryDisplayValue,
           recurringCount: 0,
           newCount: 0,
           unassignedCount: 0,
@@ -538,7 +599,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
         });
       }
 
-      const catData = categoryMap.get(category)!;
+      const catData = categoryMap.get(categorySourceValue)!;
       const mappedRecurrency = mapRecurrency(record.recurrencia);
 
       if (mappedRecurrency === Recurrency.Recurring) {
@@ -559,10 +620,11 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     const totalIncidents = filteredResults.length;
     const data: CategoryDistributionRow[] = [];
 
-    for (const [category, counts] of categoryMap) {
+    for (const [categorySourceValue, counts] of categoryMap) {
       const total = counts.recurringCount + counts.newCount + counts.unassignedCount;
       data.push({
-        category,
+        categorySourceValue,
+        categoryDisplayValue: counts.categoryDisplayValue,
         recurringCount: counts.recurringCount,
         newCount: counts.newCount,
         unassignedCount: counts.unassignedCount,
@@ -582,11 +644,12 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     app?: string,
     month?: string,
   ): Promise<BusinessFlowPriorityResult> {
-    // Query all records with application mapping
+    // Query all records with application mapping and module display value
     const queryResults = await this.db
       .select({
         monthlyReport: monthlyReports,
         registeredAppCode: applicationRegistry.code,
+        mappedModuleDisplayValue: moduleRegistry.displayValue,
       })
       .from(monthlyReports)
       .leftJoin(
@@ -596,6 +659,13 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       .leftJoin(
         applicationRegistry,
         eq(applicationPatterns.applicationId, applicationRegistry.id),
+      )
+      .leftJoin(
+        moduleRegistry,
+        and(
+          eq(monthlyReports.modulo, moduleRegistry.sourceValue),
+          eq(moduleRegistry.isActive, true),
+        ),
       )
       .all();
 
@@ -645,11 +715,14 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       Priority.Low,
     ];
 
-    // First, collect ALL unique modules from all records
-    const allModules = new Set<string>();
+    // First, collect ALL unique modules from all records (sourceValue -> displayValue)
+    const allModules = new Map<string, string | null>();
     for (const result of filteredResults) {
-      const module = result.monthlyReport.modulo || 'Unknown';
-      allModules.add(module);
+      const moduleSourceValue = result.monthlyReport.modulo || 'Unknown';
+      const moduleDisplayValue = result.mappedModuleDisplayValue || null;
+      if (!allModules.has(moduleSourceValue)) {
+        allModules.set(moduleSourceValue, moduleDisplayValue);
+      }
     }
 
     // Group by priority → module (initialize all modules with 0 for each priority)
@@ -658,8 +731,8 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     for (const priority of priorityOrder) {
       const moduleMap = new Map<string, number>();
       // Initialize all modules with 0
-      for (const module of allModules) {
-        moduleMap.set(module, 0);
+      for (const [moduleSourceValue] of allModules) {
+        moduleMap.set(moduleSourceValue, 0);
       }
       priorityMap.set(priority, moduleMap);
     }
@@ -686,7 +759,11 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
 
       // Convert to array, sort by count descending, take top 5 (including zeros)
       const modules: ModuleCount[] = Array.from(moduleMap.entries())
-        .map(([module, count]) => ({ module, count }))
+        .map(([moduleSourceValue, count]) => ({
+          moduleSourceValue,
+          moduleDisplayValue: allModules.get(moduleSourceValue) || null,
+          count,
+        }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
 

@@ -98,14 +98,16 @@ interface TicketDetail {
 }
 
 interface CategorizationDetail {
-  categorization: string;
+  categorizationSourceValue: string;
+  categorizationDisplayValue: string | null;
   count: number;
   percentage: number;
   tickets: TicketDetail[];
 }
 
 interface ModuleEvolution {
-  module: string;
+  moduleSourceValue: string;
+  moduleDisplayValue: string | null;
   count: number;
   percentage: number;
   categorizations: CategorizationDetail[];
@@ -159,7 +161,8 @@ interface UnassignedRecurrencyRequest {
 }
 
 interface CategoryDistributionRow {
-  category: string;
+  categorySourceValue: string;        // Original value from data
+  categoryDisplayValue: string | null; // Mapped display value
   recurringCount: number;
   newCount: number;
   unassignedCount: number;
@@ -175,7 +178,8 @@ interface CategoryDistributionResponse {
 }
 
 interface ModuleCount {
-  module: string;
+  moduleSourceValue: string;        // Original value from data
+  moduleDisplayValue: string | null; // Mapped display value
   count: number;
 }
 
@@ -1280,12 +1284,12 @@ function AnalyticsDashboardContent() {
                 <TableBody>
                   {categoryDistribution.data.map((row) => (
                     <TableRow
-                      key={row.category}
+                      key={row.categorySourceValue}
                       className="border-b border-amber-500/10 hover:bg-amber-500/5 transition-colors"
                     >
                       <TableCell className="font-medium text-amber-400">
-                        <div className="max-w-xs truncate" title={row.category}>
-                          {row.category}
+                        <div className="max-w-xs truncate" title={row.categorySourceValue}>
+                          {row.categoryDisplayValue || row.categorySourceValue}
                         </div>
                       </TableCell>
                       <TableCell className="text-sm text-foreground/90 text-right">
@@ -1300,7 +1304,7 @@ function AnalyticsDashboardContent() {
                             <button
                               onClick={() => {
                                 setUnassignedRecurrencyModalData(row.unassignedRequests);
-                                setUnassignedRecurrencyModalCategory(row.category);
+                                setUnassignedRecurrencyModalCategory(row.categoryDisplayValue || row.categorySourceValue);
                                 setUnassignedRecurrencyModalOpen(true);
                               }}
                               className="text-amber-400 hover:text-amber-300 underline decoration-amber-400/30 hover:decoration-amber-300 transition-colors font-medium"
@@ -1376,12 +1380,12 @@ function AnalyticsDashboardContent() {
                         <TableBody>
                           {priorityData.modules.map((moduleData) => (
                             <TableRow
-                              key={moduleData.module}
+                              key={moduleData.moduleSourceValue}
                               className="border-b border-amber-500/5 hover:bg-amber-500/5"
                             >
                               <TableCell className="text-xs text-foreground/80 py-2">
-                                <div className="max-w-[150px] truncate" title={moduleData.module}>
-                                  {moduleData.module}
+                                <div className="max-w-[150px] truncate" title={moduleData.moduleSourceValue}>
+                                  {moduleData.moduleDisplayValue || moduleData.moduleSourceValue}
                                 </div>
                               </TableCell>
                               <TableCell className="text-xs text-foreground/90 py-2 text-right font-medium">
@@ -1627,13 +1631,15 @@ function AnalyticsDashboardContent() {
                 </TableHeader>
                 <TableBody>
                   {moduleEvolutionData.data.map((moduleItem) => (
-                    <React.Fragment key={moduleItem.module}>
+                    <React.Fragment key={moduleItem.moduleSourceValue}>
                       {/* Module Row (Parent) */}
                       <TableRow
                         className="border-b border-jpc-vibrant-emerald-500/10 hover:bg-jpc-vibrant-emerald-500/5 transition-colors"
                       >
                         <TableCell className="font-medium text-jpc-vibrant-emerald-400 font-bold">
-                          {moduleItem.module}
+                          <span title={moduleItem.moduleSourceValue}>
+                            {moduleItem.moduleDisplayValue || moduleItem.moduleSourceValue}
+                          </span>
                         </TableCell>
                         <TableCell className="text-sm text-foreground/90 text-right font-semibold">
                           {moduleItem.count}
@@ -1645,12 +1651,14 @@ function AnalyticsDashboardContent() {
 
                       {/* Categorization Rows (Children) - always visible */}
                       {moduleItem.categorizations.map((cat) => (
-                        <React.Fragment key={`${moduleItem.module}-${cat.categorization}`}>
+                        <React.Fragment key={`${moduleItem.moduleSourceValue}-${cat.categorizationSourceValue}`}>
                           <TableRow
                             className="border-b border-jpc-vibrant-emerald-500/5 bg-jpc-vibrant-emerald-500/5 hover:bg-jpc-vibrant-emerald-500/10 transition-colors"
                           >
                             <TableCell className="text-xs text-foreground/70 pl-6">
-                              {cat.categorization}
+                              <span title={cat.categorizationSourceValue}>
+                                {cat.categorizationDisplayValue || cat.categorizationSourceValue}
+                              </span>
                             </TableCell>
                             <TableCell className="text-xs text-foreground/70 text-right">
                               {cat.count}
@@ -1669,7 +1677,7 @@ function AnalyticsDashboardContent() {
 
                             return (
                               <TableRow
-                                key={`${moduleItem.module}-${cat.categorization}-${group.key}`}
+                                key={`${moduleItem.moduleSourceValue}-${cat.categorizationSourceValue}-${group.key}`}
                                 className="border-b border-jpc-vibrant-emerald-500/5 bg-jpc-vibrant-emerald-500/[0.02] hover:bg-jpc-vibrant-emerald-500/5 transition-colors"
                               >
                                 <TableCell className="text-xs text-foreground/50 pl-10">
