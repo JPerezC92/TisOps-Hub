@@ -12,3 +12,5 @@ export * from './application-registry.schema';
 export * from './application-patterns.schema';
 export * from './monthly-report-status-registry.schema';
 export * from './corrective-status-registry.schema';
+export * from './categorization-registry.schema';
+export * from './module-registry.schema';

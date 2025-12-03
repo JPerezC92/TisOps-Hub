@@ -30,7 +30,8 @@ describe('GetCategoryDistributionUseCase', () => {
   const createMockResult = (overrides?: Partial<CategoryDistributionResult>): CategoryDistributionResult => ({
     data: [
       {
-        category: 'Incidente',
+        categorySourceValue: 'Error de codificación (Bug)',
+        categoryDisplayValue: 'Bugs',
         recurringCount: 20,
         newCount: 15,
         unassignedCount: 5,
@@ -41,7 +42,8 @@ describe('GetCategoryDistributionUseCase', () => {
         percentage: 50,
       },
       {
-        category: 'Requerimiento',
+        categorySourceValue: 'Error de datos (Data Source)',
+        categoryDisplayValue: 'Data Source',
         recurringCount: 10,
         newCount: 20,
         unassignedCount: 10,

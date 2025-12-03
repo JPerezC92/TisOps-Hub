@@ -33,16 +33,16 @@ describe('GetBusinessFlowPriorityUseCase', () => {
         priority: 'Critical',
         totalCount: 10,
         modules: [
-          { module: 'Module A', count: 6 },
-          { module: 'Module B', count: 4 },
+          { moduleSourceValue: 'SB2 Pase de Pedidos', moduleDisplayValue: 'Order Placement', count: 6 },
+          { moduleSourceValue: 'SB2 Multipedido', moduleDisplayValue: 'Multi-Order', count: 4 },
         ],
       },
       {
         priority: 'High',
         totalCount: 15,
         modules: [
-          { module: 'Module A', count: 8 },
-          { module: 'Module C', count: 7 },
+          { moduleSourceValue: 'SB2 Pase de Pedidos', moduleDisplayValue: 'Order Placement', count: 8 },
+          { moduleSourceValue: 'Unknown Module', moduleDisplayValue: null, count: 7 },
         ],
       },
     ],

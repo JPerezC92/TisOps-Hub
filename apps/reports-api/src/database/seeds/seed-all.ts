@@ -1,6 +1,8 @@
-import { db, applicationRegistry, applicationPatterns, monthlyReportStatusRegistry, correctiveStatusRegistry } from '@repo/database';
+import { db, applicationRegistry, applicationPatterns, monthlyReportStatusRegistry, correctiveStatusRegistry, categorizationRegistry, moduleRegistry } from '@repo/database';
 import { seed } from 'drizzle-seed';
 import { DisplayStatus, CorrectiveStatus, CorrectiveStatusSpanish } from '@repo/reports';
+import { categorizationMappings } from './data/categorization-registry.data';
+import { moduleMappings } from './data/module-registry.data';
 
 /**
  * Seed script for all database tables
@@ -24,6 +26,16 @@ async function seedAll() {
     console.log('📋 Seeding Corrective Status Registry...');
     await seedCorrectiveStatusRegistry();
     console.log('✅ Corrective Status Registry seeded successfully\n');
+
+    // Seed Categorization Registry
+    console.log('📋 Seeding Categorization Registry...');
+    await seedCategorizationRegistry();
+    console.log('✅ Categorization Registry seeded successfully\n');
+
+    // Seed Module Registry
+    console.log('📋 Seeding Module Registry...');
+    await seedModuleRegistry();
+    console.log('✅ Module Registry seeded successfully\n');
 
     console.log('🎉 All seeding completed successfully!');
   } catch (error) {
@@ -190,6 +202,47 @@ async function seedCorrectiveStatusRegistry() {
   }
 
   console.log(`  ✓ Created ${statusMappings.length} corrective status mappings`);
+}
+
+/**
+ * Seeds the categorization registry with source value to display value mappings
+ */
+async function seedCategorizationRegistry() {
+  for (const mapping of categorizationMappings) {
+    console.log(`  → Creating mapping: ${mapping.sourceValue} → ${mapping.displayValue}`);
+
+    await db
+      .insert(categorizationRegistry)
+      .values({
+        sourceValue: mapping.sourceValue,
+        displayValue: mapping.displayValue,
+        isActive: true,
+      })
+      .onConflictDoNothing();
+  }
+
+  console.log(`  ✓ Created ${categorizationMappings.length} categorization mappings`);
+}
+
+/**
+ * Seeds the module registry with source value to display value mappings and application indicator
+ */
+async function seedModuleRegistry() {
+  for (const mapping of moduleMappings) {
+    console.log(`  → Creating mapping: ${mapping.sourceValue} → ${mapping.displayValue} (${mapping.application})`);
+
+    await db
+      .insert(moduleRegistry)
+      .values({
+        sourceValue: mapping.sourceValue,
+        displayValue: mapping.displayValue,
+        application: mapping.application,
+        isActive: true,
+      })
+      .onConflictDoNothing();
+  }
+
+  console.log(`  ✓ Created ${moduleMappings.length} module mappings`);
 }
 
 // Execute seeding

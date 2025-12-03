@@ -14,6 +14,8 @@ import { WeeklyCorrectiveModule } from './weekly-corrective/weekly-corrective.mo
 import { ProblemsModule } from './problems/problems.module';
 import { ApplicationRegistryModule } from './application-registry/application-registry.module';
 import { MonthlyReportStatusRegistryModule } from './monthly-report-status-registry/monthly-report-status-registry.module';
+import { CategorizationRegistryModule } from './categorization-registry/categorization-registry.module';
+import { ModuleRegistryModule } from './module-registry/module-registry.module';
 import { DatabaseModule } from './database/infrastructure/database.module';
 
 import { AppService } from './app.service';
@@ -34,6 +36,8 @@ import { AppController } from './app.controller';
     ProblemsModule,
     ApplicationRegistryModule,
     MonthlyReportStatusRegistryModule,
+    CategorizationRegistryModule,
+    ModuleRegistryModule,
   ],
   controllers: [AppController],
   providers: [
