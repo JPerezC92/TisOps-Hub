@@ -1,32 +1,22 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { GetApplicationsWithPatternsUseCase } from '@application-registry/application/use-cases/get-applications-with-patterns.use-case';
-import { IApplicationRegistryRepository } from '@application-registry/domain/repositories/application-registry.repository.interface';
+import type { IApplicationRegistryRepository } from '@application-registry/domain/repositories/application-registry.repository.interface';
 import { ApplicationWithPatternsFactory } from '../../helpers/application-registry.factory';
 
 describe('GetApplicationsWithPatternsUseCase', () => {
   let useCase: GetApplicationsWithPatternsUseCase;
-  let mockRepository: IApplicationRegistryRepository;
+  let mockRepository: MockProxy<IApplicationRegistryRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      findById: vi.fn(),
-      findByPattern: vi.fn(),
-      findAllWithPatterns: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      createPattern: vi.fn(),
-      deletePattern: vi.fn(),
-    };
-
+    mockRepository = mock<IApplicationRegistryRepository>();
     useCase = new GetApplicationsWithPatternsUseCase(mockRepository);
   });
 
   it('should return applications with their patterns', async () => {
     const expectedApplications = ApplicationWithPatternsFactory.createMany(2);
 
-    vi.spyOn(mockRepository, 'findAllWithPatterns').mockResolvedValue(expectedApplications);
+    mockRepository.findAllWithPatterns.mockResolvedValue(expectedApplications);
 
     const result = await useCase.execute();
 
@@ -38,7 +28,7 @@ describe('GetApplicationsWithPatternsUseCase', () => {
   });
 
   it('should return empty array when no applications exist', async () => {
-    vi.spyOn(mockRepository, 'findAllWithPatterns').mockResolvedValue([]);
+    mockRepository.findAllWithPatterns.mockResolvedValue([]);
 
     const result = await useCase.execute();
 

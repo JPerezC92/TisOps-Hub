@@ -4,6 +4,25 @@ import type { InsertWarRoom } from '@repo/database';
 
 @Injectable()
 export class WarRoomsExcelParser {
+  /**
+   * Decode HTML entities in a string
+   * Handles common entities like &amp;, &lt;, &gt;, &quot;, etc.
+   */
+  private decodeHtmlEntities(text: string): string {
+    const entities: Record<string, string> = {
+      '&amp;': '&',
+      '&lt;': '<',
+      '&gt;': '>',
+      '&quot;': '"',
+      '&#39;': "'",
+      '&nbsp;': ' ',
+    };
+
+    return text.replace(/&[a-z0-9#]+;/gi, (match) => {
+      return entities[match.toLowerCase()] || match;
+    });
+  }
+
   // Helper to convert Excel serial number to JavaScript Date
   private excelSerialToDate(serial: number): Date {
     const daysOffset = 25569; // Days between 1900-01-01 and 1970-01-01
@@ -41,7 +60,9 @@ export class WarRoomsExcelParser {
       const rowNumber = index + 2; // +2 because Excel is 1-indexed and has a header row
       const cellAddress = `C${rowNumber}`;
       const cell = worksheet[cellAddress];
-      const requestIdLink = cell?.l?.Target ? String(cell.l.Target) : '';
+      const requestIdLink = cell?.l?.Target
+        ? this.decodeHtmlEntities(String(cell.l.Target))
+        : '';
 
       const dateSerial = Number(row['Date']) || 0;
       const startTimeSerial = Number(row['Start Time']) || 0;

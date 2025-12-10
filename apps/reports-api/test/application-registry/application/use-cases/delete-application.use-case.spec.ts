@@ -1,29 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { DeleteApplicationUseCase } from '@application-registry/application/use-cases/delete-application.use-case';
-import { IApplicationRegistryRepository } from '@application-registry/domain/repositories/application-registry.repository.interface';
+import type { IApplicationRegistryRepository } from '@application-registry/domain/repositories/application-registry.repository.interface';
 
 describe('DeleteApplicationUseCase', () => {
   let useCase: DeleteApplicationUseCase;
-  let mockRepository: IApplicationRegistryRepository;
+  let mockRepository: MockProxy<IApplicationRegistryRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      findById: vi.fn(),
-      findByPattern: vi.fn(),
-      findAllWithPatterns: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      createPattern: vi.fn(),
-      deletePattern: vi.fn(),
-    };
-
+    mockRepository = mock<IApplicationRegistryRepository>();
     useCase = new DeleteApplicationUseCase(mockRepository);
   });
 
   it('should soft delete application successfully', async () => {
-    vi.spyOn(mockRepository, 'delete').mockResolvedValue(undefined);
+    mockRepository.delete.mockResolvedValue(undefined);
 
     await useCase.execute(1);
 
@@ -32,7 +22,7 @@ describe('DeleteApplicationUseCase', () => {
   });
 
   it('should call repository delete with correct id', async () => {
-    vi.spyOn(mockRepository, 'delete').mockResolvedValue(undefined);
+    mockRepository.delete.mockResolvedValue(undefined);
 
     await useCase.execute(42);
 

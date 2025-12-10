@@ -1,32 +1,22 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { FindApplicationByNameUseCase } from '@application-registry/application/use-cases/find-application-by-name.use-case';
-import { IApplicationRegistryRepository } from '@application-registry/domain/repositories/application-registry.repository.interface';
+import type { IApplicationRegistryRepository } from '@application-registry/domain/repositories/application-registry.repository.interface';
 import { ApplicationFactory } from '../../helpers/application-registry.factory';
 
 describe('FindApplicationByNameUseCase', () => {
   let useCase: FindApplicationByNameUseCase;
-  let mockRepository: IApplicationRegistryRepository;
+  let mockRepository: MockProxy<IApplicationRegistryRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      findById: vi.fn(),
-      findByPattern: vi.fn(),
-      findAllWithPatterns: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      createPattern: vi.fn(),
-      deletePattern: vi.fn(),
-    };
-
+    mockRepository = mock<IApplicationRegistryRepository>();
     useCase = new FindApplicationByNameUseCase(mockRepository);
   });
 
   it('should return application when pattern matches', async () => {
     const expectedApplication = ApplicationFactory.create({ name: 'Test Application' });
 
-    vi.spyOn(mockRepository, 'findByPattern').mockResolvedValue(expectedApplication);
+    mockRepository.findByPattern.mockResolvedValue(expectedApplication);
 
     const result = await useCase.execute('Test Application');
 
@@ -35,7 +25,7 @@ describe('FindApplicationByNameUseCase', () => {
   });
 
   it('should return null when no pattern matches', async () => {
-    vi.spyOn(mockRepository, 'findByPattern').mockResolvedValue(null);
+    mockRepository.findByPattern.mockResolvedValue(null);
 
     const result = await useCase.execute('NonExistent Application');
 

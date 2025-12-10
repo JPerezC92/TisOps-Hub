@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { GetCategoryDistributionUseCase } from '@monthly-report/application/use-cases/get-category-distribution.use-case';
 import type {
   IMonthlyReportRepository,
@@ -7,23 +8,10 @@ import type {
 
 describe('GetCategoryDistributionUseCase', () => {
   let useCase: GetCategoryDistributionUseCase;
-  let mockRepository: IMonthlyReportRepository;
+  let mockRepository: MockProxy<IMonthlyReportRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      countAll: vi.fn(),
-      bulkCreate: vi.fn(),
-      deleteAll: vi.fn(),
-      findCriticalIncidentsFiltered: vi.fn(),
-      findModuleEvolution: vi.fn(),
-      findStabilityIndicators: vi.fn(),
-      findCategoryDistribution: vi.fn(),
-      findBusinessFlowByPriority: vi.fn(),
-      findPriorityByApp: vi.fn(),
-      findIncidentsByWeek: vi.fn(),
-    };
-
+    mockRepository = mock<IMonthlyReportRepository>();
     useCase = new GetCategoryDistributionUseCase(mockRepository);
   });
 
@@ -60,7 +48,7 @@ describe('GetCategoryDistributionUseCase', () => {
   it('should return category distribution data without filters', async () => {
     const expectedResult = createMockResult();
 
-    vi.spyOn(mockRepository, 'findCategoryDistribution').mockResolvedValue(expectedResult);
+    mockRepository.findCategoryDistribution.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute();
 
@@ -73,7 +61,7 @@ describe('GetCategoryDistributionUseCase', () => {
   it('should return category distribution filtered by app', async () => {
     const expectedResult = createMockResult({ totalIncidents: 30 });
 
-    vi.spyOn(mockRepository, 'findCategoryDistribution').mockResolvedValue(expectedResult);
+    mockRepository.findCategoryDistribution.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute('SB');
 
@@ -84,7 +72,7 @@ describe('GetCategoryDistributionUseCase', () => {
   it('should return category distribution filtered by month', async () => {
     const expectedResult = createMockResult({ monthName: 'November 2024' });
 
-    vi.spyOn(mockRepository, 'findCategoryDistribution').mockResolvedValue(expectedResult);
+    mockRepository.findCategoryDistribution.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute(undefined, '2024-11');
 
@@ -95,7 +83,7 @@ describe('GetCategoryDistributionUseCase', () => {
   it('should return category distribution filtered by both app and month', async () => {
     const expectedResult = createMockResult({ monthName: 'December 2024', totalIncidents: 15 });
 
-    vi.spyOn(mockRepository, 'findCategoryDistribution').mockResolvedValue(expectedResult);
+    mockRepository.findCategoryDistribution.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute('FF', '2024-12');
 
@@ -110,7 +98,7 @@ describe('GetCategoryDistributionUseCase', () => {
       totalIncidents: 0,
     };
 
-    vi.spyOn(mockRepository, 'findCategoryDistribution').mockResolvedValue(emptyResult);
+    mockRepository.findCategoryDistribution.mockResolvedValue(emptyResult);
 
     const result = await useCase.execute();
 

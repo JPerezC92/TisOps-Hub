@@ -1,29 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { DeletePatternUseCase } from '@application-registry/application/use-cases/delete-pattern.use-case';
-import { IApplicationRegistryRepository } from '@application-registry/domain/repositories/application-registry.repository.interface';
+import type { IApplicationRegistryRepository } from '@application-registry/domain/repositories/application-registry.repository.interface';
 
 describe('DeletePatternUseCase', () => {
   let useCase: DeletePatternUseCase;
-  let mockRepository: IApplicationRegistryRepository;
+  let mockRepository: MockProxy<IApplicationRegistryRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      findById: vi.fn(),
-      findByPattern: vi.fn(),
-      findAllWithPatterns: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      createPattern: vi.fn(),
-      deletePattern: vi.fn(),
-    };
-
+    mockRepository = mock<IApplicationRegistryRepository>();
     useCase = new DeletePatternUseCase(mockRepository);
   });
 
   it('should delete pattern successfully', async () => {
-    vi.spyOn(mockRepository, 'deletePattern').mockResolvedValue(undefined);
+    mockRepository.deletePattern.mockResolvedValue(undefined);
 
     await useCase.execute(1);
 
@@ -32,7 +22,7 @@ describe('DeletePatternUseCase', () => {
   });
 
   it('should call repository deletePattern with correct id', async () => {
-    vi.spyOn(mockRepository, 'deletePattern').mockResolvedValue(undefined);
+    mockRepository.deletePattern.mockResolvedValue(undefined);
 
     await useCase.execute(99);
 

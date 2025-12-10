@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { Database, DATABASE_CONNECTION, weeklyCorrectives, InsertWeeklyCorrective, applicationRegistry, applicationPatterns, correctiveStatusRegistry } from '@repo/database';
-import { eq, sql } from 'drizzle-orm';
+import { Database, DATABASE_CONNECTION, weeklyCorrectives, InsertWeeklyCorrective, applicationRegistry, applicationPatterns, correctiveStatusRegistry, monthlyReports } from '@repo/database';
+import { eq, sql, and } from 'drizzle-orm';
 import { DateTime } from 'luxon';
 import {
   CorrectiveStatus,
@@ -43,8 +43,8 @@ export class WeeklyCorrectiveRepository implements IWeeklyCorrectiveRepository {
     app?: string,
     month?: string,
   ): Promise<L3TicketsByStatusResult> {
-    // Query all records with application mapping (LEFT JOIN to get registered app name)
-    const queryResults = await this.db
+    // ===== 1. Query weekly_correctives (all records are L3) =====
+    const weeklyResults = await this.db
       .select({
         weeklyCorrective: weeklyCorrectives,
         registeredAppName: applicationRegistry.name,
@@ -61,37 +61,126 @@ export class WeeklyCorrectiveRepository implements IWeeklyCorrectiveRepository {
       )
       .all();
 
-    // Deduplicate by requestId (a record may match multiple patterns)
-    const seenIds = new Set<string>();
-    const uniqueResults = queryResults.filter((r) => {
-      if (seenIds.has(r.weeklyCorrective.requestId)) return false;
-      seenIds.add(r.weeklyCorrective.requestId);
+    // Deduplicate weekly_correctives by requestId
+    const seenWeeklyIds = new Set<string>();
+    const uniqueWeeklyResults = weeklyResults.filter((r) => {
+      if (seenWeeklyIds.has(r.weeklyCorrective.requestId)) return false;
+      seenWeeklyIds.add(r.weeklyCorrective.requestId);
       return true;
     });
 
-    // Filter by app if provided
-    let filteredResults = uniqueResults;
-    if (app && app !== 'all') {
-      filteredResults = uniqueResults.filter(
-        (r) => r.registeredAppCode === app,
-      );
+    // ===== 2. Query monthly_reports (only Nivel 3 records) =====
+    const monthlyResults = await this.db
+      .select({
+        monthlyReport: monthlyReports,
+        registeredAppName: applicationRegistry.name,
+        registeredAppCode: applicationRegistry.code,
+      })
+      .from(monthlyReports)
+      .leftJoin(
+        applicationPatterns,
+        sql`LOWER(${monthlyReports.aplicativos}) LIKE '%' || LOWER(${applicationPatterns.pattern}) || '%'`,
+      )
+      .leftJoin(
+        applicationRegistry,
+        eq(applicationPatterns.applicationId, applicationRegistry.id),
+      )
+      .where(eq(monthlyReports.requestStatus, 'Nivel 3'))
+      .all();
+
+    // Deduplicate monthly_reports by requestId
+    const seenMonthlyIds = new Set<number>();
+    const uniqueMonthlyResults = monthlyResults.filter((r) => {
+      if (seenMonthlyIds.has(r.monthlyReport.requestId)) return false;
+      seenMonthlyIds.add(r.monthlyReport.requestId);
+      return true;
+    });
+
+    // ===== 3. Normalize both sources to common format =====
+    interface NormalizedRecord {
+      requestId: string;
+      rawStatus: string;
+      priority: string;
+      application: string;
+      appCode: string | null;
+      createdTime: DateTime | null;
+      source: 'weekly' | 'monthly';
     }
 
-    // Filter by month if provided (format: YYYY-MM)
+    const normalizedWeekly: NormalizedRecord[] = uniqueWeeklyResults.map((r) => {
+      let createdTime: DateTime | null = null;
+      try {
+        createdTime = DateTime.fromFormat(r.weeklyCorrective.createdTime, 'dd/MM/yyyy HH:mm');
+        if (!createdTime.isValid) createdTime = null;
+      } catch {
+        createdTime = null;
+      }
+      return {
+        requestId: r.weeklyCorrective.requestId,
+        rawStatus: r.weeklyCorrective.requestStatus || 'Unknown',
+        priority: r.weeklyCorrective.priority || 'Unknown',
+        application: r.registeredAppName || 'Unknown',
+        appCode: r.registeredAppCode,
+        createdTime,
+        source: 'weekly' as const,
+      };
+    });
+
+    const normalizedMonthly: NormalizedRecord[] = uniqueMonthlyResults.map((r) => {
+      let createdTime: DateTime | null = null;
+      try {
+        // monthly_reports.createdTime is a timestamp (Date object)
+        if (r.monthlyReport.createdTime) {
+          createdTime = DateTime.fromJSDate(r.monthlyReport.createdTime);
+          if (!createdTime.isValid) createdTime = null;
+        }
+      } catch {
+        createdTime = null;
+      }
+      return {
+        requestId: String(r.monthlyReport.requestId),
+        rawStatus: r.monthlyReport.requestStatus || 'Unknown',
+        priority: r.monthlyReport.priority || 'Unknown', // Already in English
+        application: r.registeredAppName || 'Unknown',
+        appCode: r.registeredAppCode,
+        createdTime,
+        source: 'monthly' as const,
+      };
+    });
+
+    // ===== 4. Merge with deduplication (weekly takes precedence) =====
+    const seenIds = new Set<string>();
+    const mergedResults: NormalizedRecord[] = [];
+
+    // Add weekly first (takes precedence)
+    for (const record of normalizedWeekly) {
+      if (!seenIds.has(record.requestId)) {
+        seenIds.add(record.requestId);
+        mergedResults.push(record);
+      }
+    }
+
+    // Add monthly (only if not already seen)
+    for (const record of normalizedMonthly) {
+      if (!seenIds.has(record.requestId)) {
+        seenIds.add(record.requestId);
+        mergedResults.push(record);
+      }
+    }
+
+    // ===== 5. Filter by app if provided =====
+    let filteredResults = mergedResults;
+    if (app && app !== 'all') {
+      filteredResults = mergedResults.filter((r) => r.appCode === app);
+    }
+
+    // ===== 6. Filter by month if provided (format: YYYY-MM) =====
     let monthName = 'All Time';
     if (month) {
-      filteredResults = filteredResults.filter((result) => {
-        try {
-          const createdDate = DateTime.fromFormat(
-            result.weeklyCorrective.createdTime,
-            'dd/MM/yyyy HH:mm',
-          );
-          if (!createdDate.isValid) return false;
-          const recordMonth = createdDate.toFormat('yyyy-MM');
-          return recordMonth === month;
-        } catch {
-          return false;
-        }
+      filteredResults = filteredResults.filter((record) => {
+        if (!record.createdTime) return false;
+        const recordMonth = record.createdTime.toFormat('yyyy-MM');
+        return recordMonth === month;
       });
 
       // Format month name (e.g., "November 2024")
@@ -101,7 +190,7 @@ export class WeeklyCorrectiveRepository implements IWeeklyCorrectiveRepository {
       }
     }
 
-    // Get status mappings from corrective_status_registry
+    // ===== 7. Get status mappings from corrective_status_registry =====
     const statusMappings = await this.db
       .select({
         rawStatus: correctiveStatusRegistry.rawStatus,
@@ -123,25 +212,34 @@ export class WeeklyCorrectiveRepository implements IWeeklyCorrectiveRepository {
       [PrioritySpanish.Baja]: Priority.Low,
     };
 
-    // Collect all unique display statuses (mapped or raw if unmapped)
+    // ===== 8. Group by application and count by status =====
     const allStatusColumns = new Set<string>();
-
-    // Group by registered application name and count by status
     const appMap = new Map<string, Map<string, number>>();
 
-    for (const result of filteredResults) {
-      const record = result.weeklyCorrective;
-      // Use registered app name if available, otherwise "Unknown"
-      const application = result.registeredAppName || 'Unknown';
-      const rawStatus = record.requestStatus || 'Unknown';
-      const rawPriority = record.priority || 'Unknown';
+    for (const record of filteredResults) {
+      const application = record.application;
+      const rawStatus = record.rawStatus;
+      const rawPriority = record.priority;
 
-      // Use mapped display status or raw status if unmapped
-      let displayStatus = statusMap.get(rawStatus) || rawStatus;
+      // Use mapped display status or default to "In Backlog" for monthly Nivel 3
+      let displayStatus = statusMap.get(rawStatus);
+
+      // For monthly_reports with "Nivel 3", default to "In Backlog"
+      if (!displayStatus && record.source === 'monthly' && rawStatus === 'Nivel 3') {
+        displayStatus = CorrectiveStatus.InBacklog;
+      }
+
+      // Fallback to raw status if still unmapped
+      if (!displayStatus) {
+        displayStatus = rawStatus;
+      }
 
       // For "In Backlog", split by priority
       if (displayStatus === CorrectiveStatus.InBacklog) {
-        const englishPriority = priorityMap[rawPriority] || rawPriority;
+        // Priority from monthly is already in English, from weekly needs mapping
+        const englishPriority = record.source === 'weekly'
+          ? (priorityMap[rawPriority] || rawPriority)
+          : rawPriority;
         displayStatus = `${CorrectiveStatus.InBacklog} (${englishPriority})`;
       }
 
@@ -155,17 +253,9 @@ export class WeeklyCorrectiveRepository implements IWeeklyCorrectiveRepository {
       statusCounts.set(displayStatus, (statusCounts.get(displayStatus) || 0) + 1);
     }
 
-    // Build result array with fixed columns for "In Backlog" priorities
-    // Always include all In Backlog priority columns, even if empty
-    const fixedInBacklogColumns = [
-      InBacklogByPriority.Critical,
-      InBacklogByPriority.High,
-      InBacklogByPriority.Medium,
-      InBacklogByPriority.Low,
-    ];
-
-    // Add fixed columns to the set
-    for (const col of fixedInBacklogColumns) {
+    // Build result array with all fixed L3 status columns
+    // Always include all columns, even if empty
+    for (const col of L3TicketsStatusColumns) {
       allStatusColumns.add(col);
     }
 

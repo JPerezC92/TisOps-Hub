@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { GetModuleEvolutionUseCase } from '@monthly-report/application/use-cases/get-module-evolution.use-case';
 import type {
   IMonthlyReportRepository,
@@ -7,23 +8,10 @@ import type {
 
 describe('GetModuleEvolutionUseCase', () => {
   let useCase: GetModuleEvolutionUseCase;
-  let mockRepository: IMonthlyReportRepository;
+  let mockRepository: MockProxy<IMonthlyReportRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      countAll: vi.fn(),
-      bulkCreate: vi.fn(),
-      deleteAll: vi.fn(),
-      findCriticalIncidentsFiltered: vi.fn(),
-      findModuleEvolution: vi.fn(),
-      findStabilityIndicators: vi.fn(),
-      findCategoryDistribution: vi.fn(),
-      findBusinessFlowByPriority: vi.fn(),
-      findPriorityByApp: vi.fn(),
-      findIncidentsByWeek: vi.fn(),
-    };
-
+    mockRepository = mock<IMonthlyReportRepository>();
     useCase = new GetModuleEvolutionUseCase(mockRepository);
   });
 
@@ -66,7 +54,7 @@ describe('GetModuleEvolutionUseCase', () => {
   it('should return module evolution data without filters and calculate total', async () => {
     const mockModules = createMockModules();
 
-    vi.spyOn(mockRepository, 'findModuleEvolution').mockResolvedValue(mockModules);
+    mockRepository.findModuleEvolution.mockResolvedValue(mockModules);
 
     const result = await useCase.execute();
 
@@ -78,7 +66,7 @@ describe('GetModuleEvolutionUseCase', () => {
   it('should return module evolution filtered by app', async () => {
     const mockModules = [createMockModules()[0]];
 
-    vi.spyOn(mockRepository, 'findModuleEvolution').mockResolvedValue(mockModules);
+    mockRepository.findModuleEvolution.mockResolvedValue(mockModules);
 
     const result = await useCase.execute('SB');
 
@@ -90,7 +78,7 @@ describe('GetModuleEvolutionUseCase', () => {
   it('should return module evolution filtered by date range', async () => {
     const mockModules = createMockModules();
 
-    vi.spyOn(mockRepository, 'findModuleEvolution').mockResolvedValue(mockModules);
+    mockRepository.findModuleEvolution.mockResolvedValue(mockModules);
 
     const result = await useCase.execute(undefined, '2024-10-01', '2024-10-31');
 
@@ -101,7 +89,7 @@ describe('GetModuleEvolutionUseCase', () => {
   it('should return module evolution filtered by app and date range', async () => {
     const mockModules = [createMockModules()[0]];
 
-    vi.spyOn(mockRepository, 'findModuleEvolution').mockResolvedValue(mockModules);
+    mockRepository.findModuleEvolution.mockResolvedValue(mockModules);
 
     const result = await useCase.execute('FF', '2024-11-01', '2024-11-30');
 
@@ -110,7 +98,7 @@ describe('GetModuleEvolutionUseCase', () => {
   });
 
   it('should return empty data array and zero total when no modules exist', async () => {
-    vi.spyOn(mockRepository, 'findModuleEvolution').mockResolvedValue([]);
+    mockRepository.findModuleEvolution.mockResolvedValue([]);
 
     const result = await useCase.execute();
 
@@ -127,7 +115,7 @@ describe('GetModuleEvolutionUseCase', () => {
       { moduleSourceValue: 'Module D', moduleDisplayValue: null, count: 10, percentage: 25, categorizations: [] },
     ];
 
-    vi.spyOn(mockRepository, 'findModuleEvolution').mockResolvedValue(mockModules);
+    mockRepository.findModuleEvolution.mockResolvedValue(mockModules);
 
     const result = await useCase.execute();
 
@@ -154,7 +142,7 @@ describe('GetModuleEvolutionUseCase', () => {
       },
     ];
 
-    vi.spyOn(mockRepository, 'findModuleEvolution').mockResolvedValue(mockModules);
+    mockRepository.findModuleEvolution.mockResolvedValue(mockModules);
 
     const result = await useCase.execute();
 
@@ -183,7 +171,7 @@ describe('GetModuleEvolutionUseCase', () => {
       },
     ];
 
-    vi.spyOn(mockRepository, 'findModuleEvolution').mockResolvedValue(mockModules);
+    mockRepository.findModuleEvolution.mockResolvedValue(mockModules);
 
     const result = await useCase.execute();
 

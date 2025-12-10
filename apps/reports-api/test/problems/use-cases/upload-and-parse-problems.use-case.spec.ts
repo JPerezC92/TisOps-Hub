@@ -1,19 +1,15 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { UploadAndParseProblemsUseCase } from '@problems/application/use-cases/upload-and-parse-problems.use-case';
 import type { IProblemsRepository } from '@problems/domain/repositories/problems.repository.interface';
 import type { InsertProblem } from '@repo/database';
 
 describe('UploadAndParseProblemsUseCase', () => {
   let useCase: UploadAndParseProblemsUseCase;
-  let mockRepository: IProblemsRepository;
+  let mockRepository: MockProxy<IProblemsRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      countAll: vi.fn(),
-      bulkCreate: vi.fn(),
-      deleteAll: vi.fn(),
-    };
+    mockRepository = mock<IProblemsRepository>();
     useCase = new UploadAndParseProblemsUseCase(mockRepository);
   });
 
@@ -35,8 +31,8 @@ describe('UploadAndParseProblemsUseCase', () => {
         },
       ];
 
-      vi.mocked(mockRepository.deleteAll).mockResolvedValue(0);
-      vi.mocked(mockRepository.bulkCreate).mockResolvedValue();
+      mockRepository.deleteAll.mockResolvedValue(0);
+      mockRepository.bulkCreate.mockResolvedValue();
 
       const result = await useCase.execute(records);
 
@@ -130,8 +126,8 @@ describe('UploadAndParseProblemsUseCase', () => {
         },
       ];
 
-      vi.mocked(mockRepository.deleteAll).mockResolvedValue(0);
-      vi.mocked(mockRepository.bulkCreate).mockResolvedValue();
+      mockRepository.deleteAll.mockResolvedValue(0);
+      mockRepository.bulkCreate.mockResolvedValue();
 
       const result = await useCase.execute(records);
 
@@ -174,8 +170,8 @@ describe('UploadAndParseProblemsUseCase', () => {
         },
       ];
 
-      vi.mocked(mockRepository.deleteAll).mockResolvedValue(5);
-      vi.mocked(mockRepository.bulkCreate).mockResolvedValue();
+      mockRepository.deleteAll.mockResolvedValue(5);
+      mockRepository.bulkCreate.mockResolvedValue();
 
       const result = await useCase.execute(records);
 
@@ -204,7 +200,7 @@ describe('UploadAndParseProblemsUseCase', () => {
       ];
 
       const error = new Error('Database deletion failed');
-      vi.mocked(mockRepository.deleteAll).mockRejectedValue(error);
+      mockRepository.deleteAll.mockRejectedValue(error);
 
       await expect(useCase.execute(records)).rejects.toThrow('Database deletion failed');
       expect(mockRepository.bulkCreate).not.toHaveBeenCalled();
@@ -225,9 +221,9 @@ describe('UploadAndParseProblemsUseCase', () => {
         },
       ];
 
-      vi.mocked(mockRepository.deleteAll).mockResolvedValue(0);
+      mockRepository.deleteAll.mockResolvedValue(0);
       const error = new Error('Database insertion failed');
-      vi.mocked(mockRepository.bulkCreate).mockRejectedValue(error);
+      mockRepository.bulkCreate.mockRejectedValue(error);
 
       await expect(useCase.execute(records)).rejects.toThrow('Database insertion failed');
     });

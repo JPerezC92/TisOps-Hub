@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { GetBusinessFlowPriorityUseCase } from '@monthly-report/application/use-cases/get-business-flow-priority.use-case';
 import type {
   IMonthlyReportRepository,
@@ -7,23 +8,10 @@ import type {
 
 describe('GetBusinessFlowPriorityUseCase', () => {
   let useCase: GetBusinessFlowPriorityUseCase;
-  let mockRepository: IMonthlyReportRepository;
+  let mockRepository: MockProxy<IMonthlyReportRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      countAll: vi.fn(),
-      bulkCreate: vi.fn(),
-      deleteAll: vi.fn(),
-      findCriticalIncidentsFiltered: vi.fn(),
-      findModuleEvolution: vi.fn(),
-      findStabilityIndicators: vi.fn(),
-      findCategoryDistribution: vi.fn(),
-      findBusinessFlowByPriority: vi.fn(),
-      findPriorityByApp: vi.fn(),
-      findIncidentsByWeek: vi.fn(),
-    };
-
+    mockRepository = mock<IMonthlyReportRepository>();
     useCase = new GetBusinessFlowPriorityUseCase(mockRepository);
   });
 
@@ -54,7 +42,7 @@ describe('GetBusinessFlowPriorityUseCase', () => {
   it('should return business flow priority data without filters', async () => {
     const expectedResult = createMockResult();
 
-    vi.spyOn(mockRepository, 'findBusinessFlowByPriority').mockResolvedValue(expectedResult);
+    mockRepository.findBusinessFlowByPriority.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute();
 
@@ -67,7 +55,7 @@ describe('GetBusinessFlowPriorityUseCase', () => {
   it('should return business flow priority filtered by app', async () => {
     const expectedResult = createMockResult({ totalIncidents: 15 });
 
-    vi.spyOn(mockRepository, 'findBusinessFlowByPriority').mockResolvedValue(expectedResult);
+    mockRepository.findBusinessFlowByPriority.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute('SB');
 
@@ -78,7 +66,7 @@ describe('GetBusinessFlowPriorityUseCase', () => {
   it('should return business flow priority filtered by month', async () => {
     const expectedResult = createMockResult({ monthName: 'November 2024' });
 
-    vi.spyOn(mockRepository, 'findBusinessFlowByPriority').mockResolvedValue(expectedResult);
+    mockRepository.findBusinessFlowByPriority.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute(undefined, '2024-11');
 
@@ -89,7 +77,7 @@ describe('GetBusinessFlowPriorityUseCase', () => {
   it('should return business flow priority filtered by both app and month', async () => {
     const expectedResult = createMockResult({ monthName: 'December 2024', totalIncidents: 5 });
 
-    vi.spyOn(mockRepository, 'findBusinessFlowByPriority').mockResolvedValue(expectedResult);
+    mockRepository.findBusinessFlowByPriority.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute('FF', '2024-12');
 
@@ -104,7 +92,7 @@ describe('GetBusinessFlowPriorityUseCase', () => {
       totalIncidents: 0,
     };
 
-    vi.spyOn(mockRepository, 'findBusinessFlowByPriority').mockResolvedValue(emptyResult);
+    mockRepository.findBusinessFlowByPriority.mockResolvedValue(emptyResult);
 
     const result = await useCase.execute();
 

@@ -9,6 +9,12 @@ import { GetCategoryDistributionUseCase } from './application/use-cases/get-cate
 import { GetBusinessFlowPriorityUseCase } from './application/use-cases/get-business-flow-priority.use-case';
 import { GetPriorityByAppUseCase } from './application/use-cases/get-priority-by-app.use-case';
 import { GetIncidentsByWeekUseCase } from './application/use-cases/get-incidents-by-week.use-case';
+import { GetIncidentOverviewByCategoryUseCase } from './application/use-cases/get-incident-overview-by-category.use-case';
+import { GetL3SummaryUseCase } from './application/use-cases/get-l3-summary.use-case';
+import { GetL3RequestsByStatusUseCase } from './application/use-cases/get-l3-requests-by-status.use-case';
+import { GetMissingScopeByParentUseCase } from './application/use-cases/get-missing-scope-by-parent.use-case';
+import { GetBugsByParentUseCase } from './application/use-cases/get-bugs-by-parent.use-case';
+import { GetIncidentsByDayUseCase } from './application/use-cases/get-incidents-by-day.use-case';
 import { MonthlyReportExcelParser } from './infrastructure/parsers/monthly-report-excel.parser';
 
 @Injectable()
@@ -34,6 +40,18 @@ export class MonthlyReportService {
     private readonly getPriorityByAppUseCase: GetPriorityByAppUseCase,
     @Inject(GetIncidentsByWeekUseCase)
     private readonly getIncidentsByWeekUseCase: GetIncidentsByWeekUseCase,
+    @Inject(GetIncidentOverviewByCategoryUseCase)
+    private readonly getIncidentOverviewByCategoryUseCase: GetIncidentOverviewByCategoryUseCase,
+    @Inject(GetL3SummaryUseCase)
+    private readonly getL3SummaryUseCase: GetL3SummaryUseCase,
+    @Inject(GetL3RequestsByStatusUseCase)
+    private readonly getL3RequestsByStatusUseCase: GetL3RequestsByStatusUseCase,
+    @Inject(GetMissingScopeByParentUseCase)
+    private readonly getMissingScopeByParentUseCase: GetMissingScopeByParentUseCase,
+    @Inject(GetBugsByParentUseCase)
+    private readonly getBugsByParentUseCase: GetBugsByParentUseCase,
+    @Inject(GetIncidentsByDayUseCase)
+    private readonly getIncidentsByDayUseCase: GetIncidentsByDayUseCase,
     private readonly excelParser: MonthlyReportExcelParser,
   ) {}
 
@@ -87,5 +105,29 @@ export class MonthlyReportService {
 
   async getIncidentsByWeek(app?: string, year?: number) {
     return this.getIncidentsByWeekUseCase.execute(app, year);
+  }
+
+  async getIncidentOverviewByCategory(app?: string, startDate?: string, endDate?: string) {
+    return this.getIncidentOverviewByCategoryUseCase.execute(app, startDate, endDate);
+  }
+
+  async getL3Summary(app?: string) {
+    return this.getL3SummaryUseCase.execute(app);
+  }
+
+  async getL3RequestsByStatus(app?: string) {
+    return this.getL3RequestsByStatusUseCase.execute(app);
+  }
+
+  async getMissingScopeByParent(app?: string, month?: string) {
+    return this.getMissingScopeByParentUseCase.execute(app, month);
+  }
+
+  async getBugsByParent(app?: string, month?: string) {
+    return this.getBugsByParentUseCase.execute(app, month);
+  }
+
+  async getIncidentsByDay(app?: string) {
+    return this.getIncidentsByDayUseCase.execute(app);
   }
 }

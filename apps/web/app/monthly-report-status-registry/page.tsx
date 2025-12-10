@@ -99,7 +99,7 @@ export default function MonthlyReportStatusRegistryPage() {
     if (!selectedStatus) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/request-status-registry/${selectedStatus.id}`, {
+      const response = await fetch(`http://localhost:3000/monthly-report-status-registry/${selectedStatus.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
@@ -126,7 +126,7 @@ export default function MonthlyReportStatusRegistryPage() {
     if (!selectedStatus) return;
 
     try {
-      const response = await fetch(`http://localhost:3000/request-status-registry/${selectedStatus.id}`, {
+      const response = await fetch(`http://localhost:3000/monthly-report-status-registry/${selectedStatus.id}`, {
         method: 'DELETE',
       });
 

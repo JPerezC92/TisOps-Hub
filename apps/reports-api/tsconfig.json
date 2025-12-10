@@ -18,6 +18,9 @@
       "@problems/*": ["src/problems/*"],
       "@application-registry/*": ["src/application-registry/*"],
       "@monthly-report-status-registry/*": ["src/monthly-report-status-registry/*"],
+      "@corrective-status-registry/*": ["src/corrective-status-registry/*"],
+      "@categorization-registry/*": ["src/categorization-registry/*"],
+      "@module-registry/*": ["src/module-registry/*"],
       "@src/*": ["src/*"]
     }
   }

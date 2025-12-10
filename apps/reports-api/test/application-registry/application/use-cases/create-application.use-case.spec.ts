@@ -1,25 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { CreateApplicationUseCase } from '@application-registry/application/use-cases/create-application.use-case';
-import { IApplicationRegistryRepository } from '@application-registry/domain/repositories/application-registry.repository.interface';
+import type { IApplicationRegistryRepository } from '@application-registry/domain/repositories/application-registry.repository.interface';
 import { ApplicationFactory } from '../../helpers/application-registry.factory';
 
 describe('CreateApplicationUseCase', () => {
   let useCase: CreateApplicationUseCase;
-  let mockRepository: IApplicationRegistryRepository;
+  let mockRepository: MockProxy<IApplicationRegistryRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      findById: vi.fn(),
-      findByPattern: vi.fn(),
-      findAllWithPatterns: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      createPattern: vi.fn(),
-      deletePattern: vi.fn(),
-    };
-
+    mockRepository = mock<IApplicationRegistryRepository>();
     useCase = new CreateApplicationUseCase(mockRepository);
   });
 
@@ -39,7 +29,7 @@ describe('CreateApplicationUseCase', () => {
       isActive: true,
     });
 
-    vi.spyOn(mockRepository, 'create').mockResolvedValue(expectedApplication);
+    mockRepository.create.mockResolvedValue(expectedApplication);
 
     const result = await useCase.execute(applicationData);
 
@@ -61,7 +51,7 @@ describe('CreateApplicationUseCase', () => {
       isActive: true,
     });
 
-    vi.spyOn(mockRepository, 'create').mockResolvedValue(expectedApplication);
+    mockRepository.create.mockResolvedValue(expectedApplication);
 
     const result = await useCase.execute(applicationData);
 

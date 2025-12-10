@@ -1,21 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { GetAllTasksUseCase } from '@tasks/application/use-cases/get-all-tasks.use-case';
-import { ITaskRepository } from '@tasks/domain/repositories/task.repository.interface';
+import type { ITaskRepository } from '@tasks/domain/repositories/task.repository.interface';
 import { Task } from '@tasks/domain/entities/task.entity';
 
 describe('GetAllTasksUseCase', () => {
   let getAllTasksUseCase: GetAllTasksUseCase;
-  let mockTaskRepository: ITaskRepository;
+  let mockTaskRepository: MockProxy<ITaskRepository>;
 
   beforeEach(() => {
-    mockTaskRepository = {
-      create: vi.fn(),
-      findAll: vi.fn(),
-      findById: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    };
-
+    mockTaskRepository = mock<ITaskRepository>();
     getAllTasksUseCase = new GetAllTasksUseCase(mockTaskRepository);
   });
 
@@ -26,7 +20,7 @@ describe('GetAllTasksUseCase', () => {
       new Task(3, 'Task 3', null, 'low', false, new Date(), new Date()),
     ];
 
-    vi.spyOn(mockTaskRepository, 'findAll').mockResolvedValue(expectedTasks);
+    mockTaskRepository.findAll.mockResolvedValue(expectedTasks);
 
     const result = await getAllTasksUseCase.execute();
 
@@ -36,7 +30,7 @@ describe('GetAllTasksUseCase', () => {
   });
 
   it('should return empty array when no tasks exist', async () => {
-    vi.spyOn(mockTaskRepository, 'findAll').mockResolvedValue([]);
+    mockTaskRepository.findAll.mockResolvedValue([]);
 
     const result = await getAllTasksUseCase.execute();
 
@@ -46,7 +40,7 @@ describe('GetAllTasksUseCase', () => {
 
   it('should handle repository errors', async () => {
     const error = new Error('Database connection failed');
-    vi.spyOn(mockTaskRepository, 'findAll').mockRejectedValue(error);
+    mockTaskRepository.findAll.mockRejectedValue(error);
 
     await expect(getAllTasksUseCase.execute()).rejects.toThrow('Database connection failed');
   });

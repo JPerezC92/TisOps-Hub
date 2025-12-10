@@ -48,19 +48,21 @@ export class ProblemsExcelParser {
 
       // Extract hyperlinks from specific columns:
       // Column C (index 2) = Request ID (contains work order link)
-      // Column D (index 3) = Subject (contains work order link)
+      // Column E (index 4) = Subject (contains work order link)
       const requestIdLink = this.extractHyperlink(worksheet, rowIndex, 2);
-      const subjectLink = this.extractHyperlink(worksheet, rowIndex, 3);
+      const subjectLink = this.extractHyperlink(worksheet, rowIndex, 4);
 
       return {
         requestId: Number(row['Request ID']) || 0,
         requestIdLink: requestIdLink || undefined,
         serviceCategory: String(row['Service Category'] || ''),
+        requestStatus: String(row['Request Status'] || ''),
         subject: String(row['Subject'] || ''),
         subjectLink: subjectLink || undefined,
         createdTime: String(row['Created Time'] || ''),
         aplicativos: String(row['Aplicativos'] || ''),
         createdBy: String(row['Created By'] || ''),
+        technician: String(row['Technician'] || ''),
         planesDeAccion: String(row['Planes de Acción_1'] || ''),
         observaciones: String(row['Observaciones'] || ''),
         dueByTime: String(row['DueBy Time'] || ''),

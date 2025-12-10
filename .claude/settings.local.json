@@ -19,7 +19,17 @@
       "mcp__chrome-devtools__click",
       "Bash(pnpm --filter @repo/database build:*)",
       "mcp__chrome-devtools__list_pages",
-      "mcp__chrome-devtools__list_console_messages"
+      "mcp__chrome-devtools__list_console_messages",
+      "Bash(npx tsc:*)",
+      "mcp__chrome-devtools__fill",
+      "Bash(pnpm --filter reports-api build:*)",
+      "Bash(pnpm --filter web build:*)",
+      "Bash(cd:*)",
+      "Bash(pnpm --filter @repo/reports build:*)",
+      "Bash(turbo test:*)",
+      "Bash(pnpm --filter reports-api test)",
+      "Bash(pnpm --filter reports-api test:*)",
+      "Bash(pnpm --filter reports-api test:e2e:*)"
     ],
     "deny": [],
     "ask": []

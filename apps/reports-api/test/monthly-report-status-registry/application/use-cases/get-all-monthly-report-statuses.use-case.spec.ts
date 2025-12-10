@@ -1,29 +1,22 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { GetAllMonthlyReportStatusesUseCase } from '@monthly-report-status-registry/application/use-cases/get-all-monthly-report-statuses.use-case';
-import { IMonthlyReportStatusRegistryRepository } from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
+import type { IMonthlyReportStatusRegistryRepository } from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
 import { MonthlyReportStatusFactory } from '../../helpers/monthly-report-status.factory';
 
 describe('GetAllMonthlyReportStatusesUseCase', () => {
   let useCase: GetAllMonthlyReportStatusesUseCase;
-  let mockRepository: IMonthlyReportStatusRegistryRepository;
+  let mockRepository: MockProxy<IMonthlyReportStatusRegistryRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      findById: vi.fn(),
-      findByRawStatus: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    };
-
+    mockRepository = mock<IMonthlyReportStatusRegistryRepository>();
     useCase = new GetAllMonthlyReportStatusesUseCase(mockRepository);
   });
 
   it('should return all active status mappings', async () => {
     const expectedStatuses = MonthlyReportStatusFactory.createMany(3);
 
-    vi.spyOn(mockRepository, 'findAll').mockResolvedValue(expectedStatuses);
+    mockRepository.findAll.mockResolvedValue(expectedStatuses);
 
     const result = await useCase.execute();
 
@@ -33,7 +26,7 @@ describe('GetAllMonthlyReportStatusesUseCase', () => {
   });
 
   it('should return empty array when no status mappings exist', async () => {
-    vi.spyOn(mockRepository, 'findAll').mockResolvedValue([]);
+    mockRepository.findAll.mockResolvedValue([]);
 
     const result = await useCase.execute();
 

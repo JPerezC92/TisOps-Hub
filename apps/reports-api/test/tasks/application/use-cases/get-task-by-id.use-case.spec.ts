@@ -1,21 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { GetTaskByIdUseCase } from '@tasks/application/use-cases/get-task-by-id.use-case';
-import { ITaskRepository } from '@tasks/domain/repositories/task.repository.interface';
+import type { ITaskRepository } from '@tasks/domain/repositories/task.repository.interface';
 import { Task } from '@tasks/domain/entities/task.entity';
 
 describe('GetTaskByIdUseCase', () => {
   let getTaskByIdUseCase: GetTaskByIdUseCase;
-  let mockTaskRepository: ITaskRepository;
+  let mockTaskRepository: MockProxy<ITaskRepository>;
 
   beforeEach(() => {
-    mockTaskRepository = {
-      create: vi.fn(),
-      findAll: vi.fn(),
-      findById: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    };
-
+    mockTaskRepository = mock<ITaskRepository>();
     getTaskByIdUseCase = new GetTaskByIdUseCase(mockTaskRepository);
   });
 
@@ -30,7 +24,7 @@ describe('GetTaskByIdUseCase', () => {
       new Date(),
     );
 
-    vi.spyOn(mockTaskRepository, 'findById').mockResolvedValue(expectedTask);
+    mockTaskRepository.findById.mockResolvedValue(expectedTask);
 
     const result = await getTaskByIdUseCase.execute(1);
 
@@ -39,7 +33,7 @@ describe('GetTaskByIdUseCase', () => {
   });
 
   it('should return null when task is not found', async () => {
-    vi.spyOn(mockTaskRepository, 'findById').mockResolvedValue(null);
+    mockTaskRepository.findById.mockResolvedValue(null);
 
     const result = await getTaskByIdUseCase.execute(999);
 
@@ -49,7 +43,7 @@ describe('GetTaskByIdUseCase', () => {
 
   it('should handle repository errors', async () => {
     const error = new Error('Database error');
-    vi.spyOn(mockTaskRepository, 'findById').mockRejectedValue(error);
+    mockTaskRepository.findById.mockRejectedValue(error);
 
     await expect(getTaskByIdUseCase.execute(1)).rejects.toThrow('Database error');
   });

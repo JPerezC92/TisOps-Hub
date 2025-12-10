@@ -1,30 +1,23 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { NotFoundException } from '@nestjs/common';
 import { GetMonthlyReportStatusByIdUseCase } from '@monthly-report-status-registry/application/use-cases/get-monthly-report-status-by-id.use-case';
-import { IMonthlyReportStatusRegistryRepository } from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
+import type { IMonthlyReportStatusRegistryRepository } from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
 import { MonthlyReportStatusFactory } from '../../helpers/monthly-report-status.factory';
 
 describe('GetMonthlyReportStatusByIdUseCase', () => {
   let useCase: GetMonthlyReportStatusByIdUseCase;
-  let mockRepository: IMonthlyReportStatusRegistryRepository;
+  let mockRepository: MockProxy<IMonthlyReportStatusRegistryRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      findById: vi.fn(),
-      findByRawStatus: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    };
-
+    mockRepository = mock<IMonthlyReportStatusRegistryRepository>();
     useCase = new GetMonthlyReportStatusByIdUseCase(mockRepository);
   });
 
   it('should return status mapping when found', async () => {
     const expectedStatus = MonthlyReportStatusFactory.create({ id: 1 });
 
-    vi.spyOn(mockRepository, 'findById').mockResolvedValue(expectedStatus);
+    mockRepository.findById.mockResolvedValue(expectedStatus);
 
     const result = await useCase.execute(1);
 
@@ -33,7 +26,7 @@ describe('GetMonthlyReportStatusByIdUseCase', () => {
   });
 
   it('should throw NotFoundException when status mapping not found', async () => {
-    vi.spyOn(mockRepository, 'findById').mockResolvedValue(null);
+    mockRepository.findById.mockResolvedValue(null);
 
     await expect(useCase.execute(999)).rejects.toThrow(NotFoundException);
     await expect(useCase.execute(999)).rejects.toThrow('Monthly report status with ID 999 not found');

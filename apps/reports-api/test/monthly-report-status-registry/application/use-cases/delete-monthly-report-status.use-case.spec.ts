@@ -1,26 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { DeleteMonthlyReportStatusUseCase } from '@monthly-report-status-registry/application/use-cases/delete-monthly-report-status.use-case';
-import { IMonthlyReportStatusRegistryRepository } from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
+import type { IMonthlyReportStatusRegistryRepository } from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
 
 describe('DeleteMonthlyReportStatusUseCase', () => {
   let useCase: DeleteMonthlyReportStatusUseCase;
-  let mockRepository: IMonthlyReportStatusRegistryRepository;
+  let mockRepository: MockProxy<IMonthlyReportStatusRegistryRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      findById: vi.fn(),
-      findByRawStatus: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    };
-
+    mockRepository = mock<IMonthlyReportStatusRegistryRepository>();
     useCase = new DeleteMonthlyReportStatusUseCase(mockRepository);
   });
 
   it('should soft delete status mapping successfully', async () => {
-    vi.spyOn(mockRepository, 'delete').mockResolvedValue(undefined);
+    mockRepository.delete.mockResolvedValue(undefined);
 
     await useCase.execute(1);
 
@@ -29,7 +22,7 @@ describe('DeleteMonthlyReportStatusUseCase', () => {
   });
 
   it('should call repository delete with correct id', async () => {
-    vi.spyOn(mockRepository, 'delete').mockResolvedValue(undefined);
+    mockRepository.delete.mockResolvedValue(undefined);
 
     await useCase.execute(42);
 
