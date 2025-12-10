@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { GetIncidentsByWeekUseCase } from '@monthly-report/application/use-cases/get-incidents-by-week.use-case';
 import type {
   IMonthlyReportRepository,
@@ -7,23 +8,10 @@ import type {
 
 describe('GetIncidentsByWeekUseCase', () => {
   let useCase: GetIncidentsByWeekUseCase;
-  let mockRepository: IMonthlyReportRepository;
+  let mockRepository: MockProxy<IMonthlyReportRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      countAll: vi.fn(),
-      bulkCreate: vi.fn(),
-      deleteAll: vi.fn(),
-      findCriticalIncidentsFiltered: vi.fn(),
-      findModuleEvolution: vi.fn(),
-      findStabilityIndicators: vi.fn(),
-      findCategoryDistribution: vi.fn(),
-      findBusinessFlowByPriority: vi.fn(),
-      findPriorityByApp: vi.fn(),
-      findIncidentsByWeek: vi.fn(),
-    };
-
+    mockRepository = mock<IMonthlyReportRepository>();
     useCase = new GetIncidentsByWeekUseCase(mockRepository);
   });
 
@@ -59,7 +47,7 @@ describe('GetIncidentsByWeekUseCase', () => {
   it('should return incidents by week data without filters', async () => {
     const expectedResult = createMockResult();
 
-    vi.spyOn(mockRepository, 'findIncidentsByWeek').mockResolvedValue(expectedResult);
+    mockRepository.findIncidentsByWeek.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute();
 
@@ -72,7 +60,7 @@ describe('GetIncidentsByWeekUseCase', () => {
   it('should return incidents by week filtered by app', async () => {
     const expectedResult = createMockResult({ totalIncidents: 25 });
 
-    vi.spyOn(mockRepository, 'findIncidentsByWeek').mockResolvedValue(expectedResult);
+    mockRepository.findIncidentsByWeek.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute('SB');
 
@@ -83,7 +71,7 @@ describe('GetIncidentsByWeekUseCase', () => {
   it('should return incidents by week filtered by year', async () => {
     const expectedResult = createMockResult({ year: 2023 });
 
-    vi.spyOn(mockRepository, 'findIncidentsByWeek').mockResolvedValue(expectedResult);
+    mockRepository.findIncidentsByWeek.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute(undefined, 2023);
 
@@ -94,7 +82,7 @@ describe('GetIncidentsByWeekUseCase', () => {
   it('should return incidents by week filtered by both app and year', async () => {
     const expectedResult = createMockResult({ year: 2025, totalIncidents: 10 });
 
-    vi.spyOn(mockRepository, 'findIncidentsByWeek').mockResolvedValue(expectedResult);
+    mockRepository.findIncidentsByWeek.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute('FF', 2025);
 
@@ -109,7 +97,7 @@ describe('GetIncidentsByWeekUseCase', () => {
       totalIncidents: 0,
     };
 
-    vi.spyOn(mockRepository, 'findIncidentsByWeek').mockResolvedValue(emptyResult);
+    mockRepository.findIncidentsByWeek.mockResolvedValue(emptyResult);
 
     const result = await useCase.execute();
 

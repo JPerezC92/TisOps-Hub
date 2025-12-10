@@ -26,11 +26,13 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Priority } from '@repo/reports/frontend';
 import { getPriorityColorClasses } from '@/lib/utils/priority-colors';
 
 interface MonthlyReport {
   requestId: number;
+  requestIdLink?: string;
   aplicativos: string;
   categorizacion: string;
   createdTime: string;
@@ -55,6 +57,9 @@ interface MonthlyReport {
   cuv: string;
   release: string;
   rca: string;
+  mappedModuleDisplayValue?: string | null;
+  mappedStatusDisplayValue?: string | null;
+  mappedCategorizationDisplayValue?: string | null;
 }
 
 interface WarRoom {
@@ -237,12 +242,133 @@ interface IncidentsByWeekResponse {
   totalIncidents: number;
 }
 
+// Incidents by Day interfaces
+interface IncidentsByDayRow {
+  day: number;
+  count: number;
+}
+
+interface IncidentsByDayResponse {
+  data: IncidentsByDayRow[];
+  totalIncidents: number;
+}
+
+// Incident Overview by Category interfaces
+interface IncidentOverviewItem {
+  category: string;
+  categoryDisplayValue: string | null;
+  count: number;
+  percentage: number;
+}
+
+interface IncidentOverviewCard {
+  data: IncidentOverviewItem[];
+  total: number;
+}
+
+interface L3StatusItem {
+  status: string;
+  count: number;
+  percentage: number;
+}
+
+interface L3StatusCard {
+  data: L3StatusItem[];
+  total: number;
+}
+
+interface IncidentOverviewByCategoryResponse {
+  resolvedInL2: IncidentOverviewCard;
+  pending: IncidentOverviewCard;
+  recurrentInL2L3: IncidentOverviewCard;
+  assignedToL3Backlog: IncidentOverviewCard;
+  l3Status: L3StatusCard;
+}
+
+// L3 Summary interfaces
+interface L3SummaryRow {
+  status: string;
+  statusLabel: string;
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+  total: number;
+}
+
+interface L3SummaryResponse {
+  data: L3SummaryRow[];
+  totals: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+    total: number;
+  };
+}
+
+// L3 Requests by Status interfaces
+interface L3RequestDetail {
+  requestId: string;
+  requestIdLink?: string;
+  createdTime: string;
+  modulo: string;
+  subject: string;
+  priority: string;
+  priorityEnglish: string;
+  linkedTicketsCount: number;
+  eta: string;
+}
+
+interface L3RequestsByStatusResponse {
+  devInProgress: L3RequestDetail[];
+  inBacklog: L3RequestDetail[];
+  inTesting: L3RequestDetail[];
+  prdDeployment: L3RequestDetail[];
+}
+
+// Missing Scope by Parent interfaces
+interface MissingScopeByParentRow {
+  createdDate: string;
+  linkedRequestId: string;
+  linkedRequestIdLink: string | null;
+  additionalInfo: string;
+  totalLinkedTickets: number;
+  linkedTicketsInMonth: number;
+  requestStatus: string;
+  eta: string;
+}
+
+interface MissingScopeByParentResponse {
+  data: MissingScopeByParentRow[];
+  monthName: string;
+  totalIncidents: number;
+}
+
+// Bugs by Parent interfaces
+interface BugsByParentRow {
+  createdDate: string;
+  linkedRequestId: string;
+  linkedRequestIdLink: string | null;
+  additionalInfo: string;
+  totalLinkedTickets: number;
+  linkedTicketsInMonth: number;
+  requestStatus: string;
+  eta: string;
+}
+
+interface BugsByParentResponse {
+  data: BugsByParentRow[];
+  monthName: string;
+  totalIncidents: number;
+}
+
 // Group tickets by parentTicketId (if exists) or displayStatus
 function groupTickets(tickets: TicketDetail[]): TicketGroup[] {
   const groups = new Map<string, TicketGroup>();
 
   for (const ticket of tickets) {
-    const hasParent = ticket.parentTicketId && ticket.parentTicketId !== 'No asignado';
+    const hasParent = ticket.parentTicketId && ticket.parentTicketId !== 'No asignado' && ticket.parentTicketId !== '0';
     const key = hasParent ? ticket.parentTicketId : ticket.displayStatus;
 
     if (groups.has(key)) {
@@ -323,6 +449,9 @@ function AnalyticsDashboardContent() {
   const [itemsPerPage, setItemsPerPage] = useState(50);
   const [monthPickerOpen, setMonthPickerOpen] = useState(false);
 
+  // Report Mode state (Weekly vs Monthly)
+  const [isMonthlyMode, setIsMonthlyMode] = useState(false);
+
   // Evolution of Incidents state
   const [moduleEvolutionData, setModuleEvolutionData] = useState<ModuleEvolutionResponse | null>(null);
   const [moduleEvolutionLoading, setModuleEvolutionLoading] = useState(true);
@@ -365,6 +494,30 @@ function AnalyticsDashboardContent() {
   const [incidentsByWeek, setIncidentsByWeek] = useState<IncidentsByWeekResponse | null>(null);
   const [incidentsByWeekLoading, setIncidentsByWeekLoading] = useState(true);
 
+  // Incidents by Day state
+  const [incidentsByDay, setIncidentsByDay] = useState<IncidentsByDayResponse | null>(null);
+  const [incidentsByDayLoading, setIncidentsByDayLoading] = useState(true);
+
+  // Incident Overview by Category state
+  const [incidentOverview, setIncidentOverview] = useState<IncidentOverviewByCategoryResponse | null>(null);
+  const [incidentOverviewLoading, setIncidentOverviewLoading] = useState(true);
+
+  // L3 Summary state
+  const [l3Summary, setL3Summary] = useState<L3SummaryResponse | null>(null);
+  const [l3SummaryLoading, setL3SummaryLoading] = useState(true);
+
+  // L3 Requests by Status state
+  const [l3RequestsByStatus, setL3RequestsByStatus] = useState<L3RequestsByStatusResponse | null>(null);
+  const [l3RequestsByStatusLoading, setL3RequestsByStatusLoading] = useState(true);
+
+  // Missing Scope by Parent state
+  const [missingScopeByParent, setMissingScopeByParent] = useState<MissingScopeByParentResponse | null>(null);
+  const [missingScopeByParentLoading, setMissingScopeByParentLoading] = useState(true);
+
+  // Bugs by Parent state
+  const [bugsByParent, setBugsByParent] = useState<BugsByParentResponse | null>(null);
+  const [bugsByParentLoading, setBugsByParentLoading] = useState(true);
+
   // Get filter values from URL parameters
   const selectedApp = searchParams.get('app') || 'all';
   const selectedMonth = searchParams.get('month') || DateTime.now().toFormat('yyyy-MM');
@@ -379,19 +532,26 @@ function AnalyticsDashboardContent() {
   const selectedYear = parts[0] ?? DateTime.now().year;
   const selectedMonthNum = parts[1] ?? DateTime.now().month;
 
-  // Update URL parameters
+  // Calculate last day of month for Monthly mode
+  const lastDayOfMonth = DateTime.fromFormat(selectedMonth, 'yyyy-MM').endOf('month').toFormat('yyyy-MM-dd');
+
+  // Update URL parameters - preserve existing date params when not explicitly provided
   const updateFilters = useCallback(
     (app: string, month: string, newStartDate?: string, newEndDate?: string) => {
       const params = new URLSearchParams();
       if (app !== 'all') params.set('app', app);
       if (month) params.set('month', month);
-      if (newStartDate) params.set('startDate', newStartDate);
-      if (newEndDate) params.set('endDate', newEndDate);
+
+      // Preserve date params: use new values if provided, otherwise keep existing URL values
+      const dateStart = newStartDate ?? searchParams.get('startDate');
+      const dateEnd = newEndDate ?? searchParams.get('endDate');
+      if (dateStart) params.set('startDate', dateStart);
+      if (dateEnd) params.set('endDate', dateEnd);
 
       const queryString = params.toString();
       router.push(`${pathname}${queryString ? `?${queryString}` : ''}`);
     },
-    [router, pathname]
+    [router, pathname, searchParams]
   );
 
   // Fetch applications for filter dropdown
@@ -459,8 +619,14 @@ function AnalyticsDashboardContent() {
     try {
       const params = new URLSearchParams();
       if (selectedApp !== 'all') params.set('app', selectedApp);
-      params.set('startDate', startDate);
-      params.set('endDate', endDate);
+      // Monthly mode: only send endDate (last day of month)
+      // Weekly mode: send both startDate and endDate
+      if (isMonthlyMode) {
+        params.set('endDate', lastDayOfMonth);
+      } else {
+        params.set('startDate', startDate);
+        params.set('endDate', endDate);
+      }
 
       const response = await fetch(
         `http://localhost:3000/monthly-report/module-evolution?${params.toString()}`,
@@ -615,6 +781,148 @@ function AnalyticsDashboardContent() {
     }
   };
 
+  // Fetch incidents by day
+  const fetchIncidentsByDay = async () => {
+    setIncidentsByDayLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedApp !== 'all') params.set('app', selectedApp);
+
+      const response = await fetch(
+        `http://localhost:3000/monthly-report/incidents-by-day?${params.toString()}`,
+        { cache: 'no-store' }
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setIncidentsByDay(result);
+      }
+    } catch (error) {
+      console.error('Failed to fetch incidents by day:', error);
+    } finally {
+      setIncidentsByDayLoading(false);
+    }
+  };
+
+  // Fetch incident overview by category
+  const fetchIncidentOverview = async () => {
+    setIncidentOverviewLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedApp !== 'all') params.set('app', selectedApp);
+      // Monthly mode: only send endDate (last day of month)
+      // Weekly mode: send both startDate and endDate
+      if (isMonthlyMode) {
+        params.set('endDate', lastDayOfMonth);
+      } else {
+        if (startDate) params.set('startDate', startDate);
+        if (endDate) params.set('endDate', endDate);
+      }
+
+      const response = await fetch(
+        `http://localhost:3000/monthly-report/incident-overview-by-category?${params.toString()}`,
+        { cache: 'no-store' }
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setIncidentOverview(result);
+      }
+    } catch (error) {
+      console.error('Failed to fetch incident overview:', error);
+    } finally {
+      setIncidentOverviewLoading(false);
+    }
+  };
+
+  // Fetch L3 summary
+  const fetchL3Summary = async () => {
+    setL3SummaryLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedApp !== 'all') params.set('app', selectedApp);
+
+      const response = await fetch(
+        `http://localhost:3000/monthly-report/l3-summary?${params.toString()}`,
+        { cache: 'no-store' }
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setL3Summary(result);
+      }
+    } catch (error) {
+      console.error('Failed to fetch L3 summary:', error);
+    } finally {
+      setL3SummaryLoading(false);
+    }
+  };
+
+  // Fetch L3 requests by status
+  const fetchL3RequestsByStatus = async () => {
+    setL3RequestsByStatusLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedApp !== 'all') params.set('app', selectedApp);
+
+      const response = await fetch(
+        `http://localhost:3000/monthly-report/l3-requests-by-status?${params.toString()}`,
+        { cache: 'no-store' }
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setL3RequestsByStatus(result);
+      }
+    } catch (error) {
+      console.error('Failed to fetch L3 requests by status:', error);
+    } finally {
+      setL3RequestsByStatusLoading(false);
+    }
+  };
+
+  // Fetch missing scope by parent
+  const fetchMissingScopeByParent = async () => {
+    setMissingScopeByParentLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedApp !== 'all') params.set('app', selectedApp);
+      if (selectedMonth) params.set('month', selectedMonth);
+
+      const response = await fetch(
+        `http://localhost:3000/monthly-report/missing-scope-by-parent?${params.toString()}`,
+        { cache: 'no-store' }
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setMissingScopeByParent(result);
+      }
+    } catch (error) {
+      console.error('Failed to fetch missing scope by parent:', error);
+    } finally {
+      setMissingScopeByParentLoading(false);
+    }
+  };
+
+  // Fetch bugs by parent
+  const fetchBugsByParent = async () => {
+    setBugsByParentLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedApp !== 'all') params.set('app', selectedApp);
+      if (selectedMonth) params.set('month', selectedMonth);
+
+      const response = await fetch(
+        `http://localhost:3000/monthly-report/bugs-by-parent?${params.toString()}`,
+        { cache: 'no-store' }
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setBugsByParent(result);
+      }
+    } catch (error) {
+      console.error('Failed to fetch bugs by parent:', error);
+    } finally {
+      setBugsByParentLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchApplications();
   }, []);
@@ -626,16 +934,22 @@ function AnalyticsDashboardContent() {
     fetchCategoryDistribution();
     fetchBusinessFlowPriority();
     fetchPriorityByApp();
+    fetchMissingScopeByParent();
+    fetchBugsByParent();
   }, [selectedApp, selectedMonth]);
 
   useEffect(() => {
     fetchL3TicketsByStatus();
     fetchIncidentsByWeek();
-  }, [selectedApp]); // Only refetch on app change, not month
+    fetchIncidentsByDay();
+    fetchL3Summary();
+    fetchL3RequestsByStatus();
+  }, [selectedApp]); // Only refetch on app change
 
   useEffect(() => {
     fetchModuleEvolution();
-  }, [selectedApp, startDate, endDate]);
+    fetchIncidentOverview();
+  }, [selectedApp, startDate, endDate, isMonthlyMode, lastDayOfMonth]);
 
   // Filter data by search term (client-side filtering on top of backend filtering)
   const filteredData = data.filter(item => {
@@ -782,65 +1096,101 @@ function AnalyticsDashboardContent() {
 
               {/* Date Range Filter (for Evolution of Incidents) */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground/80">Date Range</label>
-                <Popover open={dateRangePickerOpen} onOpenChange={setDateRangePickerOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left font-normal border-jpc-vibrant-purple-500/20 bg-background hover:bg-background/80"
+                <label className="text-sm font-medium text-foreground/80">
+                  {isMonthlyMode ? 'End Date' : 'Date Range'}
+                </label>
+                {isMonthlyMode ? (
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal border-jpc-vibrant-purple-500/20 bg-background cursor-default"
+                    disabled
+                  >
+                    <svg
+                      className="mr-2 h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
-                      <svg
-                        className="mr-2 h-4 w-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                      {DateTime.fromISO(startDate).toFormat('MMM d')} - {DateTime.fromISO(endDate).toFormat('MMM d, yyyy')}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-4" align="start">
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">Start Date</label>
-                        <Input
-                          type="date"
-                          value={startDate}
-                          onChange={(e) => {
-                            updateFilters(selectedApp, selectedMonth, e.target.value, endDate);
-                          }}
-                          className="w-full"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-sm font-medium">End Date</label>
-                        <Input
-                          type="date"
-                          value={endDate}
-                          onChange={(e) => {
-                            updateFilters(selectedApp, selectedMonth, startDate, e.target.value);
-                          }}
-                          className="w-full"
-                        />
-                      </div>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    {DateTime.fromISO(lastDayOfMonth).toFormat('MMM d, yyyy')}
+                  </Button>
+                ) : (
+                  <Popover open={dateRangePickerOpen} onOpenChange={setDateRangePickerOpen}>
+                    <PopoverTrigger asChild>
                       <Button
                         variant="outline"
-                        size="sm"
-                        className="w-full"
-                        onClick={() => {
-                          const defaultRange = getDefaultDateRange();
-                          updateFilters(selectedApp, selectedMonth, defaultRange.startDate, defaultRange.endDate);
-                          setDateRangePickerOpen(false);
-                        }}
+                        className="w-full justify-start text-left font-normal border-jpc-vibrant-purple-500/20 bg-background hover:bg-background/80"
                       >
-                        Reset to Default (Last Fri - Last Thu)
+                        <svg
+                          className="mr-2 h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {DateTime.fromISO(startDate).toFormat('MMM d')} - {DateTime.fromISO(endDate).toFormat('MMM d, yyyy')}
                       </Button>
-                    </div>
-                  </PopoverContent>
-                </Popover>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-4" align="start">
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">Start Date</label>
+                          <Input
+                            type="date"
+                            value={startDate}
+                            onChange={(e) => {
+                              updateFilters(selectedApp, selectedMonth, e.target.value, endDate);
+                            }}
+                            className="w-full"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-sm font-medium">End Date</label>
+                          <Input
+                            type="date"
+                            value={endDate}
+                            onChange={(e) => {
+                              updateFilters(selectedApp, selectedMonth, startDate, e.target.value);
+                            }}
+                            className="w-full"
+                          />
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="w-full"
+                          onClick={() => {
+                            const defaultRange = getDefaultDateRange();
+                            updateFilters(selectedApp, selectedMonth, defaultRange.startDate, defaultRange.endDate);
+                            setDateRangePickerOpen(false);
+                          }}
+                        >
+                          Reset to Default (Last Fri - Last Thu)
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                )}
               </div>
+            </div>
+
+            {/* Report Mode Toggle */}
+            <div className="flex items-center gap-3 lg:ml-auto">
+              <span className={`text-sm font-medium ${!isMonthlyMode ? 'text-jpc-vibrant-cyan-400' : 'text-muted-foreground'}`}>
+                Weekly
+              </span>
+              <Switch
+                checked={isMonthlyMode}
+                onCheckedChange={setIsMonthlyMode}
+                className="data-[state=checked]:bg-jpc-vibrant-purple-500"
+              />
+              <span className={`text-sm font-medium ${isMonthlyMode ? 'text-jpc-vibrant-purple-400' : 'text-muted-foreground'}`}>
+                Monthly
+              </span>
             </div>
           </div>
         </div>
@@ -868,6 +1218,11 @@ function AnalyticsDashboardContent() {
                 Showing {paginatedData.length} of {filteredData.length} records
               </span>
             </h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Filters: {selectedApp === 'all' ? 'All Applications' : applications.find(a => a.code === selectedApp)?.name || selectedApp} | {DateTime.fromFormat(selectedMonth, 'yyyy-MM').toFormat('MMMM yyyy')} | <span className={isMonthlyMode ? 'text-jpc-vibrant-purple-400' : 'text-jpc-vibrant-cyan-400'}>{isMonthlyMode ? 'Monthly Report' : 'Weekly Report'}</span>
+              <span className="mx-2">|</span>
+              Source: <code className="px-1 py-0.5 rounded bg-muted/50">war_rooms</code>
+            </p>
           </div>
 
           {loading ? (
@@ -1049,6 +1404,11 @@ function AnalyticsDashboardContent() {
                 Showing {criticalIncidents.length} critical priority incidents from monthly reports
               </span>
             </h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Filters: {selectedApp === 'all' ? 'All Applications' : applications.find(a => a.code === selectedApp)?.name || selectedApp} | {DateTime.fromFormat(selectedMonth, 'yyyy-MM').toFormat('MMMM yyyy')} | <span className={isMonthlyMode ? 'text-jpc-vibrant-purple-400' : 'text-jpc-vibrant-cyan-400'}>{isMonthlyMode ? 'Monthly Report' : 'Weekly Report'}</span>
+              <span className="mx-2">|</span>
+              Source: <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code>
+            </p>
           </div>
 
           {criticalIncidentsLoading ? (
@@ -1066,8 +1426,9 @@ function AnalyticsDashboardContent() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-b border-jpc-vibrant-orange-500/20 hover:bg-jpc-vibrant-orange-500/5">
-                    <TableHead className="font-semibold text-foreground/90">Request ID</TableHead>
                     <TableHead className="font-semibold text-foreground/90">Application</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Request ID</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Created Date</TableHead>
                     <TableHead className="font-semibold text-foreground/90">Status</TableHead>
                     <TableHead className="font-semibold text-foreground/90">Module</TableHead>
                     <TableHead className="font-semibold text-foreground/90">Subject</TableHead>
@@ -1077,64 +1438,86 @@ function AnalyticsDashboardContent() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {criticalIncidents.map((incident) => (
-                    <TableRow
-                      key={incident.requestId}
-                      className="border-b border-jpc-vibrant-orange-500/10 hover:bg-jpc-vibrant-orange-500/5 transition-colors group"
-                    >
-                      <TableCell className="font-medium text-jpc-vibrant-orange-400">
-                        {incident.requestId}
-                      </TableCell>
-                      <TableCell className="text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
-                        <div className="max-w-xs truncate" title={incident.aplicativos}>
-                          {incident.aplicativos}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-xs">
-                        <Badge
-                          variant="outline"
-                          className="bg-jpc-vibrant-purple-500/20 text-purple-100 border-jpc-vibrant-purple-500/40 hover:bg-jpc-vibrant-purple-500/30 font-medium transition-all duration-300"
-                        >
-                          {incident.requestStatus}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
-                        <div className="max-w-xs truncate" title={incident.modulo}>
-                          {incident.modulo}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
-                        <div className="max-w-md truncate" title={incident.subject}>
-                          {incident.subject}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={`${getPriorityColorClasses(incident.priority)} border font-medium transition-all duration-300`}
-                        >
-                          {incident.priority}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
-                        {incident.categorizacion}
-                      </TableCell>
-                      <TableCell className="text-xs">
-                        {incident.rca && incident.rca !== 'No asignado' ? (
-                          <a
-                            href={incident.rca}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-jpc-vibrant-cyan-400 hover:text-jpc-vibrant-cyan-300 underline"
+                  {criticalIncidents.map((incident) => {
+                    const moduleDisplayValue = incident.mappedModuleDisplayValue || incident.modulo;
+                    const statusDisplayValue = incident.mappedStatusDisplayValue || incident.requestStatus;
+                    const categorizationDisplayValue = incident.mappedCategorizationDisplayValue || incident.categorizacion;
+                    const createdDate = incident.createdTime
+                      ? DateTime.fromISO(incident.createdTime).toFormat('d-MMM-yyyy')
+                      : '';
+                    return (
+                      <TableRow
+                        key={incident.requestId}
+                        className="border-b border-jpc-vibrant-orange-500/10 hover:bg-jpc-vibrant-orange-500/5 transition-colors group"
+                      >
+                        <TableCell className="text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
+                          <div className="max-w-xs truncate" title={incident.aplicativos}>
+                            {incident.aplicativos}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {incident.requestIdLink ? (
+                            <a
+                              href={incident.requestIdLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-jpc-vibrant-orange-400 hover:text-jpc-vibrant-orange-300 hover:underline transition-colors"
+                            >
+                              {incident.requestId}
+                            </a>
+                          ) : (
+                            <span className="text-jpc-vibrant-orange-400">{incident.requestId}</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-xs text-foreground/80">
+                          {createdDate}
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          <Badge
+                            variant="outline"
+                            className="bg-jpc-vibrant-purple-500/20 text-purple-100 border-jpc-vibrant-purple-500/40 hover:bg-jpc-vibrant-purple-500/30 font-medium transition-all duration-300"
                           >
-                            View RCA
-                          </a>
-                        ) : (
-                          <span className="text-muted-foreground/50">N/A</span>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                            {statusDisplayValue}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
+                          <div className="max-w-xs truncate" title={moduleDisplayValue}>
+                            {moduleDisplayValue}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
+                          <div className="max-w-md truncate" title={incident.subject}>
+                            {incident.subject}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={`${getPriorityColorClasses(incident.priority)} border font-medium transition-all duration-300`}
+                          >
+                            {incident.priority}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
+                          {categorizationDisplayValue}
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          {incident.rca && incident.rca !== 'No asignado' ? (
+                            <a
+                              href={incident.rca}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-jpc-vibrant-cyan-400 hover:text-jpc-vibrant-cyan-300 underline"
+                            >
+                              View RCA
+                            </a>
+                          ) : (
+                            <span className="text-muted-foreground/50">N/A</span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
@@ -1147,6 +1530,11 @@ function AnalyticsDashboardContent() {
             <h3 className="text-sm font-bold text-foreground">
               Operational Stability Indicators
             </h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Filters: {selectedApp === 'all' ? 'All Applications' : applications.find(a => a.code === selectedApp)?.name || selectedApp} | {DateTime.fromFormat(selectedMonth, 'yyyy-MM').toFormat('MMMM yyyy')} | <span className={isMonthlyMode ? 'text-jpc-vibrant-purple-400' : 'text-jpc-vibrant-cyan-400'}>{isMonthlyMode ? 'Monthly Report' : 'Weekly Report'}</span>
+              <span className="mx-2">|</span>
+              Source: <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code>
+            </p>
           </div>
 
           {/* Subsection 1: Number of incidents by level by month */}
@@ -1481,6 +1869,9 @@ function AnalyticsDashboardContent() {
               <span className="ml-2 text-muted-foreground/70 normal-case font-normal">
                 {l3TicketsByStatus ? `(${l3TicketsByStatus.totalL3Tickets} total)` : ''}
               </span>
+              <span className="ml-2 text-muted-foreground/50 normal-case font-normal">
+                | Source: <code className="px-1 py-0.5 rounded bg-muted/50 text-xs">weekly_correctives</code>, <code className="px-1 py-0.5 rounded bg-muted/50 text-xs">monthly_reports</code>
+              </span>
             </h4>
           </div>
 
@@ -1590,15 +1981,263 @@ function AnalyticsDashboardContent() {
           )}
         </div>
 
+        {/* Distribution of Missing Scope by Parent Ticket Section */}
+        <div className="mt-8 rounded-2xl border border-amber-500/20 bg-card/60 overflow-hidden shadow-2xl shadow-amber-500/10 backdrop-blur-sm hover:border-amber-500/30 transition-all duration-300">
+          <div className="px-6 py-6 border-b border-amber-500/20 bg-gradient-to-r from-amber-500/10 to-jpc-vibrant-purple-500/5">
+            <h3 className="text-sm font-bold text-foreground">
+              Distribution of Missing Scope by Parent Ticket
+              <span className="ml-3 text-xs font-normal text-muted-foreground/70">
+                {missingScopeByParent ? `(${missingScopeByParent.totalIncidents} total in ${missingScopeByParent.monthName})` : ''}
+              </span>
+            </h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Filters: {selectedApp === 'all' ? 'All Applications' : applications.find(a => a.code === selectedApp)?.name || selectedApp} | {DateTime.fromFormat(selectedMonth, 'yyyy-MM').toFormat('MMMM yyyy')} | <span className={isMonthlyMode ? 'text-jpc-vibrant-purple-400' : 'text-jpc-vibrant-cyan-400'}>{isMonthlyMode ? 'Monthly Report' : 'Weekly Report'}</span>
+              <span className="mx-2">|</span>
+              Source: <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code>, <code className="px-1 py-0.5 rounded bg-muted/50">weekly_correctives</code>, <code className="px-1 py-0.5 rounded bg-muted/50">problems</code>, <code className="px-1 py-0.5 rounded bg-muted/50">parent_child_requests</code>
+            </p>
+          </div>
+
+          {missingScopeByParentLoading ? (
+            <div className="p-8 space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : !missingScopeByParent || missingScopeByParent.data.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              No missing scope incidents found for the selected filters
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-amber-500/20 hover:bg-amber-500/5">
+                    <TableHead className="font-semibold text-foreground/90">Created Date</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Linked Request ID</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Additional Information</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 text-right">Total Linked</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 text-right">In Month</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Request Status</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">ETA</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {missingScopeByParent.data.map((row, index) => (
+                    <TableRow
+                      key={row.linkedRequestId || `unassigned-${index}`}
+                      className="border-b border-amber-500/10 hover:bg-amber-500/5 transition-colors"
+                    >
+                      <TableCell className="text-sm text-foreground/80">
+                        {row.createdDate || '-'}
+                      </TableCell>
+                      <TableCell className="font-medium text-amber-400">
+                        {row.linkedRequestIdLink ? (
+                          <a
+                            href={row.linkedRequestIdLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-amber-300 hover:underline transition-colors"
+                          >
+                            {row.linkedRequestId}
+                          </a>
+                        ) : (
+                          <span>{row.linkedRequestId || '-'}</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/80 max-w-xs truncate" title={row.additionalInfo}>
+                        {row.additionalInfo || '-'}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/90 text-right">
+                        {row.totalLinkedTickets || '-'}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/90 text-right font-semibold">
+                        {row.linkedTicketsInMonth}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/80">
+                        {row.requestStatus || '-'}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/80">
+                        {row.eta || '-'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {/* TOTAL Row */}
+                  <TableRow className="border-t-2 border-amber-500/30 bg-amber-500/10 font-bold">
+                    <TableCell className="text-sm text-foreground font-bold">TOTAL</TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell className="text-sm text-foreground text-right font-bold">
+                      {missingScopeByParent.totalIncidents}
+                    </TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+
+        {/* Distribution of Bugs by Parent Ticket Section */}
+        <div className="mt-8 rounded-2xl border border-red-500/20 bg-card/60 overflow-hidden shadow-2xl shadow-red-500/10 backdrop-blur-sm hover:border-red-500/30 transition-all duration-300">
+          <div className="px-6 py-6 border-b border-red-500/20 bg-gradient-to-r from-red-500/10 to-jpc-vibrant-purple-500/5">
+            <h3 className="text-sm font-bold text-foreground">
+              Distribution of Bugs by Parent Ticket
+              <span className="ml-3 text-xs font-normal text-muted-foreground/70">
+                {bugsByParent ? `(${bugsByParent.totalIncidents} total in ${bugsByParent.monthName})` : ''}
+              </span>
+            </h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Filters: {selectedApp === 'all' ? 'All Applications' : applications.find(a => a.code === selectedApp)?.name || selectedApp} | {DateTime.fromFormat(selectedMonth, 'yyyy-MM').toFormat('MMMM yyyy')} | <span className={isMonthlyMode ? 'text-jpc-vibrant-purple-400' : 'text-jpc-vibrant-cyan-400'}>{isMonthlyMode ? 'Monthly Report' : 'Weekly Report'}</span>
+              <span className="mx-2">|</span>
+              Source: <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code>, <code className="px-1 py-0.5 rounded bg-muted/50">weekly_correctives</code>, <code className="px-1 py-0.5 rounded bg-muted/50">problems</code>, <code className="px-1 py-0.5 rounded bg-muted/50">parent_child_requests</code>
+            </p>
+          </div>
+
+          {bugsByParentLoading ? (
+            <div className="p-8 space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : !bugsByParent || bugsByParent.data.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              No bug incidents found for the selected filters
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-red-500/20 hover:bg-red-500/5">
+                    <TableHead className="font-semibold text-foreground/90">Created Date</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Linked Request ID</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Additional Information</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 text-right">Total Linked</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 text-right">In Month</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">Request Status</TableHead>
+                    <TableHead className="font-semibold text-foreground/90">ETA</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {bugsByParent.data.map((row, index) => (
+                    <TableRow
+                      key={row.linkedRequestId || `unassigned-${index}`}
+                      className="border-b border-red-500/10 hover:bg-red-500/5 transition-colors"
+                    >
+                      <TableCell className="text-sm text-foreground/80">
+                        {row.createdDate || '-'}
+                      </TableCell>
+                      <TableCell className="font-medium text-red-400">
+                        {row.linkedRequestIdLink ? (
+                          <a
+                            href={row.linkedRequestIdLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-red-300 hover:underline transition-colors"
+                          >
+                            {row.linkedRequestId}
+                          </a>
+                        ) : (
+                          <span>{row.linkedRequestId || '-'}</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/80 max-w-xs truncate" title={row.additionalInfo}>
+                        {row.additionalInfo || '-'}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/90 text-right">
+                        {row.totalLinkedTickets || '-'}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/90 text-right font-semibold">
+                        {row.linkedTicketsInMonth}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/80">
+                        {row.requestStatus || '-'}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/80">
+                        {row.eta || '-'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {/* TOTAL Row */}
+                  <TableRow className="border-t-2 border-red-500/30 bg-red-500/10 font-bold">
+                    <TableCell className="text-sm text-foreground font-bold">TOTAL</TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell className="text-sm text-foreground text-right font-bold">
+                      {bugsByParent.totalIncidents}
+                    </TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+
+        {/* Incidents by Day Section */}
+        <div className="mt-8 rounded-2xl border border-jpc-vibrant-emerald-500/20 bg-card/60 overflow-hidden shadow-2xl shadow-jpc-vibrant-emerald-500/10 backdrop-blur-sm hover:border-jpc-vibrant-emerald-500/30 transition-all duration-300">
+          <div className="px-6 py-6 border-b border-jpc-vibrant-emerald-500/20 bg-gradient-to-r from-jpc-vibrant-emerald-500/10 to-jpc-vibrant-purple-500/5">
+            <h3 className="text-sm font-bold text-foreground">
+              Incidents by Day
+              <span className="ml-3 text-xs font-normal text-muted-foreground/70">
+                {incidentsByDay ? `${incidentsByDay.totalIncidents} incidents` : 'Loading...'}
+              </span>
+            </h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Filters: {selectedApp === 'all' ? 'All Applications' : applications.find(a => a.code === selectedApp)?.name || selectedApp}
+              <span className="mx-2">|</span>
+              Source: <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code>
+            </p>
+          </div>
+          {incidentsByDayLoading ? (
+            <div className="p-6 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-jpc-vibrant-emerald-500"></div>
+            </div>
+          ) : incidentsByDay && incidentsByDay.data.length > 0 ? (
+            <div className="p-4">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-jpc-vibrant-emerald-500/20 hover:bg-transparent">
+                    <TableHead className="text-xs font-bold text-foreground/80 uppercase tracking-wider">day</TableHead>
+                    <TableHead className="text-xs font-bold text-foreground/80 uppercase tracking-wider text-right">Incidents</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {incidentsByDay.data.map((row) => (
+                    <TableRow key={row.day} className="border-b border-jpc-vibrant-emerald-500/10 hover:bg-jpc-vibrant-emerald-500/5 transition-colors">
+                      <TableCell className="text-sm text-foreground/80">Day {row.day}</TableCell>
+                      <TableCell className="text-sm text-foreground/80 text-right">{row.count}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="p-6 text-center text-muted-foreground text-sm">
+              No data available
+            </div>
+          )}
+        </div>
+
         {/* Evolution of Incidents Section */}
         <div className="mt-8 rounded-2xl border border-jpc-vibrant-emerald-500/20 bg-card/60 overflow-hidden shadow-2xl shadow-jpc-vibrant-emerald-500/10 backdrop-blur-sm hover:border-jpc-vibrant-emerald-500/30 transition-all duration-300">
           <div className="px-6 py-6 border-b border-jpc-vibrant-emerald-500/20 bg-gradient-to-r from-jpc-vibrant-emerald-500/10 to-jpc-vibrant-purple-500/5 flex items-center justify-between">
-            <h3 className="text-sm font-bold text-foreground">
-              Evolution of Incidents
-              <span className="ml-3 text-xs font-normal text-muted-foreground/70">
-                {moduleEvolutionData ? `${moduleEvolutionData.total} incidents across ${moduleEvolutionData.data.length} modules` : 'Loading...'}
-              </span>
-            </h3>
+            <div>
+              <h3 className="text-sm font-bold text-foreground">
+                Evolution of Incidents
+                <span className="ml-3 text-xs font-normal text-muted-foreground/70">
+                  {moduleEvolutionData ? `${moduleEvolutionData.total} incidents across ${moduleEvolutionData.data.length} modules` : 'Loading...'}
+                </span>
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Filters: {selectedApp === 'all' ? 'All Applications' : applications.find(a => a.code === selectedApp)?.name || selectedApp} | {isMonthlyMode ? lastDayOfMonth : `${startDate} to ${endDate}`} | <span className={isMonthlyMode ? 'text-jpc-vibrant-purple-400' : 'text-jpc-vibrant-cyan-400'}>{isMonthlyMode ? 'Monthly Report' : 'Weekly Report'}</span>
+                <span className="mx-2">|</span>
+                Source: <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code>, <code className="px-1 py-0.5 rounded bg-muted/50">module_registry</code>, <code className="px-1 py-0.5 rounded bg-muted/50">categorization_registry</code>, <code className="px-1 py-0.5 rounded bg-muted/50">parent_child_requests</code>, <code className="px-1 py-0.5 rounded bg-muted/50">monthly_report_status_registry</code>
+              </p>
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -1670,7 +2309,7 @@ function AnalyticsDashboardContent() {
 
                           {/* Ticket Group Rows - shown below each categorization */}
                           {showTicketDetails && cat.tickets && groupTickets(cat.tickets).map((group) => {
-                            const hasParent = group.parentTicketId && group.parentTicketId !== 'No asignado';
+                            const hasParent = group.parentTicketId && group.parentTicketId !== 'No asignado' && group.parentTicketId !== '0';
                             const groupTitle = hasParent
                               ? `${group.additionalInfo && group.additionalInfo !== 'No asignado' ? `${group.additionalInfo} - ` : ''}${group.parentTicketId}`
                               : group.displayStatus;
@@ -1711,6 +2350,680 @@ function AnalyticsDashboardContent() {
             </div>
           )}
         </div>
+
+        {/* Incident Overview by Category Section */}
+        <div className="mt-8">
+          <div className="px-6 py-4 border-b border-jpc-vibrant-cyan-500/20 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-foreground">
+                Incident Overview by Category
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Filters: {selectedApp === 'all' ? 'All Applications' : applications.find(a => a.code === selectedApp)?.name || selectedApp} | {isMonthlyMode ? lastDayOfMonth : `${startDate} to ${endDate}`} | <span className={isMonthlyMode ? 'text-jpc-vibrant-purple-400' : 'text-jpc-vibrant-cyan-400'}>{isMonthlyMode ? 'Monthly Report' : 'Weekly Report'}</span>
+                <span className="mx-2">|</span>
+                Source: <code className="px-1 py-0.5 rounded bg-muted/50">weekly_correctives</code>, <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code>
+              </p>
+            </div>
+            {incidentOverview && (
+              <span className="text-sm text-muted-foreground">
+                <span className="font-semibold text-jpc-vibrant-cyan-400">{incidentOverview.recurrentInL2L3.total}</span> requests of the week
+              </span>
+            )}
+          </div>
+
+          {incidentOverviewLoading ? (
+            <div className="p-8 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-48 w-full" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-48 w-full" />
+              </div>
+            </div>
+          ) : !incidentOverview ? (
+            <div className="p-8 text-center text-muted-foreground">
+              No data available
+            </div>
+          ) : (
+            <div className="p-6 space-y-6">
+              {/* Row 1: 3 cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Card 1: Resolved in L2 */}
+                <div className="rounded-xl border border-jpc-vibrant-cyan-500/20 bg-card/60 overflow-hidden shadow-lg">
+                  <div className="px-4 py-3 border-b border-jpc-vibrant-cyan-500/20 bg-gradient-to-r from-jpc-vibrant-cyan-500/10 to-transparent">
+                    <h4 className="text-sm font-bold text-foreground">Resolved in L2</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">Distribution by category</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Incidents resolved by Level 2 support team during the current week, grouped by incident category</p>
+                    <p className="text-xs text-muted-foreground/50 mt-1">
+                      Source: <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code>
+                    </p>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-b border-jpc-vibrant-cyan-500/20 hover:bg-jpc-vibrant-cyan-500/5">
+                          <TableHead className="font-semibold text-foreground/90 text-xs">Category</TableHead>
+                          <TableHead className="font-semibold text-foreground/90 text-xs text-right">Count</TableHead>
+                          <TableHead className="font-semibold text-foreground/90 text-xs text-right">Percentage</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {incidentOverview.resolvedInL2.data.map((item) => (
+                          <TableRow key={item.category} className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-jpc-vibrant-cyan-500/5">
+                            <TableCell className="text-xs text-foreground/80">
+                              <span title={item.category}>
+                                {item.categoryDisplayValue || item.category}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-xs text-jpc-vibrant-cyan-400 text-right font-semibold">{item.count}</TableCell>
+                            <TableCell className="text-xs text-foreground/70 text-right">{item.percentage.toFixed(1)}%</TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow className="border-t-2 border-jpc-vibrant-cyan-500/30 bg-jpc-vibrant-cyan-500/10">
+                          <TableCell className="text-xs font-bold text-foreground">TOTAL</TableCell>
+                          <TableCell className="text-xs font-bold text-jpc-vibrant-cyan-400 text-right">{incidentOverview.resolvedInL2.total}</TableCell>
+                          <TableCell className="text-xs font-bold text-foreground text-right">100%</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="px-4 py-2 bg-jpc-vibrant-cyan-500/5 border-t border-jpc-vibrant-cyan-500/10">
+                    <p className="text-xs text-jpc-vibrant-cyan-400 italic">{incidentOverview.resolvedInL2.total} Resolved tickets of the Week</p>
+                  </div>
+                </div>
+
+                {/* Card 2: Pending */}
+                <div className="rounded-xl border border-jpc-vibrant-cyan-500/20 bg-card/60 overflow-hidden shadow-lg">
+                  <div className="px-4 py-3 border-b border-jpc-vibrant-cyan-500/20 bg-gradient-to-r from-jpc-vibrant-cyan-500/10 to-transparent">
+                    <h4 className="text-sm font-bold text-foreground">Pending</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">Distribution by category</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Incidents currently being handled by Level 2 support team, pending resolution</p>
+                    <p className="text-xs text-muted-foreground/50 mt-1">
+                      Source: <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code>
+                    </p>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-b border-jpc-vibrant-cyan-500/20 hover:bg-jpc-vibrant-cyan-500/5">
+                          <TableHead className="font-semibold text-foreground/90 text-xs">Category</TableHead>
+                          <TableHead className="font-semibold text-foreground/90 text-xs text-right">Count</TableHead>
+                          <TableHead className="font-semibold text-foreground/90 text-xs text-right">Percentage</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {incidentOverview.pending.data.map((item) => (
+                          <TableRow key={item.category} className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-jpc-vibrant-cyan-500/5">
+                            <TableCell className="text-xs text-foreground/80">
+                              <span title={item.category}>
+                                {item.categoryDisplayValue || item.category}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-xs text-jpc-vibrant-cyan-400 text-right font-semibold">{item.count}</TableCell>
+                            <TableCell className="text-xs text-foreground/70 text-right">{item.percentage.toFixed(1)}%</TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow className="border-t-2 border-jpc-vibrant-cyan-500/30 bg-jpc-vibrant-cyan-500/10">
+                          <TableCell className="text-xs font-bold text-foreground">TOTAL</TableCell>
+                          <TableCell className="text-xs font-bold text-jpc-vibrant-cyan-400 text-right">{incidentOverview.pending.total}</TableCell>
+                          <TableCell className="text-xs font-bold text-foreground text-right">100%</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="px-4 py-2 bg-jpc-vibrant-cyan-500/5 border-t border-jpc-vibrant-cyan-500/10">
+                    <p className="text-xs text-jpc-vibrant-cyan-400 italic">{incidentOverview.pending.total} pending tickets of the Week</p>
+                  </div>
+                </div>
+
+                {/* Card 3: Recurrent in L2 & L3 */}
+                <div className="rounded-xl border border-jpc-vibrant-cyan-500/20 bg-card/60 overflow-hidden shadow-lg">
+                  <div className="px-4 py-3 border-b border-jpc-vibrant-cyan-500/20 bg-gradient-to-r from-jpc-vibrant-cyan-500/10 to-transparent">
+                    <h4 className="text-sm font-bold text-foreground">Recurrent in L2 & L3</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">Distribution by recurrency</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Analysis of incident recurrence patterns to identify unique vs recurring issues</p>
+                    <p className="text-xs text-muted-foreground/50 mt-1">
+                      Source: <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code>
+                    </p>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-b border-jpc-vibrant-cyan-500/20 hover:bg-jpc-vibrant-cyan-500/5">
+                          <TableHead className="font-semibold text-foreground/90 text-xs">Category</TableHead>
+                          <TableHead className="font-semibold text-foreground/90 text-xs text-right">Count</TableHead>
+                          <TableHead className="font-semibold text-foreground/90 text-xs text-right">Percentage</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {incidentOverview.recurrentInL2L3.data.map((item) => (
+                          <TableRow key={item.category} className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-jpc-vibrant-cyan-500/5">
+                            <TableCell className="text-xs text-foreground/80">{item.category}</TableCell>
+                            <TableCell className="text-xs text-jpc-vibrant-cyan-400 text-right font-semibold">{item.count}</TableCell>
+                            <TableCell className="text-xs text-foreground/70 text-right">{item.percentage.toFixed(1)}%</TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow className="border-t-2 border-jpc-vibrant-cyan-500/30 bg-jpc-vibrant-cyan-500/10">
+                          <TableCell className="text-xs font-bold text-foreground">TOTAL</TableCell>
+                          <TableCell className="text-xs font-bold text-jpc-vibrant-cyan-400 text-right">{incidentOverview.recurrentInL2L3.total}</TableCell>
+                          <TableCell className="text-xs font-bold text-foreground text-right">100%</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="px-4 py-2 bg-jpc-vibrant-cyan-500/5 border-t border-jpc-vibrant-cyan-500/10">
+                    <p className="text-xs text-jpc-vibrant-cyan-400 italic">{incidentOverview.recurrentInL2L3.total} tickets of the Week</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 2: 2 cards */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Card 4: Assigned to L3 Backlog */}
+                <div className="rounded-xl border border-jpc-vibrant-cyan-500/20 bg-card/60 overflow-hidden shadow-lg">
+                  <div className="px-4 py-3 border-b border-jpc-vibrant-cyan-500/20 bg-gradient-to-r from-jpc-vibrant-cyan-500/10 to-transparent">
+                    <h4 className="text-sm font-bold text-foreground">Assigned to L3 Backlog</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">Distribution by Categorie</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Incidents escalated to Level 3 support or currently in the backlog awaiting assignment</p>
+                    <p className="text-xs text-muted-foreground/50 mt-1">
+                      Source: <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code>
+                    </p>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-b border-jpc-vibrant-cyan-500/20 hover:bg-jpc-vibrant-cyan-500/5">
+                          <TableHead className="font-semibold text-foreground/90 text-xs">Category</TableHead>
+                          <TableHead className="font-semibold text-foreground/90 text-xs text-right">Count</TableHead>
+                          <TableHead className="font-semibold text-foreground/90 text-xs text-right">Percentage</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {incidentOverview.assignedToL3Backlog.data.map((item) => (
+                          <TableRow key={item.category} className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-jpc-vibrant-cyan-500/5">
+                            <TableCell className="text-xs text-foreground/80">
+                              <span title={item.category}>
+                                {item.categoryDisplayValue || item.category}
+                              </span>
+                            </TableCell>
+                            <TableCell className="text-xs text-jpc-vibrant-cyan-400 text-right font-semibold">{item.count}</TableCell>
+                            <TableCell className="text-xs text-foreground/70 text-right">{item.percentage.toFixed(1)}%</TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow className="border-t-2 border-jpc-vibrant-cyan-500/30 bg-jpc-vibrant-cyan-500/10">
+                          <TableCell className="text-xs font-bold text-foreground">TOTAL</TableCell>
+                          <TableCell className="text-xs font-bold text-jpc-vibrant-cyan-400 text-right">{incidentOverview.assignedToL3Backlog.total}</TableCell>
+                          <TableCell className="text-xs font-bold text-foreground text-right">100%</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="px-4 py-2 bg-jpc-vibrant-cyan-500/5 border-t border-jpc-vibrant-cyan-500/10">
+                    <p className="text-xs text-jpc-vibrant-cyan-400 italic">{incidentOverview.assignedToL3Backlog.total} pending tickets of the Week</p>
+                  </div>
+                </div>
+
+                {/* Card 5: L3 Status */}
+                <div className="rounded-xl border border-jpc-vibrant-cyan-500/20 bg-card/60 overflow-hidden shadow-lg">
+                  <div className="px-4 py-3 border-b border-jpc-vibrant-cyan-500/20 bg-gradient-to-r from-jpc-vibrant-cyan-500/10 to-transparent">
+                    <h4 className="text-sm font-bold text-foreground">L3 Status</h4>
+                    <p className="text-xs text-muted-foreground mt-0.5">Distribution by Status</p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">Level 3 incident status distribution from previous periods, showing backlog evolution over time</p>
+                    <p className="text-xs text-muted-foreground/50 mt-1">
+                      {isMonthlyMode
+                        ? <>Filters: {selectedApp === 'all' ? 'All Applications' : applications.find(a => a.code === selectedApp)?.name || selectedApp} | {lastDayOfMonth} | Source: <code className="px-1 py-0.5 rounded bg-muted/50">weekly_correctives</code>, <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code></>
+                        : <>Filter: Records before {startDate} | Source: <code className="px-1 py-0.5 rounded bg-muted/50">weekly_correctives</code>, <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code></>
+                      }
+                    </p>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow className="border-b border-jpc-vibrant-cyan-500/20 hover:bg-jpc-vibrant-cyan-500/5">
+                          <TableHead className="font-semibold text-foreground/90 text-xs">Category</TableHead>
+                          <TableHead className="font-semibold text-foreground/90 text-xs text-right">Count</TableHead>
+                          <TableHead className="font-semibold text-foreground/90 text-xs text-right">Percentage</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {incidentOverview.l3Status.data.map((item) => (
+                          <TableRow key={item.status} className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-jpc-vibrant-cyan-500/5">
+                            <TableCell className="text-xs text-foreground/80">{item.status}</TableCell>
+                            <TableCell className="text-xs text-jpc-vibrant-cyan-400 text-right font-semibold">{item.count}</TableCell>
+                            <TableCell className="text-xs text-foreground/70 text-right">{item.percentage.toFixed(1)}%</TableCell>
+                          </TableRow>
+                        ))}
+                        <TableRow className="border-t-2 border-jpc-vibrant-cyan-500/30 bg-jpc-vibrant-cyan-500/10">
+                          <TableCell className="text-xs font-bold text-foreground">TOTAL</TableCell>
+                          <TableCell className="text-xs font-bold text-jpc-vibrant-cyan-400 text-right">{incidentOverview.l3Status.total}</TableCell>
+                          <TableCell className="text-xs font-bold text-foreground text-right">100%</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
+                  <div className="px-4 py-2 bg-jpc-vibrant-cyan-500/5 border-t border-jpc-vibrant-cyan-500/10">
+                    <p className="text-xs text-jpc-vibrant-cyan-400 italic">{incidentOverview.l3Status.total} tickets previous week</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* L3 Summary Section */}
+        <div className="mt-8">
+          <div className="px-6 py-4 border-b border-jpc-vibrant-cyan-500/20 flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-foreground">
+                L3 Summary
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Filters: {selectedApp === 'all' ? 'All Applications' : applications.find(a => a.code === selectedApp)?.name || selectedApp} | <span className={isMonthlyMode ? 'text-jpc-vibrant-purple-400' : 'text-jpc-vibrant-cyan-400'}>{isMonthlyMode ? 'Monthly Report' : 'Weekly Report'}</span>
+                <span className="mx-2">|</span>
+                Source: <code className="px-1 py-0.5 rounded bg-muted/50">weekly_correctives</code>, <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code>
+              </p>
+            </div>
+            {l3Summary && (
+              <span className="text-sm text-muted-foreground">
+                <span className="font-semibold text-jpc-vibrant-cyan-400">{l3Summary.totals.total}</span> pending code fixes
+              </span>
+            )}
+          </div>
+
+          {l3SummaryLoading ? (
+            <div className="p-8">
+              <Skeleton className="h-64 w-full" />
+            </div>
+          ) : !l3Summary ? (
+            <div className="p-8 text-center text-muted-foreground">
+              No data available
+            </div>
+          ) : (
+            <div className="p-6">
+              <div className="rounded-xl border border-jpc-vibrant-cyan-500/20 bg-card/60 overflow-hidden shadow-lg">
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-b border-jpc-vibrant-cyan-500/30 bg-jpc-vibrant-cyan-500/10">
+                        <TableHead className="font-bold text-foreground text-sm">Pending code fixes</TableHead>
+                        <TableHead className="font-bold text-foreground text-sm text-center">Critical</TableHead>
+                        <TableHead className="font-bold text-foreground text-sm text-center">High</TableHead>
+                        <TableHead className="font-bold text-foreground text-sm text-center">Medium</TableHead>
+                        <TableHead className="font-bold text-foreground text-sm text-center">Low</TableHead>
+                        <TableHead className="font-bold text-foreground text-sm text-center">TOTAL</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {l3Summary.data.map((row) => (
+                        <TableRow key={row.status} className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-jpc-vibrant-cyan-500/5">
+                          <TableCell className="text-sm text-foreground/80">{row.statusLabel}</TableCell>
+                          <TableCell className="text-sm text-center">
+                            {row.critical > 0 ? (
+                              <span className="text-red-400 font-semibold">{row.critical}</span>
+                            ) : (
+                              <span className="text-foreground/50">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-sm text-center">
+                            {row.high > 0 ? (
+                              <span className="text-orange-400 font-semibold">{row.high}</span>
+                            ) : (
+                              <span className="text-foreground/50">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-sm text-center">
+                            {row.medium > 0 ? (
+                              <span className="text-yellow-400 font-semibold">{row.medium}</span>
+                            ) : (
+                              <span className="text-foreground/50">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-sm text-center">
+                            {row.low > 0 ? (
+                              <span className="text-green-400 font-semibold">{row.low}</span>
+                            ) : (
+                              <span className="text-foreground/50">-</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-sm text-center font-semibold text-jpc-vibrant-cyan-400">{row.total}</TableCell>
+                        </TableRow>
+                      ))}
+                      {/* TOTAL Row */}
+                      <TableRow className="border-t-2 border-jpc-vibrant-cyan-500/30 bg-jpc-vibrant-cyan-500/10">
+                        <TableCell className="text-sm font-bold text-foreground">TOTAL</TableCell>
+                        <TableCell className="text-sm text-center font-bold">
+                          {l3Summary.totals.critical > 0 ? (
+                            <span className="text-red-400">{l3Summary.totals.critical}</span>
+                          ) : (
+                            <span className="text-foreground/50">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm text-center font-bold">
+                          {l3Summary.totals.high > 0 ? (
+                            <span className="text-orange-400">{l3Summary.totals.high}</span>
+                          ) : (
+                            <span className="text-foreground/50">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm text-center font-bold">
+                          {l3Summary.totals.medium > 0 ? (
+                            <span className="text-yellow-400">{l3Summary.totals.medium}</span>
+                          ) : (
+                            <span className="text-foreground/50">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm text-center font-bold">
+                          {l3Summary.totals.low > 0 ? (
+                            <span className="text-green-400">{l3Summary.totals.low}</span>
+                          ) : (
+                            <span className="text-foreground/50">-</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-sm text-center font-bold text-jpc-vibrant-cyan-400">{l3Summary.totals.total}</TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* L3 Requests by Status Sections */}
+        {l3RequestsByStatusLoading ? (
+          <div className="mt-8 p-8">
+            <Skeleton className="h-64 w-full" />
+          </div>
+        ) : l3RequestsByStatus && (
+          <div className="mt-8 space-y-6">
+            {/* Ready to Deploy Section */}
+            <div className="rounded-xl border border-jpc-vibrant-cyan-500/20 bg-card/60 overflow-hidden shadow-lg">
+              <div className="px-6 py-4 border-b border-jpc-vibrant-cyan-500/20 flex items-center justify-between bg-jpc-vibrant-cyan-500/5">
+                <div>
+                  <h4 className="text-md font-semibold text-foreground">
+                    Ready to deploy
+                  </h4>
+                  <p className="text-xs text-muted-foreground/50">
+                    Filters: {selectedApp === 'all' ? 'All Applications' : applications.find(a => a.code === selectedApp)?.name || selectedApp} | <span className={isMonthlyMode ? 'text-jpc-vibrant-purple-400' : 'text-jpc-vibrant-cyan-400'}>{isMonthlyMode ? 'Monthly Report' : 'Weekly Report'}</span>
+                    <span className="mx-2">|</span>
+                    Source: <code className="px-1 py-0.5 rounded bg-muted/50">weekly_correctives</code> + <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code> (Nivel 3)
+                  </p>
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  <span className="font-semibold text-jpc-vibrant-cyan-400">{l3RequestsByStatus.prdDeployment.length}</span> request(s)
+                </span>
+              </div>
+              {l3RequestsByStatus.prdDeployment.length === 0 ? (
+                <div className="p-6 text-center text-muted-foreground text-sm">No requests</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-b border-jpc-vibrant-cyan-500/30">
+                        <TableHead className="font-semibold text-foreground/80 text-sm w-12">#</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Request ID</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Create Date</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Module</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Subject</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Priority</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm text-center">Linked Tickets</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">ETA</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {l3RequestsByStatus.prdDeployment.map((req, index) => (
+                        <TableRow key={req.requestId} className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-jpc-vibrant-cyan-500/5">
+                          <TableCell className="text-sm text-foreground/60">{index + 1}</TableCell>
+                          <TableCell className="text-sm font-mono">
+                            {req.requestIdLink ? (
+                              <a href={req.requestIdLink} target="_blank" rel="noopener noreferrer"
+                                 className="text-jpc-vibrant-cyan-400 hover:text-jpc-vibrant-cyan-300 hover:underline transition-colors">
+                                {req.requestId}
+                              </a>
+                            ) : (
+                              <span className="text-jpc-vibrant-cyan-400">{req.requestId}</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-sm text-foreground/80">{req.createdTime}</TableCell>
+                          <TableCell className="text-sm text-foreground/80">{req.modulo}</TableCell>
+                          <TableCell className="text-sm text-foreground/80 max-w-xs truncate">{req.subject}</TableCell>
+                          <TableCell className="text-sm">
+                            <span className={`font-medium ${
+                              req.priorityEnglish === 'Critical' ? 'text-red-400' :
+                              req.priorityEnglish === 'High' ? 'text-orange-400' :
+                              req.priorityEnglish === 'Medium' ? 'text-yellow-400' :
+                              'text-green-400'
+                            }`}>
+                              {req.priorityEnglish}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-sm text-center text-foreground/80">{req.linkedTicketsCount}</TableCell>
+                          <TableCell className="text-sm text-foreground/80">{req.eta}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </div>
+
+            {/* In Testing Section */}
+            <div className="rounded-xl border border-jpc-vibrant-cyan-500/20 bg-card/60 overflow-hidden shadow-lg">
+              <div className="px-6 py-4 border-b border-jpc-vibrant-cyan-500/20 flex items-center justify-between bg-jpc-vibrant-cyan-500/5">
+                <div>
+                  <h4 className="text-md font-semibold text-foreground">
+                    In testing
+                  </h4>
+                  <p className="text-xs text-muted-foreground/50">
+                    Filters: {selectedApp === 'all' ? 'All Applications' : applications.find(a => a.code === selectedApp)?.name || selectedApp} | <span className={isMonthlyMode ? 'text-jpc-vibrant-purple-400' : 'text-jpc-vibrant-cyan-400'}>{isMonthlyMode ? 'Monthly Report' : 'Weekly Report'}</span>
+                    <span className="mx-2">|</span>
+                    Source: <code className="px-1 py-0.5 rounded bg-muted/50">weekly_correctives</code> + <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code> (Nivel 3)
+                  </p>
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  <span className="font-semibold text-jpc-vibrant-cyan-400">{l3RequestsByStatus.inTesting.length}</span> request(s)
+                </span>
+              </div>
+              {l3RequestsByStatus.inTesting.length === 0 ? (
+                <div className="p-6 text-center text-muted-foreground text-sm">No requests</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-b border-jpc-vibrant-cyan-500/30">
+                        <TableHead className="font-semibold text-foreground/80 text-sm w-12">#</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Request ID</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Create Date</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Module</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Subject</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Priority</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm text-center">Linked Tickets</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">ETA</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {l3RequestsByStatus.inTesting.map((req, index) => (
+                        <TableRow key={req.requestId} className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-jpc-vibrant-cyan-500/5">
+                          <TableCell className="text-sm text-foreground/60">{index + 1}</TableCell>
+                          <TableCell className="text-sm font-mono">
+                            {req.requestIdLink ? (
+                              <a href={req.requestIdLink} target="_blank" rel="noopener noreferrer"
+                                 className="text-jpc-vibrant-cyan-400 hover:text-jpc-vibrant-cyan-300 hover:underline transition-colors">
+                                {req.requestId}
+                              </a>
+                            ) : (
+                              <span className="text-jpc-vibrant-cyan-400">{req.requestId}</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-sm text-foreground/80">{req.createdTime}</TableCell>
+                          <TableCell className="text-sm text-foreground/80">{req.modulo}</TableCell>
+                          <TableCell className="text-sm text-foreground/80 max-w-xs truncate">{req.subject}</TableCell>
+                          <TableCell className="text-sm">
+                            <span className={`font-medium ${
+                              req.priorityEnglish === 'Critical' ? 'text-red-400' :
+                              req.priorityEnglish === 'High' ? 'text-orange-400' :
+                              req.priorityEnglish === 'Medium' ? 'text-yellow-400' :
+                              'text-green-400'
+                            }`}>
+                              {req.priorityEnglish}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-sm text-center text-foreground/80">{req.linkedTicketsCount}</TableCell>
+                          <TableCell className="text-sm text-foreground/80">{req.eta}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </div>
+
+            {/* Dev in Progress Section */}
+            <div className="rounded-xl border border-jpc-vibrant-cyan-500/20 bg-card/60 overflow-hidden shadow-lg">
+              <div className="px-6 py-4 border-b border-jpc-vibrant-cyan-500/20 flex items-center justify-between bg-jpc-vibrant-cyan-500/5">
+                <div>
+                  <h4 className="text-md font-semibold text-foreground">
+                    Dev in progress
+                  </h4>
+                  <p className="text-xs text-muted-foreground/50">
+                    Filters: {selectedApp === 'all' ? 'All Applications' : applications.find(a => a.code === selectedApp)?.name || selectedApp} | <span className={isMonthlyMode ? 'text-jpc-vibrant-purple-400' : 'text-jpc-vibrant-cyan-400'}>{isMonthlyMode ? 'Monthly Report' : 'Weekly Report'}</span>
+                    <span className="mx-2">|</span>
+                    Source: <code className="px-1 py-0.5 rounded bg-muted/50">weekly_correctives</code> + <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code> (Nivel 3)
+                  </p>
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  <span className="font-semibold text-jpc-vibrant-cyan-400">{l3RequestsByStatus.devInProgress.length}</span> request(s)
+                </span>
+              </div>
+              {l3RequestsByStatus.devInProgress.length === 0 ? (
+                <div className="p-6 text-center text-muted-foreground text-sm">No requests</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-b border-jpc-vibrant-cyan-500/30">
+                        <TableHead className="font-semibold text-foreground/80 text-sm w-12">#</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Request ID</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Create Date</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Module</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Subject</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Priority</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm text-center">Linked Tickets</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">ETA</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {l3RequestsByStatus.devInProgress.map((req, index) => (
+                        <TableRow key={req.requestId} className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-jpc-vibrant-cyan-500/5">
+                          <TableCell className="text-sm text-foreground/60">{index + 1}</TableCell>
+                          <TableCell className="text-sm font-mono">
+                            {req.requestIdLink ? (
+                              <a href={req.requestIdLink} target="_blank" rel="noopener noreferrer"
+                                 className="text-jpc-vibrant-cyan-400 hover:text-jpc-vibrant-cyan-300 hover:underline transition-colors">
+                                {req.requestId}
+                              </a>
+                            ) : (
+                              <span className="text-jpc-vibrant-cyan-400">{req.requestId}</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-sm text-foreground/80">{req.createdTime}</TableCell>
+                          <TableCell className="text-sm text-foreground/80">{req.modulo}</TableCell>
+                          <TableCell className="text-sm text-foreground/80 max-w-xs truncate">{req.subject}</TableCell>
+                          <TableCell className="text-sm">
+                            <span className={`font-medium ${
+                              req.priorityEnglish === 'Critical' ? 'text-red-400' :
+                              req.priorityEnglish === 'High' ? 'text-orange-400' :
+                              req.priorityEnglish === 'Medium' ? 'text-yellow-400' :
+                              'text-green-400'
+                            }`}>
+                              {req.priorityEnglish}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-sm text-center text-foreground/80">{req.linkedTicketsCount}</TableCell>
+                          <TableCell className="text-sm text-foreground/80">{req.eta}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </div>
+
+            {/* In Backlog Section */}
+            <div className="rounded-xl border border-jpc-vibrant-cyan-500/20 bg-card/60 overflow-hidden shadow-lg">
+              <div className="px-6 py-4 border-b border-jpc-vibrant-cyan-500/20 flex items-center justify-between bg-jpc-vibrant-cyan-500/5">
+                <div>
+                  <h4 className="text-md font-semibold text-foreground">
+                    In backlog
+                  </h4>
+                  <p className="text-xs text-muted-foreground/50">
+                    Filters: {selectedApp === 'all' ? 'All Applications' : applications.find(a => a.code === selectedApp)?.name || selectedApp} | <span className={isMonthlyMode ? 'text-jpc-vibrant-purple-400' : 'text-jpc-vibrant-cyan-400'}>{isMonthlyMode ? 'Monthly Report' : 'Weekly Report'}</span>
+                    <span className="mx-2">|</span>
+                    Source: <code className="px-1 py-0.5 rounded bg-muted/50">weekly_correctives</code> + <code className="px-1 py-0.5 rounded bg-muted/50">monthly_reports</code> (Nivel 3)
+                  </p>
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  <span className="font-semibold text-jpc-vibrant-cyan-400">{l3RequestsByStatus.inBacklog.length}</span> request(s)
+                </span>
+              </div>
+              {l3RequestsByStatus.inBacklog.length === 0 ? (
+                <div className="p-6 text-center text-muted-foreground text-sm">No requests</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-b border-jpc-vibrant-cyan-500/30">
+                        <TableHead className="font-semibold text-foreground/80 text-sm w-12">#</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Request ID</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Create Date</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Module</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Subject</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">Priority</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm text-center">Linked Tickets</TableHead>
+                        <TableHead className="font-semibold text-foreground/80 text-sm">ETA</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {l3RequestsByStatus.inBacklog.map((req, index) => (
+                        <TableRow key={req.requestId} className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-jpc-vibrant-cyan-500/5">
+                          <TableCell className="text-sm text-foreground/60">{index + 1}</TableCell>
+                          <TableCell className="text-sm font-mono">
+                            {req.requestIdLink ? (
+                              <a href={req.requestIdLink} target="_blank" rel="noopener noreferrer"
+                                 className="text-jpc-vibrant-cyan-400 hover:text-jpc-vibrant-cyan-300 hover:underline transition-colors">
+                                {req.requestId}
+                              </a>
+                            ) : (
+                              <span className="text-jpc-vibrant-cyan-400">{req.requestId}</span>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-sm text-foreground/80">{req.createdTime}</TableCell>
+                          <TableCell className="text-sm text-foreground/80">{req.modulo}</TableCell>
+                          <TableCell className="text-sm text-foreground/80 max-w-xs truncate">{req.subject}</TableCell>
+                          <TableCell className="text-sm">
+                            <span className={`font-medium ${
+                              req.priorityEnglish === 'Critical' ? 'text-red-400' :
+                              req.priorityEnglish === 'High' ? 'text-orange-400' :
+                              req.priorityEnglish === 'Medium' ? 'text-yellow-400' :
+                              'text-green-400'
+                            }`}>
+                              {req.priorityEnglish}
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-sm text-center text-foreground/80">{req.linkedTicketsCount}</TableCell>
+                          <TableCell className="text-sm text-foreground/80">{req.eta}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Modal for Request IDs */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

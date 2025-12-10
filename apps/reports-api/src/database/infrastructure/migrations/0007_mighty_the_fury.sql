@@ -1,0 +1,1 @@
+ALTER TABLE `weekly_correctives` ADD `request_id_link` text;

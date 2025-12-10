@@ -119,12 +119,141 @@ export interface IncidentsByWeekResult {
   totalIncidents: number;
 }
 
+// Incidents by Day interfaces
+export interface IncidentsByDayRow {
+  day: number;     // Day of month (1-31)
+  count: number;
+}
+
+export interface IncidentsByDayResult {
+  data: IncidentsByDayRow[];
+  totalIncidents: number;
+}
+
+// Incident Overview by Category interfaces
+export interface IncidentOverviewItem {
+  category: string;
+  categoryDisplayValue: string | null;
+  count: number;
+  percentage: number;
+}
+
+export interface IncidentOverviewCard {
+  data: IncidentOverviewItem[];
+  total: number;
+}
+
+export interface L3StatusItem {
+  status: string;
+  count: number;
+  percentage: number;
+}
+
+export interface L3StatusCard {
+  data: L3StatusItem[];
+  total: number;
+}
+
+export interface IncidentOverviewByCategoryResult {
+  resolvedInL2: IncidentOverviewCard;
+  pending: IncidentOverviewCard;
+  recurrentInL2L3: IncidentOverviewCard;
+  assignedToL3Backlog: IncidentOverviewCard;
+  l3Status: L3StatusCard;
+}
+
+// L3 Summary interfaces
+export interface L3SummaryRow {
+  status: string;
+  statusLabel: string;
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+  total: number;
+}
+
+export interface L3SummaryResult {
+  data: L3SummaryRow[];
+  totals: {
+    critical: number;
+    high: number;
+    medium: number;
+    low: number;
+    total: number;
+  };
+}
+
+// L3 Requests by Status interfaces
+export interface L3RequestDetail {
+  requestId: string;
+  requestIdLink?: string;
+  createdTime: string;
+  modulo: string;
+  subject: string;
+  priority: string;
+  priorityEnglish: string;
+  linkedTicketsCount: number;
+  eta: string;
+}
+
+export interface L3RequestsByStatusResult {
+  devInProgress: L3RequestDetail[];
+  inBacklog: L3RequestDetail[];
+  inTesting: L3RequestDetail[];
+  prdDeployment: L3RequestDetail[];
+}
+
+// Missing Scope by Parent interfaces
+export interface MissingScopeByParentRow {
+  createdDate: string;
+  linkedRequestId: string;
+  linkedRequestIdLink: string | null;
+  additionalInfo: string;
+  totalLinkedTickets: number;
+  linkedTicketsInMonth: number;
+  requestStatus: string;
+  eta: string;
+}
+
+export interface MissingScopeByParentResult {
+  data: MissingScopeByParentRow[];
+  monthName: string;
+  totalIncidents: number;
+}
+
+// Bugs by Parent interfaces
+export interface BugsByParentRow {
+  createdDate: string;
+  linkedRequestId: string;
+  linkedRequestIdLink: string | null;
+  additionalInfo: string;
+  totalLinkedTickets: number;
+  linkedTicketsInMonth: number;
+  requestStatus: string;
+  eta: string;
+}
+
+export interface BugsByParentResult {
+  data: BugsByParentRow[];
+  monthName: string;
+  totalIncidents: number;
+}
+
+// Critical Incidents with mapping interface
+export interface CriticalIncidentWithMapping {
+  monthlyReport: MonthlyReport;
+  mappedModuleDisplayValue: string | null;
+  mappedStatusDisplayValue: string | null;
+  mappedCategorizationDisplayValue: string | null;
+}
+
 export interface IMonthlyReportRepository {
   findAll(): Promise<MonthlyReport[]>;
   countAll(): Promise<number>;
   bulkCreate(records: InsertMonthlyReport[]): Promise<void>;
   deleteAll(): Promise<number>;
-  findCriticalIncidentsFiltered(app?: string, month?: string): Promise<MonthlyReport[]>;
+  findCriticalIncidentsFiltered(app?: string, month?: string): Promise<CriticalIncidentWithMapping[]>;
   findModuleEvolution(
     app?: string,
     startDate?: string,
@@ -150,4 +279,26 @@ export interface IMonthlyReportRepository {
     app?: string,
     year?: number,
   ): Promise<IncidentsByWeekResult>;
+  findIncidentOverviewByCategory(
+    app?: string,
+    startDate?: string,
+    endDate?: string,
+  ): Promise<IncidentOverviewByCategoryResult>;
+  findL3Summary(
+    app?: string,
+  ): Promise<L3SummaryResult>;
+  findL3RequestsByStatus(
+    app?: string,
+  ): Promise<L3RequestsByStatusResult>;
+  findMissingScopeByParent(
+    app?: string,
+    month?: string,
+  ): Promise<MissingScopeByParentResult>;
+  findBugsByParent(
+    app?: string,
+    month?: string,
+  ): Promise<BugsByParentResult>;
+  findIncidentsByDay(
+    app?: string,
+  ): Promise<IncidentsByDayResult>;
 }

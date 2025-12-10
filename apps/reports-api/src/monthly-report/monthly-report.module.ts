@@ -15,6 +15,12 @@ import { GetCategoryDistributionUseCase } from './application/use-cases/get-cate
 import { GetBusinessFlowPriorityUseCase } from './application/use-cases/get-business-flow-priority.use-case';
 import { GetPriorityByAppUseCase } from './application/use-cases/get-priority-by-app.use-case';
 import { GetIncidentsByWeekUseCase } from './application/use-cases/get-incidents-by-week.use-case';
+import { GetIncidentOverviewByCategoryUseCase } from './application/use-cases/get-incident-overview-by-category.use-case';
+import { GetL3SummaryUseCase } from './application/use-cases/get-l3-summary.use-case';
+import { GetL3RequestsByStatusUseCase } from './application/use-cases/get-l3-requests-by-status.use-case';
+import { GetMissingScopeByParentUseCase } from './application/use-cases/get-missing-scope-by-parent.use-case';
+import { GetBugsByParentUseCase } from './application/use-cases/get-bugs-by-parent.use-case';
+import { GetIncidentsByDayUseCase } from './application/use-cases/get-incidents-by-day.use-case';
 
 @Module({
   imports: [DatabaseModule],
@@ -74,6 +80,36 @@ import { GetIncidentsByWeekUseCase } from './application/use-cases/get-incidents
     {
       provide: GetIncidentsByWeekUseCase,
       useFactory: (repository: any) => new GetIncidentsByWeekUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetIncidentOverviewByCategoryUseCase,
+      useFactory: (repository: any) => new GetIncidentOverviewByCategoryUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetL3SummaryUseCase,
+      useFactory: (repository: any) => new GetL3SummaryUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetL3RequestsByStatusUseCase,
+      useFactory: (repository: any) => new GetL3RequestsByStatusUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetMissingScopeByParentUseCase,
+      useFactory: (repository: any) => new GetMissingScopeByParentUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetBugsByParentUseCase,
+      useFactory: (repository: any) => new GetBugsByParentUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetIncidentsByDayUseCase,
+      useFactory: (repository: any) => new GetIncidentsByDayUseCase(repository),
       inject: [MONTHLY_REPORT_REPOSITORY],
     },
   ],

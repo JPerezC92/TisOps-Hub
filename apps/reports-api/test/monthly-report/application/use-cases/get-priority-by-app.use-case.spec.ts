@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { GetPriorityByAppUseCase } from '@monthly-report/application/use-cases/get-priority-by-app.use-case';
 import type {
   IMonthlyReportRepository,
@@ -7,23 +8,10 @@ import type {
 
 describe('GetPriorityByAppUseCase', () => {
   let useCase: GetPriorityByAppUseCase;
-  let mockRepository: IMonthlyReportRepository;
+  let mockRepository: MockProxy<IMonthlyReportRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      countAll: vi.fn(),
-      bulkCreate: vi.fn(),
-      deleteAll: vi.fn(),
-      findCriticalIncidentsFiltered: vi.fn(),
-      findModuleEvolution: vi.fn(),
-      findStabilityIndicators: vi.fn(),
-      findCategoryDistribution: vi.fn(),
-      findBusinessFlowByPriority: vi.fn(),
-      findPriorityByApp: vi.fn(),
-      findIncidentsByWeek: vi.fn(),
-    };
-
+    mockRepository = mock<IMonthlyReportRepository>();
     useCase = new GetPriorityByAppUseCase(mockRepository);
   });
 
@@ -54,7 +42,7 @@ describe('GetPriorityByAppUseCase', () => {
   it('should return priority by app data without filters', async () => {
     const expectedResult = createMockResult();
 
-    vi.spyOn(mockRepository, 'findPriorityByApp').mockResolvedValue(expectedResult);
+    mockRepository.findPriorityByApp.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute();
 
@@ -70,7 +58,7 @@ describe('GetPriorityByAppUseCase', () => {
       totalIncidents: 50,
     });
 
-    vi.spyOn(mockRepository, 'findPriorityByApp').mockResolvedValue(expectedResult);
+    mockRepository.findPriorityByApp.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute('SB');
 
@@ -82,7 +70,7 @@ describe('GetPriorityByAppUseCase', () => {
   it('should return priority by app filtered by month', async () => {
     const expectedResult = createMockResult({ monthName: 'November 2024' });
 
-    vi.spyOn(mockRepository, 'findPriorityByApp').mockResolvedValue(expectedResult);
+    mockRepository.findPriorityByApp.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute(undefined, '2024-11');
 
@@ -93,7 +81,7 @@ describe('GetPriorityByAppUseCase', () => {
   it('should return priority by app filtered by both app and month', async () => {
     const expectedResult = createMockResult({ monthName: 'December 2024', totalIncidents: 25 });
 
-    vi.spyOn(mockRepository, 'findPriorityByApp').mockResolvedValue(expectedResult);
+    mockRepository.findPriorityByApp.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute('FF', '2024-12');
 
@@ -108,7 +96,7 @@ describe('GetPriorityByAppUseCase', () => {
       totalIncidents: 0,
     };
 
-    vi.spyOn(mockRepository, 'findPriorityByApp').mockResolvedValue(emptyResult);
+    mockRepository.findPriorityByApp.mockResolvedValue(emptyResult);
 
     const result = await useCase.execute();
 

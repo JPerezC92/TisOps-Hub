@@ -1,4 +1,5 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { GetL3TicketsByStatusUseCase } from '@weekly-corrective/application/use-cases/get-l3-tickets-by-status.use-case';
 import type {
   IWeeklyCorrectiveRepository,
@@ -7,17 +8,10 @@ import type {
 
 describe('GetL3TicketsByStatusUseCase', () => {
   let useCase: GetL3TicketsByStatusUseCase;
-  let mockRepository: IWeeklyCorrectiveRepository;
+  let mockRepository: MockProxy<IWeeklyCorrectiveRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      countAll: vi.fn(),
-      bulkCreate: vi.fn(),
-      deleteAll: vi.fn(),
-      findL3TicketsByStatus: vi.fn(),
-    };
-
+    mockRepository = mock<IWeeklyCorrectiveRepository>();
     useCase = new GetL3TicketsByStatusUseCase(mockRepository);
   });
 
@@ -51,7 +45,7 @@ describe('GetL3TicketsByStatusUseCase', () => {
   it('should return L3 tickets by status data without filters', async () => {
     const expectedResult = createMockResult();
 
-    vi.spyOn(mockRepository, 'findL3TicketsByStatus').mockResolvedValue(expectedResult);
+    mockRepository.findL3TicketsByStatus.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute();
 
@@ -68,7 +62,7 @@ describe('GetL3TicketsByStatusUseCase', () => {
       totalL3Tickets: 23,
     });
 
-    vi.spyOn(mockRepository, 'findL3TicketsByStatus').mockResolvedValue(expectedResult);
+    mockRepository.findL3TicketsByStatus.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute('SB');
 
@@ -80,7 +74,7 @@ describe('GetL3TicketsByStatusUseCase', () => {
   it('should return L3 tickets by status filtered by month', async () => {
     const expectedResult = createMockResult({ monthName: 'November 2024' });
 
-    vi.spyOn(mockRepository, 'findL3TicketsByStatus').mockResolvedValue(expectedResult);
+    mockRepository.findL3TicketsByStatus.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute(undefined, '2024-11');
 
@@ -91,7 +85,7 @@ describe('GetL3TicketsByStatusUseCase', () => {
   it('should return L3 tickets by status filtered by both app and month', async () => {
     const expectedResult = createMockResult({ monthName: 'December 2024', totalL3Tickets: 15 });
 
-    vi.spyOn(mockRepository, 'findL3TicketsByStatus').mockResolvedValue(expectedResult);
+    mockRepository.findL3TicketsByStatus.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute('FF', '2024-12');
 
@@ -107,7 +101,7 @@ describe('GetL3TicketsByStatusUseCase', () => {
       totalL3Tickets: 0,
     };
 
-    vi.spyOn(mockRepository, 'findL3TicketsByStatus').mockResolvedValue(emptyResult);
+    mockRepository.findL3TicketsByStatus.mockResolvedValue(emptyResult);
 
     const result = await useCase.execute();
 
@@ -134,7 +128,7 @@ describe('GetL3TicketsByStatusUseCase', () => {
       totalL3Tickets: 8,
     };
 
-    vi.spyOn(mockRepository, 'findL3TicketsByStatus').mockResolvedValue(expectedResult);
+    mockRepository.findL3TicketsByStatus.mockResolvedValue(expectedResult);
 
     const result = await useCase.execute();
 

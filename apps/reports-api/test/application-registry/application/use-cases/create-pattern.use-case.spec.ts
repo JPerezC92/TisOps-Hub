@@ -1,25 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { CreatePatternUseCase } from '@application-registry/application/use-cases/create-pattern.use-case';
-import { IApplicationRegistryRepository } from '@application-registry/domain/repositories/application-registry.repository.interface';
+import type { IApplicationRegistryRepository } from '@application-registry/domain/repositories/application-registry.repository.interface';
 import { ApplicationPatternFactory } from '../../helpers/application-registry.factory';
 
 describe('CreatePatternUseCase', () => {
   let useCase: CreatePatternUseCase;
-  let mockRepository: IApplicationRegistryRepository;
+  let mockRepository: MockProxy<IApplicationRegistryRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      findById: vi.fn(),
-      findByPattern: vi.fn(),
-      findAllWithPatterns: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-      createPattern: vi.fn(),
-      deletePattern: vi.fn(),
-    };
-
+    mockRepository = mock<IApplicationRegistryRepository>();
     useCase = new CreatePatternUseCase(mockRepository);
   });
 
@@ -41,7 +31,7 @@ describe('CreatePatternUseCase', () => {
       isActive: true,
     });
 
-    vi.spyOn(mockRepository, 'createPattern').mockResolvedValue(expectedPattern);
+    mockRepository.createPattern.mockResolvedValue(expectedPattern);
 
     const result = await useCase.execute(patternData);
 
@@ -64,7 +54,7 @@ describe('CreatePatternUseCase', () => {
       isActive: true,
     });
 
-    vi.spyOn(mockRepository, 'createPattern').mockResolvedValue(expectedPattern);
+    mockRepository.createPattern.mockResolvedValue(expectedPattern);
 
     const result = await useCase.execute(patternData);
 

@@ -355,7 +355,18 @@ export default function WeeklyCorrectivePage() {
                   {paginatedWeeklyCorrectives.map((wc) => (
                     <tr key={wc.requestId} className="border-b border-jpc-vibrant-cyan-500/10 hover:bg-jpc-vibrant-cyan-500/10 transition-all duration-300 group">
                       <td className="px-6 py-4 text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors font-medium">
-                        {wc.requestId}
+                        {wc.requestIdLink ? (
+                          <a
+                            href={wc.requestIdLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-jpc-vibrant-cyan-400 hover:text-jpc-vibrant-cyan-300 hover:underline transition-colors"
+                          >
+                            {wc.requestId}
+                          </a>
+                        ) : (
+                          wc.requestId
+                        )}
                       </td>
                       <td className="px-6 py-4 text-xs text-foreground/80 group-hover:text-cyan-100 transition-colors">
                         <div className="max-w-xs truncate" title={wc.technician}>

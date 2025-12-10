@@ -1,19 +1,15 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { GetAllProblemsUseCase } from '@problems/application/use-cases/get-all-problems.use-case';
 import type { IProblemsRepository } from '@problems/domain/repositories/problems.repository.interface';
 import type { Problem } from '@repo/database';
 
 describe('GetAllProblemsUseCase', () => {
   let useCase: GetAllProblemsUseCase;
-  let mockRepository: IProblemsRepository;
+  let mockRepository: MockProxy<IProblemsRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      countAll: vi.fn(),
-      bulkCreate: vi.fn(),
-      deleteAll: vi.fn(),
-    };
+    mockRepository = mock<IProblemsRepository>();
     useCase = new GetAllProblemsUseCase(mockRepository);
   });
 
@@ -48,8 +44,8 @@ describe('GetAllProblemsUseCase', () => {
         },
       ];
 
-      vi.mocked(mockRepository.findAll).mockResolvedValue(mockProblems);
-      vi.mocked(mockRepository.countAll).mockResolvedValue(2);
+      mockRepository.findAll.mockResolvedValue(mockProblems);
+      mockRepository.countAll.mockResolvedValue(2);
 
       const result = await useCase.execute();
 
@@ -62,8 +58,8 @@ describe('GetAllProblemsUseCase', () => {
     });
 
     it('should return empty array when no problems exist', async () => {
-      vi.mocked(mockRepository.findAll).mockResolvedValue([]);
-      vi.mocked(mockRepository.countAll).mockResolvedValue(0);
+      mockRepository.findAll.mockResolvedValue([]);
+      mockRepository.countAll.mockResolvedValue(0);
 
       const result = await useCase.execute();
 
@@ -77,7 +73,7 @@ describe('GetAllProblemsUseCase', () => {
 
     it('should propagate repository errors', async () => {
       const error = new Error('Database connection failed');
-      vi.mocked(mockRepository.findAll).mockRejectedValue(error);
+      mockRepository.findAll.mockRejectedValue(error);
 
       await expect(useCase.execute()).rejects.toThrow('Database connection failed');
       expect(mockRepository.findAll).toHaveBeenCalledTimes(1);

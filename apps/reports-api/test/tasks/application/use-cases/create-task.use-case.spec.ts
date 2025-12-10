@@ -1,21 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { CreateTaskUseCase } from '@tasks/application/use-cases/create-task.use-case';
-import { ITaskRepository } from '@tasks/domain/repositories/task.repository.interface';
+import type { ITaskRepository } from '@tasks/domain/repositories/task.repository.interface';
 import { Task } from '@tasks/domain/entities/task.entity';
 
 describe('CreateTaskUseCase', () => {
   let createTaskUseCase: CreateTaskUseCase;
-  let mockTaskRepository: ITaskRepository;
+  let mockTaskRepository: MockProxy<ITaskRepository>;
 
   beforeEach(() => {
-    mockTaskRepository = {
-      create: vi.fn(),
-      findAll: vi.fn(),
-      findById: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    };
-
+    mockTaskRepository = mock<ITaskRepository>();
     createTaskUseCase = new CreateTaskUseCase(mockTaskRepository);
   });
 
@@ -36,7 +30,7 @@ describe('CreateTaskUseCase', () => {
       new Date(),
     );
 
-    vi.spyOn(mockTaskRepository, 'create').mockResolvedValue(expectedTask);
+    mockTaskRepository.create.mockResolvedValue(expectedTask);
 
     const result = await createTaskUseCase.execute(taskData);
 
@@ -66,7 +60,7 @@ describe('CreateTaskUseCase', () => {
       new Date(),
     );
 
-    vi.spyOn(mockTaskRepository, 'create').mockResolvedValue(expectedTask);
+    mockTaskRepository.create.mockResolvedValue(expectedTask);
 
     const result = await createTaskUseCase.execute(taskData);
 
@@ -97,7 +91,7 @@ describe('CreateTaskUseCase', () => {
       new Date(),
     );
 
-    vi.spyOn(mockTaskRepository, 'create').mockResolvedValue(expectedTask);
+    mockTaskRepository.create.mockResolvedValue(expectedTask);
 
     const result = await createTaskUseCase.execute(taskData);
 
@@ -125,7 +119,7 @@ describe('CreateTaskUseCase', () => {
       new Date(),
     );
 
-    vi.spyOn(mockTaskRepository, 'create').mockResolvedValue(expectedTask);
+    mockTaskRepository.create.mockResolvedValue(expectedTask);
 
     await createTaskUseCase.execute(taskData);
 

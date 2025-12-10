@@ -158,6 +158,7 @@ async function seedMonthlyReportStatusRegistry() {
     { rawStatus: 'En Mantenimiento Correctivo', displayStatus: DisplayStatus.InL3Backlog },
     { rawStatus: 'En Pruebas', displayStatus: DisplayStatus.InL3Backlog },
     { rawStatus: 'Dev in Progress', displayStatus: DisplayStatus.InL3Backlog },
+    { rawStatus: 'PRD Deployment', displayStatus: DisplayStatus.InL3Backlog },
   ];
 
   for (const mapping of statusMappings) {

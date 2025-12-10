@@ -20,6 +20,7 @@ export default defineConfig({
       '@problems': resolve(__dirname, './src/problems'),
       '@application-registry': resolve(__dirname, './src/application-registry'),
       '@monthly-report-status-registry': resolve(__dirname, './src/monthly-report-status-registry'),
+      '@corrective-status-registry': resolve(__dirname, './src/corrective-status-registry'),
       '@src': resolve(__dirname, './src'),
     },
   },

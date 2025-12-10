@@ -113,6 +113,12 @@ export class MonthlyReportExcelParser {
         }
       }
 
+      // Fallback: construct URL for linkedRequestId if no hyperlink found
+      const linkedRequestIdValue = String(row['Linked Request Id'] || '').trim();
+      if (!linkedRequestIdLink && linkedRequestIdValue && linkedRequestIdValue.toLowerCase() !== 'no asignado') {
+        linkedRequestIdLink = `https://sdp.belcorp.biz/WorkOrder.do?woMode=viewWO&woID=${linkedRequestIdValue}`;
+      }
+
       return {
         requestId: Number(row['Request ID']) || 0,
         requestIdLink,

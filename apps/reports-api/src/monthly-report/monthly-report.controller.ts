@@ -97,6 +97,64 @@ export class MonthlyReportController {
     return this.monthlyReportService.getIncidentsByWeek(app, yearNum);
   }
 
+  @Get('incidents-by-day')
+  @ApiOperation({ summary: 'Get incident counts grouped by day of month' })
+  @ApiResponse({ status: 200, description: 'Returns incidents count per day' })
+  async getIncidentsByDay(
+    @Query('app') app?: string,
+  ) {
+    return this.monthlyReportService.getIncidentsByDay(app);
+  }
+
+  @Get('incident-overview-by-category')
+  @ApiOperation({ summary: 'Get incident overview grouped by category for 5 cards' })
+  @ApiResponse({ status: 200, description: 'Returns incident overview data for Resolved in L2, Pending, Recurrent, L3 Backlog, and L3 Status' })
+  async getIncidentOverviewByCategory(
+    @Query('app') app?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.monthlyReportService.getIncidentOverviewByCategory(app, startDate, endDate);
+  }
+
+  @Get('l3-summary')
+  @ApiOperation({ summary: 'Get L3 summary table with pending code fixes by status and priority' })
+  @ApiResponse({ status: 200, description: 'Returns L3 summary data grouped by status with priority breakdown' })
+  async getL3Summary(
+    @Query('app') app?: string,
+  ) {
+    return this.monthlyReportService.getL3Summary(app);
+  }
+
+  @Get('l3-requests-by-status')
+  @ApiOperation({ summary: 'Get L3 requests grouped by status with full details' })
+  @ApiResponse({ status: 200, description: 'Returns L3 requests grouped by status (Dev in Progress, In Backlog, In Testing, PRD Deployment)' })
+  async getL3RequestsByStatus(
+    @Query('app') app?: string,
+  ) {
+    return this.monthlyReportService.getL3RequestsByStatus(app);
+  }
+
+  @Get('missing-scope-by-parent')
+  @ApiOperation({ summary: 'Get distribution of missing scope incidents by parent ticket' })
+  @ApiResponse({ status: 200, description: 'Returns missing scope incidents grouped by linked request ID with parent ticket details' })
+  async getMissingScopeByParent(
+    @Query('app') app?: string,
+    @Query('month') month?: string,
+  ) {
+    return this.monthlyReportService.getMissingScopeByParent(app, month);
+  }
+
+  @Get('bugs-by-parent')
+  @ApiOperation({ summary: 'Get distribution of bug incidents by parent ticket' })
+  @ApiResponse({ status: 200, description: 'Returns bug incidents grouped by linked request ID with parent ticket details' })
+  async getBugsByParent(
+    @Query('app') app?: string,
+    @Query('month') month?: string,
+  ) {
+    return this.monthlyReportService.getBugsByParent(app, month);
+  }
+
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Upload and parse XD 2025 DATA INFORME MENSUAL - Current Month.xlsx file' })

@@ -1,22 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { UpdateMonthlyReportStatusUseCase } from '@monthly-report-status-registry/application/use-cases/update-monthly-report-status.use-case';
-import { IMonthlyReportStatusRegistryRepository } from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
+import type { IMonthlyReportStatusRegistryRepository } from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
 import { MonthlyReportStatusFactory } from '../../helpers/monthly-report-status.factory';
 
 describe('UpdateMonthlyReportStatusUseCase', () => {
   let useCase: UpdateMonthlyReportStatusUseCase;
-  let mockRepository: IMonthlyReportStatusRegistryRepository;
+  let mockRepository: MockProxy<IMonthlyReportStatusRegistryRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      findById: vi.fn(),
-      findByRawStatus: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    };
-
+    mockRepository = mock<IMonthlyReportStatusRegistryRepository>();
     useCase = new UpdateMonthlyReportStatusUseCase(mockRepository);
   });
 
@@ -34,7 +27,7 @@ describe('UpdateMonthlyReportStatusUseCase', () => {
       isActive: false,
     });
 
-    vi.spyOn(mockRepository, 'update').mockResolvedValue(expectedStatus);
+    mockRepository.update.mockResolvedValue(expectedStatus);
 
     const result = await useCase.execute(1, updateData);
 
@@ -55,7 +48,7 @@ describe('UpdateMonthlyReportStatusUseCase', () => {
       displayStatus: 'New Display Status',
     });
 
-    vi.spyOn(mockRepository, 'update').mockResolvedValue(expectedStatus);
+    mockRepository.update.mockResolvedValue(expectedStatus);
 
     const result = await useCase.execute(1, updateData);
 

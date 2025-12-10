@@ -32,7 +32,7 @@ describe('ProblemsExcelParser', () => {
         Sheets: {
           'ManageEngine Report Framework': {
             'C2': { v: '131205', l: { Target: 'https://sdp.belcorp.biz/WorkOrder.do?woID=131205' } },
-            'D2': { v: 'Test Subject', l: { Target: 'https://sdp.belcorp.biz/WorkOrder.do?woID=131205' } },
+            'E2': { v: 'Test Subject', l: { Target: 'https://sdp.belcorp.biz/WorkOrder.do?woID=131205' } },
           },
         },
       };
@@ -78,11 +78,13 @@ describe('ProblemsExcelParser', () => {
         requestId: 131205,
         requestIdLink: 'https://sdp.belcorp.biz/WorkOrder.do?woID=131205',
         serviceCategory: 'Problemas',
+        requestStatus: '',
         subject: 'UNETE 4 | VALIDACION | Test',
         subjectLink: 'https://sdp.belcorp.biz/WorkOrder.do?woID=131205',
         createdTime: '17/10/2025 11:34',
         aplicativos: 'Unete 3.0',
         createdBy: 'John Doe',
+        technician: '',
         planesDeAccion: 'Plan A',
         observaciones: 'Some observations',
         dueByTime: '25/11/2025 11:34',
@@ -141,7 +143,7 @@ describe('ProblemsExcelParser', () => {
         Sheets: {
           'ManageEngine Report Framework': {
             'C2': { v: '131205' },
-            'D2': {
+            'E2': {
               v: 'Test Subject',
               l: { Target: 'https://sdp.belcorp.biz/WorkOrder.do?woID=131205' },
             },

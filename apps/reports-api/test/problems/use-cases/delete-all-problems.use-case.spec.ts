@@ -1,24 +1,20 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { DeleteAllProblemsUseCase } from '@problems/application/use-cases/delete-all-problems.use-case';
 import type { IProblemsRepository } from '@problems/domain/repositories/problems.repository.interface';
 
 describe('DeleteAllProblemsUseCase', () => {
   let useCase: DeleteAllProblemsUseCase;
-  let mockRepository: IProblemsRepository;
+  let mockRepository: MockProxy<IProblemsRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      countAll: vi.fn(),
-      bulkCreate: vi.fn(),
-      deleteAll: vi.fn(),
-    };
+    mockRepository = mock<IProblemsRepository>();
     useCase = new DeleteAllProblemsUseCase(mockRepository);
   });
 
   describe('execute', () => {
     it('should delete all problems and return count', async () => {
-      vi.mocked(mockRepository.deleteAll).mockResolvedValue(50);
+      mockRepository.deleteAll.mockResolvedValue(50);
 
       const result = await useCase.execute();
 
@@ -30,7 +26,7 @@ describe('DeleteAllProblemsUseCase', () => {
     });
 
     it('should handle deletion when no records exist', async () => {
-      vi.mocked(mockRepository.deleteAll).mockResolvedValue(0);
+      mockRepository.deleteAll.mockResolvedValue(0);
 
       const result = await useCase.execute();
 
@@ -43,7 +39,7 @@ describe('DeleteAllProblemsUseCase', () => {
 
     it('should propagate repository errors', async () => {
       const error = new Error('Database deletion failed');
-      vi.mocked(mockRepository.deleteAll).mockRejectedValue(error);
+      mockRepository.deleteAll.mockRejectedValue(error);
 
       await expect(useCase.execute()).rejects.toThrow('Database deletion failed');
       expect(mockRepository.deleteAll).toHaveBeenCalledTimes(1);

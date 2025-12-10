@@ -1,22 +1,15 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { mock, MockProxy } from 'vitest-mock-extended';
 import { MapRawStatusUseCase } from '@monthly-report-status-registry/application/use-cases/map-raw-status.use-case';
-import { IMonthlyReportStatusRegistryRepository } from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
+import type { IMonthlyReportStatusRegistryRepository } from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
 import { MonthlyReportStatusFactory } from '../../helpers/monthly-report-status.factory';
 
 describe('MapRawStatusUseCase', () => {
   let useCase: MapRawStatusUseCase;
-  let mockRepository: IMonthlyReportStatusRegistryRepository;
+  let mockRepository: MockProxy<IMonthlyReportStatusRegistryRepository>;
 
   beforeEach(() => {
-    mockRepository = {
-      findAll: vi.fn(),
-      findById: vi.fn(),
-      findByRawStatus: vi.fn(),
-      create: vi.fn(),
-      update: vi.fn(),
-      delete: vi.fn(),
-    };
-
+    mockRepository = mock<IMonthlyReportStatusRegistryRepository>();
     useCase = new MapRawStatusUseCase(mockRepository);
   });
 
@@ -26,7 +19,7 @@ describe('MapRawStatusUseCase', () => {
       displayStatus: 'In L3 Backlog',
     });
 
-    vi.spyOn(mockRepository, 'findByRawStatus').mockResolvedValue(status);
+    mockRepository.findByRawStatus.mockResolvedValue(status);
 
     const result = await useCase.execute('Pendiente');
 
@@ -35,7 +28,7 @@ describe('MapRawStatusUseCase', () => {
   });
 
   it('should return "In L3 Backlog" as fallback when raw status is not found', async () => {
-    vi.spyOn(mockRepository, 'findByRawStatus').mockResolvedValue(null);
+    mockRepository.findByRawStatus.mockResolvedValue(null);
 
     const result = await useCase.execute('Unknown Status');
 
@@ -49,7 +42,7 @@ describe('MapRawStatusUseCase', () => {
       displayStatus: 'Resolved',
     });
 
-    vi.spyOn(mockRepository, 'findByRawStatus').mockResolvedValue(resolvedStatus);
+    mockRepository.findByRawStatus.mockResolvedValue(resolvedStatus);
 
     const result = await useCase.execute('Resuelto');
 
