@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getDisplayStatusColor } from '@/lib/utils/display-status';
 
 interface RequestStatus {
   id: number;
@@ -192,22 +193,6 @@ export default function MonthlyReportStatusRegistryPage() {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, sortBy]);
-
-  // Get unique display statuses for color coding
-  const getDisplayStatusColor = (displayStatus: string) => {
-    switch (displayStatus) {
-      case 'Closed':
-        return 'bg-jpc-vibrant-emerald-500/20 text-jpc-vibrant-emerald-400 border-jpc-vibrant-emerald-500/40';
-      case 'On going L2':
-        return 'bg-jpc-vibrant-cyan-500/20 text-jpc-vibrant-cyan-400 border-jpc-vibrant-cyan-500/40';
-      case 'On going L3':
-        return 'bg-jpc-vibrant-purple-500/20 text-jpc-vibrant-purple-400 border-jpc-vibrant-purple-500/40';
-      case 'In L3 Backlog':
-        return 'bg-jpc-vibrant-orange-500/20 text-jpc-vibrant-orange-400 border-jpc-vibrant-orange-500/40';
-      default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/40';
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background">

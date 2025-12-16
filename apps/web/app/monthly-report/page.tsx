@@ -2,32 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import type { MonthlyReport } from '@repo/reports/frontend';
-import { Priority, DisplayStatus, type DisplayStatusValue } from '@repo/reports/frontend';
+import { Priority, type DisplayStatusValue } from '@repo/reports/frontend';
 import { StatsGrid } from '@/components/stats-grid';
 import { UploadSectionDynamic } from '@/components/upload-section-dynamic';
 import { Badge } from '@/components/ui/badge';
 import { getPriorityColorClasses } from '@/lib/utils/priority-colors';
+import { getDisplayStatusColor } from '@/lib/utils/display-status';
 
 // Extended type with computed displayStatus column
 interface MonthlyReportWithDisplayStatus extends MonthlyReport {
   displayStatus: DisplayStatusValue;
 }
-
-// Get color classes for display status badges
-const getDisplayStatusColor = (displayStatus: DisplayStatusValue) => {
-  switch (displayStatus) {
-    case DisplayStatus.Closed:
-      return 'bg-jpc-vibrant-emerald-500/20 text-jpc-vibrant-emerald-400 border-jpc-vibrant-emerald-500/40';
-    case DisplayStatus.OnGoingL2:
-      return 'bg-jpc-vibrant-cyan-500/20 text-jpc-vibrant-cyan-400 border-jpc-vibrant-cyan-500/40';
-    case DisplayStatus.OnGoingL3:
-      return 'bg-jpc-vibrant-purple-500/20 text-jpc-vibrant-purple-400 border-jpc-vibrant-purple-500/40';
-    case DisplayStatus.InL3Backlog:
-      return 'bg-jpc-vibrant-orange-500/20 text-jpc-vibrant-orange-400 border-jpc-vibrant-orange-500/40';
-    default:
-      return 'bg-gray-500/20 text-gray-400 border-gray-500/40';
-  }
-};
 
 export default function MonthlyReportPage() {
   const [monthlyReports, setMonthlyReports] = useState<MonthlyReportWithDisplayStatus[]>([]);
