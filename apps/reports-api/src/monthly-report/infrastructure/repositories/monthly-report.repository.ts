@@ -1246,6 +1246,24 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       filteredNivel3 = uniqueNivel3Results.filter((r) => r.registeredAppCode === app);
     }
 
+    // Apply date range filter (same as filteredResults)
+    if (startDate || endDate) {
+      const start = startDate ? DateTime.fromISO(startDate).startOf('day') : null;
+      const end = endDate ? DateTime.fromISO(endDate).endOf('day') : null;
+
+      filteredNivel3 = filteredNivel3.filter((result) => {
+        try {
+          const createdDate = DateTime.fromJSDate(result.monthlyReport.createdTime);
+          if (!createdDate.isValid) return false;
+          if (start && createdDate < start) return false;
+          if (end && createdDate > end) return false;
+          return true;
+        } catch {
+          return false;
+        }
+      });
+    }
+
     // 4. Assigned to L3 Backlog - combine mapped statuses + Nivel 3 records
     const l3BacklogRecords = filteredResults.filter((r) => {
       const mappedStatus = statusMap.get(r.monthlyReport.requestStatus);

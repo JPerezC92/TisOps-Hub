@@ -29,7 +29,11 @@
       "Bash(turbo test:*)",
       "Bash(pnpm --filter reports-api test)",
       "Bash(pnpm --filter reports-api test:*)",
-      "Bash(pnpm --filter reports-api test:e2e:*)"
+      "Bash(pnpm --filter reports-api test:e2e:*)",
+      "Bash(cat:*)",
+      "Bash(pnpm --filter web test)",
+      "Bash(pnpm exec playwright install:*)",
+      "Bash(pnpm --filter web test:e2e:*)"
     ],
     "deny": [],
     "ask": []

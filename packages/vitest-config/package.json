@@ -1,5 +1,5 @@
 {
-  "name": "@repo/jest-config",
+  "name": "@repo/vitest-config",
   "version": "0.0.0",
   "private": true,
   "license": "MIT",
@@ -8,6 +8,14 @@
   },
   "main": "./dist/entry.js",
   "types": "./dist/entry.d.ts",
+  "typesVersions": {
+    "*": {
+      "base": ["./dist/base.d.ts"],
+      "nest": ["./dist/nest.d.ts"],
+      "next": ["./dist/next.d.ts"],
+      "react": ["./dist/react.d.ts"]
+    }
+  },
   "exports": {
     ".": {
       "import": "./dist/entry.js",
@@ -28,13 +36,16 @@
       "import": "./dist/next.js",
       "require": "./dist/next.js",
       "types": "./dist/next.d.ts"
+    },
+    "./react": {
+      "import": "./dist/react.js",
+      "require": "./dist/react.js",
+      "types": "./dist/react.d.ts"
     }
   },
   "devDependencies": {
-    "@jest/types": "30.2.0",
-    "jest": "30.2.0",
-    "next": "16.0.1",
-    "typescript": "5.8.2"
+    "typescript": "5.8.2",
+    "vitest": "4.0.8"
   },
   "scripts": {
     "build": "tsc"

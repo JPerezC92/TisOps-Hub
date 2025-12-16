@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getCorrectiveStatusColor } from '@/lib/utils/display-status';
 
 interface CorrectiveStatus {
   id: number;
@@ -213,22 +214,6 @@ export default function CorrectiveStatusRegistryPage() {
     setCurrentPage(1);
   }, [searchTerm, statusFilter, sortBy]);
 
-  // Get display status color
-  const getDisplayStatusColor = (displayStatus: string) => {
-    switch (displayStatus) {
-      case 'In Backlog':
-        return 'bg-jpc-vibrant-orange-500/20 text-jpc-vibrant-orange-400 border-jpc-vibrant-orange-500/40';
-      case 'Dev in Progress':
-        return 'bg-jpc-vibrant-cyan-500/20 text-jpc-vibrant-cyan-400 border-jpc-vibrant-cyan-500/40';
-      case 'In Testing':
-        return 'bg-jpc-vibrant-purple-500/20 text-jpc-vibrant-purple-400 border-jpc-vibrant-purple-500/40';
-      case 'PRD Deployment':
-        return 'bg-jpc-vibrant-emerald-500/20 text-jpc-vibrant-emerald-400 border-jpc-vibrant-emerald-500/40';
-      default:
-        return 'bg-gray-500/20 text-gray-400 border-gray-500/40';
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -340,7 +325,7 @@ export default function CorrectiveStatusRegistryPage() {
                         <span className="text-muted-foreground/50 text-lg">&#8594;</span>
                       </td>
                       <td className="px-6 py-4">
-                        <Badge variant="outline" className={`${getDisplayStatusColor(status.displayStatus)} font-medium`}>
+                        <Badge variant="outline" className={`${getCorrectiveStatusColor(status.displayStatus)} font-medium`}>
                           {status.displayStatus}
                         </Badge>
                       </td>
