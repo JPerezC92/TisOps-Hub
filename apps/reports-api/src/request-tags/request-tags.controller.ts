@@ -7,13 +7,17 @@ import {
   UploadedFile,
   HttpException,
   HttpStatus,
+  HttpCode,
   Query,
+  Body,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { RequestTagsService } from './request-tags.service';
 import { GetRequestIdsByAdditionalInfoUseCase } from './application/use-cases/get-request-ids-by-additional-info.use-case';
 import { GetMissingIdsByLinkedRequestUseCase } from './application/use-cases/get-missing-ids-by-linked-request.use-case';
+import { CreateRequestTagDto } from './application/dtos/create-request-tag.dto';
+import { JSendSuccess } from '@repo/reports/common';
 
 @ApiTags('request-tags')
 @Controller('request-tags')
@@ -29,6 +33,15 @@ export class RequestTagsController {
   @ApiResponse({ status: 200, description: 'Returns all records' })
   async findAll() {
     return this.requestTagsService.findAll();
+  }
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new request tag' })
+  @ApiResponse({ status: 201, description: 'Request tag created successfully' })
+  @ApiResponse({ status: 409, description: 'Request tag already exists' })
+  async create(@Body() data: CreateRequestTagDto) {
+    return this.requestTagsService.create(data);
   }
 
   @Post('upload')
@@ -99,7 +112,7 @@ export class RequestTagsController {
   async getRequestIdsByAdditionalInfo(
     @Query('info') info: string,
     @Query('linkedRequestId') linkedRequestId: string,
-  ) {
+  ): Promise<JSendSuccess<{ requestIds: Array<{ requestId: string; requestIdLink?: string }> }>> {
     if (!info) {
       throw new HttpException(
         'Query parameter "info" is required',
@@ -114,7 +127,11 @@ export class RequestTagsController {
       );
     }
 
-    return this.getRequestIdsByAdditionalInfoUseCase.execute(info, linkedRequestId);
+    const requestIds = await this.getRequestIdsByAdditionalInfoUseCase.execute(info, linkedRequestId);
+    return {
+      status: 'success',
+      data: { requestIds },
+    };
   }
 
   @Get('missing-ids')
@@ -151,7 +168,7 @@ export class RequestTagsController {
     status: 400,
     description: 'Query parameter "linkedRequestId" is required',
   })
-  async getMissingIds(@Query('linkedRequestId') linkedRequestId: string) {
+  async getMissingIds(@Query('linkedRequestId') linkedRequestId: string): Promise<JSendSuccess<{ missingIds: Array<{ requestId: string; requestIdLink?: string }> }>> {
     if (!linkedRequestId) {
       throw new HttpException(
         'Query parameter "linkedRequestId" is required',
@@ -160,6 +177,9 @@ export class RequestTagsController {
     }
 
     const missingIds = await this.getMissingIdsByLinkedRequestUseCase.execute(linkedRequestId);
-    return { missingIds };
+    return {
+      status: 'success',
+      data: { missingIds },
+    };
   }
 }

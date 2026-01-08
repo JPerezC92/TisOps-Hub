@@ -64,14 +64,24 @@ export class DatabaseExceptionFilter implements ExceptionFilter {
       exception instanceof Error ? exception.stack : undefined,
     );
 
-    // Send user-friendly response
-    response.status(status).json({
-      statusCode: status,
-      message,
-      timestamp: new Date().toISOString(),
-      path: request.url,
-      method: request.method,
-    });
+    // Send JSend-compliant response
+    if (status >= 400 && status < 500) {
+      // Client error (4xx) - use 'fail' status
+      response.status(status).json({
+        status: 'fail',
+        data: {
+          message,
+          code: errorType,
+        },
+      });
+    } else {
+      // Server error (5xx) - use 'error' status
+      response.status(status).json({
+        status: 'error',
+        message,
+        code: errorType,
+      });
+    }
   }
 
   private async logErrorToDatabase(

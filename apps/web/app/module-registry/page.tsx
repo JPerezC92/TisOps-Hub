@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getErrorMessage } from '@/lib/api';
 
 interface Module {
   id: number;
@@ -98,7 +99,7 @@ export default function ModuleRegistryPage() {
         alert('Module mapping created successfully');
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message || 'Failed to create module mapping'}`);
+        alert(`Error: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Failed to create module mapping:', error);
@@ -126,7 +127,7 @@ export default function ModuleRegistryPage() {
         alert('Module mapping updated successfully');
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message || 'Failed to update module mapping'}`);
+        alert(`Error: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Failed to update module mapping:', error);
@@ -150,7 +151,7 @@ export default function ModuleRegistryPage() {
         alert('Module mapping deleted successfully');
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message || 'Failed to delete module mapping'}`);
+        alert(`Error: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Failed to delete module mapping:', error);

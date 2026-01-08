@@ -60,7 +60,7 @@ describe('GetCriticalIncidentsAnalyticsUseCase', () => {
   it('should return critical incidents filtered by month', async () => {
     const mockData = MonthlyReportFactory.createManyCriticalIncidentsWithMapping(4, {
       priority: Priority.Critical,
-      createdTime: '15/10/2024 10:30',
+      createdTime: new Date('2024-10-15T10:30:00'),
     });
 
     mockRepository.findCriticalIncidentsFiltered.mockResolvedValue(mockData);
@@ -70,7 +70,7 @@ describe('GetCriticalIncidentsAnalyticsUseCase', () => {
     expect(mockRepository.findCriticalIncidentsFiltered).toHaveBeenCalledWith(undefined, '2024-10');
     expect(result).toHaveLength(4);
     result.forEach((item: CriticalIncidentResponse) => {
-      expect(item.createdTime).toBe('15/10/2024 10:30');
+      expect(item.createdTime).toEqual(new Date('2024-10-15T10:30:00'));
     });
   });
 
@@ -78,7 +78,7 @@ describe('GetCriticalIncidentsAnalyticsUseCase', () => {
     const mockData = MonthlyReportFactory.createManyCriticalIncidentsWithMapping(1, {
       priority: Priority.Critical,
       aplicativos: 'FFVV',
-      createdTime: '20/11/2024 14:00',
+      createdTime: new Date('2024-11-20T14:00:00'),
     });
 
     mockRepository.findCriticalIncidentsFiltered.mockResolvedValue(mockData);
@@ -88,7 +88,7 @@ describe('GetCriticalIncidentsAnalyticsUseCase', () => {
     expect(mockRepository.findCriticalIncidentsFiltered).toHaveBeenCalledWith('FF', '2024-11');
     expect(result).toHaveLength(1);
     expect(result[0].aplicativos).toBe('FFVV');
-    expect(result[0].createdTime).toBe('20/11/2024 14:00');
+    expect(result[0].createdTime).toEqual(new Date('2024-11-20T14:00:00'));
   });
 
   it('should return empty array when no critical incidents exist', async () => {

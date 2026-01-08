@@ -6,6 +6,7 @@ import type { WarRoom } from '@repo/reports/frontend';
 import { StatsGrid } from '@/components/stats-grid';
 import { UploadSectionDynamic } from '@/components/upload-section-dynamic';
 import { Badge } from '@/components/ui/badge';
+import { getErrorMessage } from '@/lib/api';
 
 // Date formatting utility using Luxon
 function formatExcelDate(timestamp: number | Date | string): string {
@@ -96,7 +97,7 @@ export default function WarRoomsPage() {
         await fetchWarRooms();
       } else {
         const error = await response.json();
-        alert(`❌ Upload failed: ${error.message}`);
+        alert(`❌ Upload failed: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Upload error:', error);
@@ -137,7 +138,7 @@ export default function WarRoomsPage() {
         await fetchWarRooms();
       } else {
         const error = await response.json();
-        alert(`❌ Failed to delete records: ${error.message}`);
+        alert(`❌ Failed to delete records: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Delete records error:', error);

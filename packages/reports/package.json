@@ -10,6 +10,12 @@
   },
   "main": "./dist/entry.js",
   "types": "./dist/entry.d.ts",
+  "typesVersions": {
+    "*": {
+      "frontend": ["./dist/frontend.d.ts"],
+      "common": ["./dist/common/index.d.ts"]
+    }
+  },
   "files": [
     "./dist/**"
   ],

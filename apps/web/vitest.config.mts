@@ -7,8 +7,13 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    include: ['**/*.{test,spec}.{ts,tsx}'],
+    include: [
+      'modules/**/__tests__/**/*.spec.{ts,tsx}',
+      'shared/**/__tests__/**/*.spec.{ts,tsx}',
+      'lib/**/__tests__/**/*.spec.ts',
+    ],
     exclude: ['node_modules', '.next', 'dist', 'e2e'],
     pool: 'vmThreads',
+    setupFiles: ['./test/setup.ts'],
   },
 })

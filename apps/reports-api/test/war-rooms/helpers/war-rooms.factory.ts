@@ -13,14 +13,13 @@ export class WarRoomsFactory {
     ]);
     const status = overrides?.status ?? faker.helpers.arrayElement(['Closed', 'Open']);
 
-    // Excel date serial number (days since 1900-01-01)
-    const excelDate = overrides?.date ?? faker.number.int({ min: 44000, max: 46000 });
+    // Generate date as Date object
+    const date = overrides?.date ?? faker.date.recent({ days: 90 });
 
-    // Excel time serial (fraction of day, 0.0 to 1.0)
-    const startTime = overrides?.startTime ?? faker.number.float({ min: 0, max: 1, fractionDigits: 6 });
+    // Generate start and end times as Date objects
     const durationMinutes = overrides?.durationMinutes ?? faker.number.int({ min: 30, max: 480 });
-    const durationFraction = durationMinutes / (24 * 60); // Convert minutes to fraction of day
-    const endTime = overrides?.endTime ?? Math.min(startTime + durationFraction, 1.0);
+    const startTime = overrides?.startTime ?? faker.date.recent({ days: 30 });
+    const endTime = overrides?.endTime ?? new Date(startTime.getTime() + durationMinutes * 60 * 1000);
 
     return {
       requestId,
@@ -32,7 +31,7 @@ export class WarRoomsFactory {
         'MDM',
         'Portal Consultoras',
       ]),
-      date: excelDate,
+      date,
       summary: overrides?.summary ?? faker.lorem.sentence(),
       initialPriority: priority,
       startTime,

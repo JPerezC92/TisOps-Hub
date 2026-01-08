@@ -9,6 +9,7 @@ export default mergeConfig(
     plugins: [swc.vite()],
     resolve: {
       alias: {
+        '@shared': resolve(__dirname, './src/shared'),
         '@tasks': resolve(__dirname, './src/tasks'),
         '@parent-child-requests': resolve(
           __dirname,

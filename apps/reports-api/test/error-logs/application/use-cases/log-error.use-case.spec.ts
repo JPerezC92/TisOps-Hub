@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mock, MockProxy } from 'vitest-mock-extended';
 import { LogErrorUseCase, LogErrorData } from '@error-logs/application/use-cases/log-error.use-case';
 import { IErrorLogRepository } from '@error-logs/domain/repositories/error-log.repository.interface';

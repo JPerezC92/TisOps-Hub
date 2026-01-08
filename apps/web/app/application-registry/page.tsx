@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getErrorMessage } from '@/lib/api';
 
 interface ApplicationPattern {
   id: number;
@@ -121,7 +122,7 @@ export default function ApplicationRegistryPage() {
         alert('Application created successfully');
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message || 'Failed to create application'}`);
+        alert(`Error: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Failed to create application:', error);
@@ -149,7 +150,7 @@ export default function ApplicationRegistryPage() {
         alert('Application updated successfully');
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message || 'Failed to update application'}`);
+        alert(`Error: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Failed to update application:', error);
@@ -178,7 +179,7 @@ export default function ApplicationRegistryPage() {
         alert(`${deleteTarget.type === 'app' ? 'Application' : 'Pattern'} deleted successfully`);
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message || 'Failed to delete'}`);
+        alert(`Error: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Failed to delete:', error);
@@ -210,7 +211,7 @@ export default function ApplicationRegistryPage() {
         alert('Pattern added successfully');
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message || 'Failed to add pattern'}`);
+        alert(`Error: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Failed to add pattern:', error);

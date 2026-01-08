@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getErrorMessage } from '@/lib/api';
 
 interface Categorization {
   id: number;
@@ -85,7 +86,7 @@ export default function CategorizationRegistryPage() {
         alert('Categorization mapping created successfully');
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message || 'Failed to create categorization mapping'}`);
+        alert(`Error: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Failed to create categorization mapping:', error);
@@ -113,7 +114,7 @@ export default function CategorizationRegistryPage() {
         alert('Categorization mapping updated successfully');
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message || 'Failed to update categorization mapping'}`);
+        alert(`Error: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Failed to update categorization mapping:', error);
@@ -137,7 +138,7 @@ export default function CategorizationRegistryPage() {
         alert('Categorization mapping deleted successfully');
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message || 'Failed to delete categorization mapping'}`);
+        alert(`Error: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Failed to delete categorization mapping:', error);
