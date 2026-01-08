@@ -14,6 +14,7 @@ export class WeeklyCorrectiveFactory {
 
     return {
       requestId,
+      requestIdLink: overrides?.requestIdLink ?? `https://sdp.belcorp.biz/WorkOrder.do?woID=${requestId}`,
       technician: overrides?.technician ?? faker.person.fullName(),
       aplicativos: overrides?.aplicativos ?? faker.helpers.arrayElement([
         'Somos Belcorp',

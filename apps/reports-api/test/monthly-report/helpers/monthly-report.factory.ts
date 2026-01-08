@@ -30,6 +30,7 @@ export class MonthlyReportFactory {
 
     return {
       requestId,
+      requestIdLink: overrides?.requestIdLink ?? `https://sdp.belcorp.biz/WorkOrder.do?woID=${requestId}`,
       aplicativos: overrides?.aplicativos ?? faker.helpers.arrayElement([
         'Somos Belcorp',
         'FFVV',
@@ -41,13 +42,7 @@ export class MonthlyReportFactory {
         'Requerimiento',
         'Consulta',
       ]),
-      createdTime: overrides?.createdTime ?? faker.date.recent({ days: 30 }).toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
+      createdTime: overrides?.createdTime ?? faker.date.recent({ days: 30 }),
       requestStatus: status,
       modulo: overrides?.modulo ?? faker.helpers.arrayElement([
         'Pedidos',
@@ -79,6 +74,9 @@ export class MonthlyReportFactory {
       linkedRequestId: overrides?.linkedRequestId ?? (faker.datatype.boolean()
         ? faker.number.int({ min: 100000, max: 200000 }).toString()
         : 'No asignado'),
+      linkedRequestIdLink: overrides?.linkedRequestIdLink ?? (faker.datatype.boolean()
+        ? `https://sdp.belcorp.biz/WorkOrder.do?woID=${faker.number.int({ min: 100000, max: 200000 })}`
+        : null),
       requestOlaStatus: overrides?.requestOlaStatus ?? faker.helpers.arrayElement([
         'Violated',
         'Not Violated',

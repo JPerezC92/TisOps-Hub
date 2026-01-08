@@ -33,7 +33,10 @@
       "Bash(cat:*)",
       "Bash(pnpm --filter web test)",
       "Bash(pnpm exec playwright install:*)",
-      "Bash(pnpm --filter web test:e2e:*)"
+      "Bash(pnpm --filter web test:e2e:*)",
+      "Bash(findstr:*)",
+      "Bash(mkdir:*)",
+      "Bash(pnpm --filter web test -- --run)"
     ],
     "deny": [],
     "ask": []

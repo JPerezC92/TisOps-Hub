@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { mock, MockProxy } from 'vitest-mock-extended';
 import { CreateRequestTagUseCase } from '@request-tags/application/use-cases/create-request-tag.use-case';
 import { IRequestTagRepository, RequestTagData } from '@request-tags/domain/repositories/request-tag.repository.interface';
+import { RequestTagAlreadyExistsError } from '@request-tags/domain/errors/request-tag-already-exists.error';
+import { DomainError } from '@shared/domain/errors/domain.error';
 import { RequestTagFactory } from '../../helpers/request-tag.factory';
 
 describe('CreateRequestTagUseCase', () => {
@@ -40,7 +42,7 @@ describe('CreateRequestTagUseCase', () => {
     expect(result).toEqual(createdTag);
   });
 
-  it('should throw error when request ID already exists', async () => {
+  it('should return RequestTagAlreadyExistsError when request ID already exists', async () => {
     const tagData: RequestTagData = {
       requestId: 'REQ001',
       createdTime: '2024-01-01T00:00:00Z',
@@ -57,10 +59,11 @@ describe('CreateRequestTagUseCase', () => {
 
     mockRepository.findByRequestId.mockResolvedValue(existingTag);
 
-    await expect(createRequestTagUseCase.execute(tagData)).rejects.toThrow(
-      'Request ID REQ001 already exists',
-    );
+    const result = await createRequestTagUseCase.execute(tagData);
 
+    expect(DomainError.isDomainError(result)).toBe(true);
+    expect(result).toBeInstanceOf(RequestTagAlreadyExistsError);
+    expect((result as RequestTagAlreadyExistsError).requestId).toBe('REQ001');
     expect(mockRepository.findByRequestId).toHaveBeenCalledWith('REQ001');
     expect(mockRepository.create).not.toHaveBeenCalled();
   });
@@ -89,10 +92,14 @@ describe('CreateRequestTagUseCase', () => {
 
     const result = await createRequestTagUseCase.execute(tagData);
 
-    expect(result.requestIdLink).toBeUndefined();
-    expect(result.linkedRequestIdLink).toBeUndefined();
-    expect(result.isAssigned()).toBe(false);
-    expect(result.hasJiraTicket()).toBe(false);
+    // Type guard: result is RequestTag when creation succeeds
+    expect(DomainError.isDomainError(result)).toBe(false);
+    if (!DomainError.isDomainError(result)) {
+      expect(result.requestIdLink).toBeUndefined();
+      expect(result.linkedRequestIdLink).toBeUndefined();
+      expect(result.isAssigned()).toBe(false);
+      expect(result.hasJiraTicket()).toBe(false);
+    }
   });
 
   it('should handle repository errors during creation', async () => {

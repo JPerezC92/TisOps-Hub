@@ -9,6 +9,7 @@ import type {
   RequestCategorization,
 } from '@repo/reports/frontend';
 import { useEffect, useState } from 'react';
+import { getErrorMessage } from '@/lib/api';
 
 interface RequestCategorizationWithInfo extends RequestCategorization {
   additionalInformation: string[];
@@ -408,7 +409,7 @@ export default function RequestCategorizationPage() {
         await fetchData();
       } else {
         const error = await response.json();
-        alert(`❌ Upload failed: ${error.message}`);
+        alert(`❌ Upload failed: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Upload error:', error);
@@ -542,7 +543,7 @@ export default function RequestCategorizationPage() {
         await fetchData();
       } else {
         const error = await response.json();
-        alert(`❌ Failed to delete records: ${error.message}`);
+        alert(`❌ Failed to delete records: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Delete records error:', error);

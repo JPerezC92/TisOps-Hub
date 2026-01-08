@@ -5,6 +5,7 @@ import type { Problem } from '@repo/reports/frontend';
 import { StatsGrid } from '@/components/stats-grid';
 import { UploadSectionDynamic } from '@/components/upload-section-dynamic';
 import { Badge } from '@/components/ui/badge';
+import { getErrorMessage } from '@/lib/api';
 
 export default function ProblemsPage() {
   const [problems, setProblems] = useState<Problem[]>([]);
@@ -76,7 +77,7 @@ export default function ProblemsPage() {
         await fetchProblems();
       } else {
         const error = await response.json();
-        alert(`❌ Upload failed: ${error.message}`);
+        alert(`❌ Upload failed: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Upload error:', error);
@@ -114,7 +115,7 @@ export default function ProblemsPage() {
         await fetchProblems();
       } else {
         const error = await response.json();
-        alert(`❌ Failed to delete records: ${error.message || 'Unknown error'}`);
+        alert(`❌ Failed to delete records: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Delete records error:', error);

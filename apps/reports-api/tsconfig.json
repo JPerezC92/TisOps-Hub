@@ -4,6 +4,7 @@
     "baseUrl": "./",
     "outDir": "./dist",
     "paths": {
+      "@shared/*": ["src/shared/*"],
       "@tasks/*": ["src/tasks/*"],
       "@parent-child-requests/*": ["src/parent-child-requests/*"],
       "@request-categorization/*": ["src/request-categorization/*"],

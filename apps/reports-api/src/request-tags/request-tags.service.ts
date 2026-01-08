@@ -3,6 +3,11 @@ import * as XLSX from 'xlsx';
 import { GetAllRequestTagsUseCase } from './application/use-cases/get-all-request-tags.use-case';
 import { DeleteAllRequestTagsUseCase } from './application/use-cases/delete-all-request-tags.use-case';
 import { ImportRequestTagsUseCase } from './application/use-cases/import-request-tags.use-case';
+import { CreateRequestTagUseCase } from './application/use-cases/create-request-tag.use-case';
+import { DomainError } from '@shared/domain/errors/domain.error';
+import { JSendSuccess } from '@repo/reports/common';
+import { RequestTagData } from './domain/repositories/request-tag.repository.interface';
+import { RequestTag } from './domain/entities/request-tag.entity';
 
 @Injectable()
 export class RequestTagsService {
@@ -36,25 +41,44 @@ export class RequestTagsService {
     private readonly getAllRequestTagsUseCase: GetAllRequestTagsUseCase,
     private readonly deleteAllRequestTagsUseCase: DeleteAllRequestTagsUseCase,
     private readonly importRequestTagsUseCase: ImportRequestTagsUseCase,
+    private readonly createRequestTagUseCase: CreateRequestTagUseCase,
   ) {}
 
-  async findAll() {
+  async findAll(): Promise<JSendSuccess<{ tags: RequestTag[]; total: number }>> {
     const tags = await this.getAllRequestTagsUseCase.execute();
     return {
-      data: tags,
-      total: tags.length,
+      status: 'success',
+      data: {
+        tags,
+        total: tags.length,
+      },
     };
   }
 
-  async deleteAll() {
+  async create(data: RequestTagData): Promise<JSendSuccess<RequestTag>> {
+    const result = await this.createRequestTagUseCase.execute(data);
+
+    if (DomainError.isDomainError(result)) {
+      throw result;
+    }
+
+    return {
+      status: 'success',
+      data: result,
+    };
+  }
+
+  async deleteAll(): Promise<JSendSuccess<{ deleted: number }>> {
     const result = await this.deleteAllRequestTagsUseCase.execute();
     return {
-      message: 'All records deleted successfully',
-      deleted: result.deleted,
+      status: 'success',
+      data: {
+        deleted: result.deleted,
+      },
     };
   }
 
-  async uploadAndParse(buffer: Buffer) {
+  async uploadAndParse(buffer: Buffer): Promise<JSendSuccess<{ imported: number; skipped: number; total: number }>> {
     try {
       // Parse Excel file
       const workbook = XLSX.read(buffer, { type: 'buffer' });
@@ -107,10 +131,12 @@ export class RequestTagsService {
       const result = await this.importRequestTagsUseCase.execute(records);
 
       return {
-        message: 'File uploaded and parsed successfully',
-        imported: result.imported,
-        skipped: result.skipped,
-        total: records.length,
+        status: 'success',
+        data: {
+          imported: result.imported,
+          skipped: result.skipped,
+          total: records.length,
+        },
       };
     } catch (error) {
       if (error instanceof HttpException) {

@@ -145,8 +145,8 @@ describe('ParentChildRequestsController (Integration)', () => {
         totalRecords: 100,
         uniqueParents: 25,
         topParents: [
-          { linkedRequestId: 'REQ001', count: 10 },
-          { linkedRequestId: 'REQ002', count: 8 },
+          { parentId: 'REQ001', childCount: 10, link: 'https://example.com/REQ001' },
+          { parentId: 'REQ002', childCount: 8, link: 'https://example.com/REQ002' },
         ],
       };
 
@@ -160,7 +160,7 @@ describe('ParentChildRequestsController (Integration)', () => {
         totalRecords: 100,
         uniqueParents: 25,
         topParents: expect.arrayContaining([
-          expect.objectContaining({ linkedRequestId: 'REQ001', count: 10 }),
+          expect.objectContaining({ parentId: 'REQ001', childCount: 10 }),
         ]),
       });
       expect(mockRepository.getStats).toHaveBeenCalledOnce();

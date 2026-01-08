@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { StatsGrid } from '@/components/stats-grid';
 import { UploadSectionDynamic } from '@/components/upload-section-dynamic';
 import { Badge } from '@/components/ui/badge';
+import { getErrorMessage } from '@/lib/api';
 
 interface ParentChildRequest {
   id: number;
@@ -100,7 +101,7 @@ export default function PortfolioStylePage() {
         await fetchData();
       } else {
         const error = await response.json();
-        alert(`❌ Upload failed: ${error.message || 'Failed to upload file'}`);
+        alert(`❌ Upload failed: ${getErrorMessage(error)}`);
       }
     } catch (error: unknown) {
       console.error('Upload error:', error);
@@ -141,7 +142,7 @@ export default function PortfolioStylePage() {
         await fetchData();
       } else {
         const error = await response.json();
-        alert(`❌ Failed to delete records: ${error.message}`);
+        alert(`❌ Failed to delete records: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Delete records error:', error);

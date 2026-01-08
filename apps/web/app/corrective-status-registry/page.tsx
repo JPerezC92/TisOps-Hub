@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getCorrectiveStatusColor } from '@/lib/utils/display-status';
+import { getErrorMessage } from '@/lib/api';
 
 interface CorrectiveStatus {
   id: number;
@@ -104,7 +105,7 @@ export default function CorrectiveStatusRegistryPage() {
         alert('Status mapping created successfully');
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message || 'Failed to create status mapping'}`);
+        alert(`Error: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Failed to create status mapping:', error);
@@ -133,7 +134,7 @@ export default function CorrectiveStatusRegistryPage() {
         alert('Status mapping updated successfully');
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message || 'Failed to update status mapping'}`);
+        alert(`Error: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Failed to update status mapping:', error);
@@ -158,7 +159,7 @@ export default function CorrectiveStatusRegistryPage() {
         alert('Status mapping deleted successfully');
       } else {
         const error = await response.json();
-        alert(`Error: ${error.message || 'Failed to delete status mapping'}`);
+        alert(`Error: ${getErrorMessage(error)}`);
       }
     } catch (error) {
       console.error('Failed to delete status mapping:', error);
