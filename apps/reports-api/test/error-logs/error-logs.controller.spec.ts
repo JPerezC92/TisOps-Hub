@@ -54,7 +54,7 @@ describe('ErrorLogsController (Integration)', () => {
   });
 
   describe('GET /error-logs', () => {
-    it('should return all error logs', async () => {
+    it('should return all error logs in JSend format', async () => {
       const mockErrorLogs = ErrorLogFactory.createMany(3);
 
       mockErrorLogRepository.findAll.mockResolvedValue(mockErrorLogs);
@@ -63,8 +63,15 @@ describe('ErrorLogsController (Integration)', () => {
         .get('/error-logs')
         .expect(200);
 
-      expect(response.body).toHaveLength(3);
-      expect(response.body[0]).toMatchObject({
+      expect(response.body).toMatchObject({
+        status: 'success',
+        data: {
+          logs: expect.any(Array),
+          total: 3,
+        },
+      });
+      expect(response.body.data.logs).toHaveLength(3);
+      expect(response.body.data.logs[0]).toMatchObject({
         id: mockErrorLogs[0].id,
         errorType: mockErrorLogs[0].errorType,
         errorMessage: mockErrorLogs[0].errorMessage,
@@ -81,7 +88,9 @@ describe('ErrorLogsController (Integration)', () => {
         .get('/error-logs?limit=2')
         .expect(200);
 
-      expect(response.body).toHaveLength(2);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.logs).toHaveLength(2);
+      expect(response.body.data.total).toBe(2);
       expect(mockErrorLogRepository.findAll).toHaveBeenCalledWith(2);
     });
 
@@ -92,7 +101,13 @@ describe('ErrorLogsController (Integration)', () => {
         .get('/error-logs')
         .expect(200);
 
-      expect(response.body).toEqual([]);
+      expect(response.body).toMatchObject({
+        status: 'success',
+        data: {
+          logs: [],
+          total: 0,
+        },
+      });
       expect(mockErrorLogRepository.findAll).toHaveBeenCalledOnce();
     });
 
@@ -108,9 +123,9 @@ describe('ErrorLogsController (Integration)', () => {
         .get('/error-logs')
         .expect(200);
 
-      expect(response.body).toHaveLength(2);
-      expect(response.body[0].errorType).toBe('DatabaseError');
-      expect(response.body[1].errorType).toBe('ValidationError');
+      expect(response.body.data.logs).toHaveLength(2);
+      expect(response.body.data.logs[0].errorType).toBe('DatabaseError');
+      expect(response.body.data.logs[1].errorType).toBe('ValidationError');
     });
 
     it('should return 400 when limit is not a valid number', async () => {
@@ -126,7 +141,7 @@ describe('ErrorLogsController (Integration)', () => {
   });
 
   describe('GET /error-logs/:id', () => {
-    it('should return an error log by id', async () => {
+    it('should return an error log by id in JSend format', async () => {
       const mockErrorLog = ErrorLogFactory.create({
         id: 1,
         errorType: 'DatabaseError',
@@ -140,9 +155,12 @@ describe('ErrorLogsController (Integration)', () => {
         .expect(200);
 
       expect(response.body).toMatchObject({
-        id: 1,
-        errorType: 'DatabaseError',
-        errorMessage: 'Connection timeout',
+        status: 'success',
+        data: {
+          id: 1,
+          errorType: 'DatabaseError',
+          errorMessage: 'Connection timeout',
+        },
       });
       expect(mockErrorLogRepository.findById).toHaveBeenCalledWith(1);
     });
@@ -166,14 +184,17 @@ describe('ErrorLogsController (Integration)', () => {
         .expect(200);
 
       expect(response.body).toMatchObject({
-        id: 1,
-        errorType: 'NetworkError',
-        errorMessage: 'Failed to fetch',
-        stackTrace: 'Error at line 42',
-        endpoint: '/api/test',
-        method: 'POST',
-        userId: 'user-123',
-        metadata: { key: 'value' },
+        status: 'success',
+        data: {
+          id: 1,
+          errorType: 'NetworkError',
+          errorMessage: 'Failed to fetch',
+          stackTrace: 'Error at line 42',
+          endpoint: '/api/test',
+          method: 'POST',
+          userId: 'user-123',
+          metadata: { key: 'value' },
+        },
       });
     });
 

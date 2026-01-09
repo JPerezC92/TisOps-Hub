@@ -38,6 +38,11 @@ export type {
   RequestTagResponse,
 } from './request-tags';
 
+export type {
+  ErrorLog,
+  ErrorLogResponse,
+} from './error-logs';
+
 // Re-export database types (these are just type definitions, safe for frontend)
 export type {
   WarRoom,

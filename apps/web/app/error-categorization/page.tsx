@@ -446,8 +446,8 @@ export default function RequestCategorizationPage() {
         throw new Error('Failed to fetch Request IDs');
       }
 
-      const requestIds = await response.json();
-      setModalRequestIds(requestIds);
+      const data = await response.json();
+      setModalRequestIds(data.data?.requestIds || []);
     } catch (error) {
       console.error('Error fetching Request IDs:', error);
       setModalRequestIds([]);

@@ -75,6 +75,12 @@ export type {
   RequestTagResponse,
 } from './request-tags';
 
+// Error Logs Types
+export type {
+  ErrorLog,
+  ErrorLogResponse,
+} from './error-logs';
+
 // War Rooms Types (re-export from database)
 export type { WarRoom, InsertWarRoom } from '@repo/database';
 
