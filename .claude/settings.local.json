@@ -36,7 +36,9 @@
       "Bash(pnpm --filter web test:e2e:*)",
       "Bash(findstr:*)",
       "Bash(mkdir:*)",
-      "Bash(pnpm --filter web test -- --run)"
+      "Bash(pnpm --filter web test -- --run)",
+      "Bash(pnpm run build)",
+      "Bash(pnpm run test:*)"
     ],
     "deny": [],
     "ask": []
