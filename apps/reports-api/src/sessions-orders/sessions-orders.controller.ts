@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Delete,
+  Query,
   UseInterceptors,
   UploadedFile,
   HttpException,
@@ -64,5 +65,20 @@ export class SessionsOrdersController {
   @ApiResponse({ status: 200, description: 'All records deleted' })
   async deleteAll() {
     return this.sessionsOrdersService.deleteAll();
+  }
+
+  @Get('last-30-days')
+  @ApiOperation({ summary: 'Get sessions and orders data for the last 30 records' })
+  @ApiResponse({ status: 200, description: 'Returns sessions/orders data with day, incidents, sessions, and placed orders' })
+  async getLast30Days() {
+    return this.sessionsOrdersService.getLast30Days();
+  }
+
+  @Get('incidents-vs-orders-by-month')
+  @ApiOperation({ summary: 'Get incidents vs placed orders aggregated by month' })
+  @ApiResponse({ status: 200, description: 'Returns incidents and placed orders grouped by month' })
+  async getIncidentsVsOrdersByMonth(@Query('year') year?: string) {
+    const yearNum = year ? parseInt(year, 10) : undefined;
+    return this.sessionsOrdersService.getIncidentsVsOrdersByMonth(yearNum);
   }
 }

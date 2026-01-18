@@ -240,6 +240,32 @@ export interface BugsByParentResult {
   totalIncidents: number;
 }
 
+// Incidents by Release by Day interfaces
+export interface IncidentsByReleaseByDayRow {
+  day: number;              // 1-31
+  dayLabel: string;         // "Dic 1", "Dic 2", etc.
+  incidents: number;        // Total - Error por Cambio
+  errorPorCambioCount: number;
+  total: number;            // All incidents
+}
+
+export interface IncidentsByReleaseByDayResult {
+  data: IncidentsByReleaseByDayRow[];
+  monthName: string;        // "Dic", "Nov", etc. (Spanish abbreviation)
+}
+
+// Change Release by Module interfaces
+export interface ChangeReleaseByModuleRow {
+  moduleSourceValue: string;
+  moduleDisplayValue: string | null;
+  incidents: number;
+}
+
+export interface ChangeReleaseByModuleResult {
+  data: ChangeReleaseByModuleRow[];
+  monthName: string;
+}
+
 // Critical Incidents with mapping interface
 export interface CriticalIncidentWithMapping {
   monthlyReport: MonthlyReport;
@@ -301,4 +327,12 @@ export interface IMonthlyReportRepository {
   findIncidentsByDay(
     app?: string,
   ): Promise<IncidentsByDayResult>;
+  findIncidentsByReleaseByDay(
+    app?: string,
+    month?: string,
+  ): Promise<IncidentsByReleaseByDayResult>;
+  findChangeReleaseByModule(
+    app?: string,
+    month?: string,
+  ): Promise<ChangeReleaseByModuleResult>;
 }

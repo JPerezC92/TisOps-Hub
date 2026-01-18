@@ -155,6 +155,26 @@ export class MonthlyReportController {
     return this.monthlyReportService.getBugsByParent(app, month);
   }
 
+  @Get('incidents-by-release-by-day')
+  @ApiOperation({ summary: 'Get daily incident counts with Error por Cambio breakdown' })
+  @ApiResponse({ status: 200, description: 'Returns incidents per day with total, incidents (excluding Error por Cambio), and Error por Cambio count' })
+  async getIncidentsByReleaseByDay(
+    @Query('app') app?: string,
+    @Query('month') month?: string,
+  ) {
+    return this.monthlyReportService.getIncidentsByReleaseByDay(app, month);
+  }
+
+  @Get('change-release-by-module')
+  @ApiOperation({ summary: 'Get Error por Cambio incidents grouped by module' })
+  @ApiResponse({ status: 200, description: 'Returns Error por Cambio incident counts per module' })
+  async getChangeReleaseByModule(
+    @Query('app') app?: string,
+    @Query('month') month?: string,
+  ) {
+    return this.monthlyReportService.getChangeReleaseByModule(app, month);
+  }
+
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Upload and parse XD 2025 DATA INFORME MENSUAL - Current Month.xlsx file' })

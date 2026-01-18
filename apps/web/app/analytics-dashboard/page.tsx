@@ -363,6 +363,57 @@ interface BugsByParentResponse {
   totalIncidents: number;
 }
 
+// Sessions Orders Last 30 Days interfaces
+interface SessionsOrdersLast30DaysRow {
+  day: string;         // "Day 27"
+  date: string;        // "2025-01-27"
+  incidents: number;
+  sessions: number;
+  placedOrders: number;
+}
+
+interface SessionsOrdersLast30DaysResponse {
+  data: SessionsOrdersLast30DaysRow[];
+}
+
+// Incidents vs Orders by Month interfaces
+interface IncidentsVsOrdersByMonthRow {
+  month: string;       // "Jan", "Feb", etc.
+  monthNumber: number; // 1-12 for sorting
+  incidents: number;
+  placedOrders: number;
+}
+
+interface IncidentsVsOrdersByMonthResponse {
+  data: IncidentsVsOrdersByMonthRow[];
+}
+
+// Incidents by Release by Day interfaces
+interface IncidentsByReleaseByDayRow {
+  day: number;
+  dayLabel: string;
+  incidents: number;        // Total - Error por Cambio
+  errorPorCambioCount: number;
+  total: number;
+}
+
+interface IncidentsByReleaseByDayResponse {
+  data: IncidentsByReleaseByDayRow[];
+  monthName: string;
+}
+
+// Change Release by Module interfaces
+interface ChangeReleaseByModuleRow {
+  moduleSourceValue: string;
+  moduleDisplayValue: string | null;
+  incidents: number;
+}
+
+interface ChangeReleaseByModuleResponse {
+  data: ChangeReleaseByModuleRow[];
+  monthName: string;
+}
+
 // Group tickets by parentTicketId (if exists) or displayStatus
 function groupTickets(tickets: TicketDetail[]): TicketGroup[] {
   const groups = new Map<string, TicketGroup>();
@@ -517,6 +568,22 @@ function AnalyticsDashboardContent() {
   // Bugs by Parent state
   const [bugsByParent, setBugsByParent] = useState<BugsByParentResponse | null>(null);
   const [bugsByParentLoading, setBugsByParentLoading] = useState(true);
+
+  // Sessions Orders Last 30 Days state
+  const [sessionsOrdersData, setSessionsOrdersData] = useState<SessionsOrdersLast30DaysResponse | null>(null);
+  const [sessionsOrdersLoading, setSessionsOrdersLoading] = useState(true);
+
+  // Incidents vs Orders by Month state
+  const [incidentsVsOrdersData, setIncidentsVsOrdersData] = useState<IncidentsVsOrdersByMonthResponse | null>(null);
+  const [incidentsVsOrdersLoading, setIncidentsVsOrdersLoading] = useState(true);
+
+  // Incidents by Release by Day state
+  const [incidentsByReleaseByDayData, setIncidentsByReleaseByDayData] = useState<IncidentsByReleaseByDayResponse | null>(null);
+  const [incidentsByReleaseByDayLoading, setIncidentsByReleaseByDayLoading] = useState(true);
+
+  // Change Release by Module state
+  const [changeReleaseByModuleData, setChangeReleaseByModuleData] = useState<ChangeReleaseByModuleResponse | null>(null);
+  const [changeReleaseByModuleLoading, setChangeReleaseByModuleLoading] = useState(true);
 
   // Get filter values from URL parameters
   const selectedApp = searchParams.get('app') || 'all';
@@ -758,13 +825,13 @@ function AnalyticsDashboardContent() {
     }
   };
 
-  // Fetch incidents by week in 2025
+  // Fetch incidents by week based on selected month's year
   const fetchIncidentsByWeek = async () => {
     setIncidentsByWeekLoading(true);
     try {
       const params = new URLSearchParams();
       if (selectedApp !== 'all') params.set('app', selectedApp);
-      params.set('year', '2025'); // Fixed to 2025 as per spec
+      params.set('year', selectedYear.toString());
 
       const response = await fetch(
         `http://localhost:3000/monthly-report/incidents-by-week?${params.toString()}`,
@@ -923,8 +990,93 @@ function AnalyticsDashboardContent() {
     }
   };
 
+  // Fetch sessions orders last 30 days
+  const fetchSessionsOrdersLast30Days = async () => {
+    setSessionsOrdersLoading(true);
+    try {
+      const response = await fetch(
+        'http://localhost:3000/sessions-orders/last-30-days',
+        { cache: 'no-store' }
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setSessionsOrdersData(result);
+      }
+    } catch (error) {
+      console.error('Failed to fetch sessions orders last 30 days:', error);
+    } finally {
+      setSessionsOrdersLoading(false);
+    }
+  };
+
+  // Fetch incidents vs orders by month
+  const fetchIncidentsVsOrdersByMonth = async () => {
+    setIncidentsVsOrdersLoading(true);
+    try {
+      const response = await fetch(
+        `http://localhost:3000/sessions-orders/incidents-vs-orders-by-month?year=${selectedYear}`,
+        { cache: 'no-store' }
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setIncidentsVsOrdersData(result);
+      }
+    } catch (error) {
+      console.error('Failed to fetch incidents vs orders by month:', error);
+    } finally {
+      setIncidentsVsOrdersLoading(false);
+    }
+  };
+
+  // Fetch incidents by release by day
+  const fetchIncidentsByReleaseByDay = async () => {
+    setIncidentsByReleaseByDayLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedApp !== 'all') params.set('app', selectedApp);
+      if (selectedMonth) params.set('month', selectedMonth);
+
+      const response = await fetch(
+        `http://localhost:3000/monthly-report/incidents-by-release-by-day?${params.toString()}`,
+        { cache: 'no-store' }
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setIncidentsByReleaseByDayData(result);
+      }
+    } catch (error) {
+      console.error('Failed to fetch incidents by release by day:', error);
+    } finally {
+      setIncidentsByReleaseByDayLoading(false);
+    }
+  };
+
+  // Fetch change release by module
+  const fetchChangeReleaseByModule = async () => {
+    setChangeReleaseByModuleLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (selectedApp !== 'all') params.set('app', selectedApp);
+      if (selectedMonth) params.set('month', selectedMonth);
+
+      const response = await fetch(
+        `http://localhost:3000/monthly-report/change-release-by-module?${params.toString()}`,
+        { cache: 'no-store' }
+      );
+      if (response.ok) {
+        const result = await response.json();
+        setChangeReleaseByModuleData(result);
+      }
+    } catch (error) {
+      console.error('Failed to fetch change release by module:', error);
+    } finally {
+      setChangeReleaseByModuleLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchApplications();
+    fetchSessionsOrdersLast30Days();
   }, []);
 
   useEffect(() => {
@@ -936,6 +1088,9 @@ function AnalyticsDashboardContent() {
     fetchPriorityByApp();
     fetchMissingScopeByParent();
     fetchBugsByParent();
+    fetchIncidentsVsOrdersByMonth();
+    fetchIncidentsByReleaseByDay();
+    fetchChangeReleaseByModule();
   }, [selectedApp, selectedMonth]);
 
   useEffect(() => {
@@ -944,7 +1099,7 @@ function AnalyticsDashboardContent() {
     fetchIncidentsByDay();
     fetchL3Summary();
     fetchL3RequestsByStatus();
-  }, [selectedApp]); // Only refetch on app change
+  }, [selectedApp, selectedMonth]); // Refetch on app or month change
 
   useEffect(() => {
     fetchModuleEvolution();
@@ -1978,6 +2133,226 @@ function AnalyticsDashboardContent() {
                 </TableBody>
               </Table>
             </div>
+          )}
+
+          {/* Sessions/Orders tables - Only show for Somos Belcorp */}
+          {selectedApp === 'SB' && (
+            <>
+              {/* Divider between subsections */}
+              <div className="border-t border-amber-500/20 mt-4" />
+
+              {/* Subsection 7: Sessions and Orders - Last 30 Days */}
+          <div className="px-6 pt-4 pb-2">
+            <h4 className="text-xs font-semibold text-amber-400/80 uppercase tracking-wider">
+              Sessions and Orders - Last 30 Days
+              <span className="ml-2 text-muted-foreground/70 normal-case font-normal">
+                (sorted ascending by date)
+              </span>
+            </h4>
+          </div>
+
+          {sessionsOrdersLoading ? (
+            <div className="p-8 space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : !sessionsOrdersData || sessionsOrdersData.data.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              No sessions/orders data found for the last 30 days
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-amber-500/20 hover:bg-amber-500/5">
+                    <TableHead className="font-semibold text-foreground/90">Day</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 text-right">Incidents</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 text-right"># of Sessions</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 text-right"># of Placed Orders</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {sessionsOrdersData.data.map((row) => (
+                    <TableRow
+                      key={row.date}
+                      className="border-b border-amber-500/10 hover:bg-amber-500/5 transition-colors"
+                    >
+                      <TableCell className="font-medium text-amber-400">
+                        {row.day}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/90 text-right">
+                        {row.incidents}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/90 text-right">
+                        {row.sessions}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/90 text-right">
+                        {row.placedOrders}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          {/* Divider between subsections */}
+          <div className="border-t border-amber-500/20 mt-4" />
+
+          {/* Subsection 8: Number of Incidents vs Placed Orders by Month */}
+          <div className="px-6 pt-4 pb-2">
+            <h4 className="text-xs font-semibold text-amber-400/80 uppercase tracking-wider">
+              Number of Incidents vs Placed Orders by Month
+            </h4>
+          </div>
+
+          {incidentsVsOrdersLoading ? (
+            <div className="p-8 space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : !incidentsVsOrdersData || incidentsVsOrdersData.data.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              No incidents vs orders data found
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-amber-500/20 hover:bg-amber-500/5">
+                    <TableHead className="font-semibold text-foreground/90">Month</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 text-right">Incidents</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 text-right">Placed Orders</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {incidentsVsOrdersData.data.map((row) => (
+                    <TableRow
+                      key={row.monthNumber}
+                      className="border-b border-amber-500/10 hover:bg-amber-500/5 transition-colors"
+                    >
+                      <TableCell className="font-medium text-amber-400">
+                        {row.month}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/90 text-right">
+                        {row.incidents}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/90 text-right">
+                        {row.placedOrders}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          {/* Divider between subsections */}
+          <div className="border-t border-amber-500/20 mt-4" />
+
+          {/* Subsection 9: {MONTH} Incident by Release by Day */}
+          <div className="px-6 pt-4 pb-2">
+            <h4 className="text-xs font-semibold text-amber-400/80 uppercase tracking-wider">
+              {incidentsByReleaseByDayData?.monthName || 'Month'} Incident by Release by Day
+            </h4>
+          </div>
+
+          {incidentsByReleaseByDayLoading ? (
+            <div className="p-8 space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : !incidentsByReleaseByDayData || incidentsByReleaseByDayData.data.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              No incidents by release by day data found
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-amber-500/20 hover:bg-amber-500/5">
+                    <TableHead className="font-semibold text-foreground/90">Day</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 text-right">Incidents</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 text-right">Error por Cambio</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 text-right">Total</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {incidentsByReleaseByDayData.data.map((row) => (
+                    <TableRow
+                      key={row.day}
+                      className="border-b border-amber-500/10 hover:bg-amber-500/5 transition-colors"
+                    >
+                      <TableCell className="font-medium text-amber-400">
+                        {row.dayLabel}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/90 text-right">
+                        {row.incidents}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/90 text-right">
+                        {row.errorPorCambioCount}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/90 text-right">
+                        {row.total}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          {/* Divider between subsections */}
+          <div className="border-t border-amber-500/20 mt-4" />
+
+          {/* Subsection 10: {MONTH} Change Release by Module */}
+          <div className="px-6 pt-4 pb-2">
+            <h4 className="text-xs font-semibold text-amber-400/80 uppercase tracking-wider">
+              {changeReleaseByModuleData?.monthName || 'Month'} Change Release by Module
+            </h4>
+          </div>
+
+          {changeReleaseByModuleLoading ? (
+            <div className="p-8 space-y-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-10 w-full" />
+            </div>
+          ) : !changeReleaseByModuleData || changeReleaseByModuleData.data.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">
+              No change release by module data found
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-amber-500/20 hover:bg-amber-500/5">
+                    <TableHead className="font-semibold text-foreground/90">Module</TableHead>
+                    <TableHead className="font-semibold text-foreground/90 text-right">Incidents</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {changeReleaseByModuleData.data.map((row) => (
+                    <TableRow
+                      key={row.moduleSourceValue}
+                      className="border-b border-amber-500/10 hover:bg-amber-500/5 transition-colors"
+                    >
+                      <TableCell className="font-medium text-amber-400">
+                        {row.moduleDisplayValue || row.moduleSourceValue}
+                      </TableCell>
+                      <TableCell className="text-sm text-foreground/90 text-right">
+                        {row.incidents}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+            </>
           )}
         </div>
 

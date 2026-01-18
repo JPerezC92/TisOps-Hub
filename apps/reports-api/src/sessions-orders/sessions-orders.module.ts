@@ -8,6 +8,8 @@ import { SESSIONS_ORDERS_REPOSITORY } from './domain/repositories/sessions-order
 import { GetAllSessionsOrdersUseCase } from './application/use-cases/get-all-sessions-orders.use-case';
 import { DeleteAllSessionsOrdersUseCase } from './application/use-cases/delete-all-sessions-orders.use-case';
 import { UploadAndParseSessionsOrdersUseCase } from './application/use-cases/upload-and-parse-sessions-orders.use-case';
+import { GetLast30DaysUseCase } from './application/use-cases/get-last-30-days.use-case';
+import { GetIncidentsVsOrdersByMonthUseCase } from './application/use-cases/get-incidents-vs-orders-by-month.use-case';
 
 @Module({
   imports: [DatabaseModule],
@@ -32,6 +34,16 @@ import { UploadAndParseSessionsOrdersUseCase } from './application/use-cases/upl
     {
       provide: UploadAndParseSessionsOrdersUseCase,
       useFactory: (repository: any) => new UploadAndParseSessionsOrdersUseCase(repository),
+      inject: [SESSIONS_ORDERS_REPOSITORY],
+    },
+    {
+      provide: GetLast30DaysUseCase,
+      useFactory: (repository: any) => new GetLast30DaysUseCase(repository),
+      inject: [SESSIONS_ORDERS_REPOSITORY],
+    },
+    {
+      provide: GetIncidentsVsOrdersByMonthUseCase,
+      useFactory: (repository: any) => new GetIncidentsVsOrdersByMonthUseCase(repository),
       inject: [SESSIONS_ORDERS_REPOSITORY],
     },
   ],
