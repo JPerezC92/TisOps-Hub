@@ -35,6 +35,10 @@ import type {
   CriticalIncidentWithMapping,
   IncidentsByDayResult,
   IncidentsByDayRow,
+  IncidentsByReleaseByDayResult,
+  IncidentsByReleaseByDayRow,
+  ChangeReleaseByModuleResult,
+  ChangeReleaseByModuleRow,
 } from '@monthly-report/domain/repositories/monthly-report.repository.interface';
 
 @Injectable()
@@ -2562,6 +2566,213 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     return {
       data,
       totalIncidents: filteredResults.length,
+    };
+  }
+
+  async findIncidentsByReleaseByDay(
+    app?: string,
+    month?: string,
+  ): Promise<IncidentsByReleaseByDayResult> {
+    // Get all monthly reports with application patterns
+    const results = await this.db
+      .select({
+        requestId: monthlyReports.requestId,
+        aplicativos: monthlyReports.aplicativos,
+        createdTime: monthlyReports.createdTime,
+        categorizacion: monthlyReports.categorizacion,
+        registeredAppCode: applicationRegistry.code,
+      })
+      .from(monthlyReports)
+      .leftJoin(
+        applicationPatterns,
+        sql`LOWER(${monthlyReports.aplicativos}) LIKE '%' || LOWER(${applicationPatterns.pattern}) || '%'`,
+      )
+      .leftJoin(
+        applicationRegistry,
+        eq(applicationPatterns.applicationId, applicationRegistry.id),
+      )
+      .all();
+
+    // Parse month filter (format: "2025-12")
+    let targetYear: number | undefined;
+    let targetMonth: number | undefined;
+    if (month) {
+      const parts = month.split('-').map(Number);
+      targetYear = parts[0];
+      targetMonth = parts[1];
+    }
+
+    // Filter results by app
+    let filteredResults = results;
+    if (app && app !== 'all') {
+      filteredResults = results.filter((r) => r.registeredAppCode === app);
+    }
+
+    // Filter by month if provided
+    if (targetYear && targetMonth) {
+      filteredResults = filteredResults.filter((row) => {
+        if (!row.createdTime) return false;
+        const createdDate = DateTime.fromJSDate(row.createdTime);
+        return createdDate.year === targetYear && createdDate.month === targetMonth;
+      });
+    }
+
+    // Deduplicate by requestId (LEFT JOIN can create duplicates when aplicativos matches multiple patterns)
+    const uniqueResults = Array.from(
+      new Map(filteredResults.map(r => [r.requestId, r])).values()
+    );
+
+    // Group by day and count total + Error por Cambio
+    const dayMap = new Map<
+      number,
+      { total: number; errorPorCambio: number }
+    >();
+
+    for (const row of uniqueResults) {
+      if (!row.createdTime) continue;
+
+      const createdDate = DateTime.fromJSDate(row.createdTime);
+      const day = createdDate.day;
+
+      if (!dayMap.has(day)) {
+        dayMap.set(day, { total: 0, errorPorCambio: 0 });
+      }
+
+      const dayData = dayMap.get(day)!;
+      dayData.total++;
+
+      if (row.categorizacion === 'Error por Cambio') {
+        dayData.errorPorCambio++;
+      }
+    }
+
+    // Get Spanish month abbreviation
+    const spanishMonthAbbreviations = [
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+    ];
+    const monthAbbr = targetMonth
+      ? spanishMonthAbbreviations[targetMonth - 1]
+      : 'Mes';
+
+    // Convert to array, filter only days with Error por Cambio, and sort ascending by day
+    const data: IncidentsByReleaseByDayRow[] = Array.from(dayMap.entries())
+      .filter(([, counts]) => counts.errorPorCambio > 0)
+      .map(([day, counts]) => ({
+        day,
+        dayLabel: `${monthAbbr} ${day}`,
+        incidents: counts.total - counts.errorPorCambio,
+        errorPorCambioCount: counts.errorPorCambio,
+        total: counts.total,
+      }))
+      .sort((a, b) => a.day - b.day);
+
+    return {
+      data,
+      monthName: monthAbbr,
+    };
+  }
+
+  async findChangeReleaseByModule(
+    app?: string,
+    month?: string,
+  ): Promise<ChangeReleaseByModuleResult> {
+    // Get all monthly reports with application patterns and module registry
+    const results = await this.db
+      .select({
+        requestId: monthlyReports.requestId,
+        modulo: monthlyReports.modulo,
+        createdTime: monthlyReports.createdTime,
+        categorizacion: monthlyReports.categorizacion,
+        registeredAppCode: applicationRegistry.code,
+        moduleDisplayValue: moduleRegistry.displayValue,
+      })
+      .from(monthlyReports)
+      .leftJoin(
+        applicationPatterns,
+        sql`LOWER(${monthlyReports.aplicativos}) LIKE '%' || LOWER(${applicationPatterns.pattern}) || '%'`,
+      )
+      .leftJoin(
+        applicationRegistry,
+        eq(applicationPatterns.applicationId, applicationRegistry.id),
+      )
+      .leftJoin(
+        moduleRegistry,
+        and(
+          eq(monthlyReports.modulo, moduleRegistry.sourceValue),
+          eq(moduleRegistry.isActive, true),
+        ),
+      )
+      .all();
+
+    // Parse month filter (format: "2025-12")
+    let targetYear: number | undefined;
+    let targetMonth: number | undefined;
+    if (month) {
+      const parts = month.split('-').map(Number);
+      targetYear = parts[0];
+      targetMonth = parts[1];
+    }
+
+    // Filter results by app
+    let filteredResults = results;
+    if (app && app !== 'all') {
+      filteredResults = results.filter((r) => r.registeredAppCode === app);
+    }
+
+    // Filter by month if provided
+    if (targetYear && targetMonth) {
+      filteredResults = filteredResults.filter((row) => {
+        if (!row.createdTime) return false;
+        const createdDate = DateTime.fromJSDate(row.createdTime);
+        return createdDate.year === targetYear && createdDate.month === targetMonth;
+      });
+    }
+
+    // Filter only "Error por Cambio" incidents
+    filteredResults = filteredResults.filter(
+      (row) => row.categorizacion === 'Error por Cambio'
+    );
+
+    // Deduplicate by requestId
+    const uniqueResults = Array.from(
+      new Map(filteredResults.map(r => [r.requestId, r])).values()
+    );
+
+    // Group by module and count
+    const moduleMap = new Map<string, { count: number; displayValue: string | null }>();
+
+    for (const row of uniqueResults) {
+      const modulo = row.modulo || 'Unknown';
+
+      if (!moduleMap.has(modulo)) {
+        moduleMap.set(modulo, { count: 0, displayValue: row.moduleDisplayValue });
+      }
+
+      moduleMap.get(modulo)!.count++;
+    }
+
+    // Get Spanish month abbreviation
+    const spanishMonthAbbreviations = [
+      'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
+      'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
+    ];
+    const monthAbbr = targetMonth
+      ? spanishMonthAbbreviations[targetMonth - 1]
+      : 'Mes';
+
+    // Convert to array and sort by count descending
+    const data: ChangeReleaseByModuleRow[] = Array.from(moduleMap.entries())
+      .map(([modulo, info]) => ({
+        moduleSourceValue: modulo,
+        moduleDisplayValue: info.displayValue,
+        incidents: info.count,
+      }))
+      .sort((a, b) => b.incidents - a.incidents);
+
+    return {
+      data,
+      monthName: monthAbbr,
     };
   }
 }

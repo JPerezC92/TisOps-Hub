@@ -8,8 +8,9 @@ export const sessionsOrders = sqliteTable(
     ano: integer('ano').notNull(), // Year (2024, 2025, etc.)
     mes: integer('mes').notNull(), // Month (1-12)
     peak: integer('peak').notNull(), // Peak indicator (0 or 1)
-    dia: integer('dia').notNull(), // Excel date serial number
+    dia: integer('dia').notNull(), // Unix timestamp (milliseconds)
     incidentes: integer('incidentes').notNull(), // Number of incidents
+    sessions: integer('sessions').notNull(), // Number of sessions
     placedOrders: integer('placed_orders').notNull(), // Number of placed orders
     billedOrders: integer('billed_orders').notNull(), // Number of billed orders
   },

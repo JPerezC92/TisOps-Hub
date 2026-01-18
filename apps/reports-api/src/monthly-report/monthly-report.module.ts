@@ -21,6 +21,8 @@ import { GetL3RequestsByStatusUseCase } from './application/use-cases/get-l3-req
 import { GetMissingScopeByParentUseCase } from './application/use-cases/get-missing-scope-by-parent.use-case';
 import { GetBugsByParentUseCase } from './application/use-cases/get-bugs-by-parent.use-case';
 import { GetIncidentsByDayUseCase } from './application/use-cases/get-incidents-by-day.use-case';
+import { GetIncidentsByReleaseByDayUseCase } from './application/use-cases/get-incidents-by-release-by-day.use-case';
+import { GetChangeReleaseByModuleUseCase } from './application/use-cases/get-change-release-by-module.use-case';
 
 @Module({
   imports: [DatabaseModule],
@@ -110,6 +112,16 @@ import { GetIncidentsByDayUseCase } from './application/use-cases/get-incidents-
     {
       provide: GetIncidentsByDayUseCase,
       useFactory: (repository: any) => new GetIncidentsByDayUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetIncidentsByReleaseByDayUseCase,
+      useFactory: (repository: any) => new GetIncidentsByReleaseByDayUseCase(repository),
+      inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: GetChangeReleaseByModuleUseCase,
+      useFactory: (repository: any) => new GetChangeReleaseByModuleUseCase(repository),
       inject: [MONTHLY_REPORT_REPOSITORY],
     },
   ],

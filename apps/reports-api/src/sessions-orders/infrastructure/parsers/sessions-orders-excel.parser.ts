@@ -1,6 +1,35 @@
 import { Injectable } from '@nestjs/common';
 import * as XLSX from 'xlsx';
+import { DateTime } from 'luxon';
 import type { InsertSessionsOrder, InsertSessionsOrdersRelease } from '@repo/database';
+
+// Convert date value to Unix timestamp (handles Date object, serial number, or string)
+const parseDateToTimestamp = (value: any): number => {
+  // If it's already a Date object (from cellDates: true)
+  if (value instanceof Date) {
+    return value.getTime();
+  }
+
+  // If it's a number (Excel serial number)
+  if (typeof value === 'number') {
+    // Excel serial to Unix timestamp
+    return (value - 25569) * 86400 * 1000;
+  }
+
+  // If it's a string like "27/11/2025" or "27-Nov-2025"
+  if (typeof value === 'string') {
+    // Try dd/MM/yyyy format first
+    let date = DateTime.fromFormat(value, 'dd/MM/yyyy');
+    if (date.isValid) return date.toMillis();
+
+    // Try d-MMM-yyyy format with Spanish locale
+    date = DateTime.fromFormat(value, 'd-MMM-yyyy', { locale: 'es' });
+    if (date.isValid) return date.toMillis();
+  }
+
+  console.warn(`Could not parse date value: ${value} (type: ${typeof value})`);
+  return 0;
+};
 
 export interface ParsedSessionsOrdersData {
   mainRecords: InsertSessionsOrder[];
@@ -10,8 +39,8 @@ export interface ParsedSessionsOrdersData {
 @Injectable()
 export class SessionsOrdersExcelParser {
   parse(buffer: Buffer): ParsedSessionsOrdersData {
-    // Parse Excel file
-    const workbook = XLSX.read(buffer, { type: 'buffer' });
+    // Parse Excel file with cellDates option to get proper Date objects
+    const workbook = XLSX.read(buffer, { type: 'buffer', cellDates: true });
 
     // Process Hoja1 (main data)
     const hoja1 = workbook.Sheets['Hoja1'];
@@ -33,8 +62,9 @@ export class SessionsOrdersExcelParser {
       ano: Number(row['año']) || 0,
       mes: Number(row['mes']) || 0,
       peak: Number(row['peak']) || 0,
-      dia: Number(row['dia']) || 0,
+      dia: parseDateToTimestamp(row['dia']),
       incidentes: Number(row['incidentes']) || 0,
+      sessions: Number(row['session']) || 0,
       placedOrders: Number(row['placed orders']) || 0,
       billedOrders: Number(row['billed orders']) || 0,
     }));

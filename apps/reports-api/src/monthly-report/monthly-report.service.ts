@@ -15,6 +15,8 @@ import { GetL3RequestsByStatusUseCase } from './application/use-cases/get-l3-req
 import { GetMissingScopeByParentUseCase } from './application/use-cases/get-missing-scope-by-parent.use-case';
 import { GetBugsByParentUseCase } from './application/use-cases/get-bugs-by-parent.use-case';
 import { GetIncidentsByDayUseCase } from './application/use-cases/get-incidents-by-day.use-case';
+import { GetIncidentsByReleaseByDayUseCase } from './application/use-cases/get-incidents-by-release-by-day.use-case';
+import { GetChangeReleaseByModuleUseCase } from './application/use-cases/get-change-release-by-module.use-case';
 import { MonthlyReportExcelParser } from './infrastructure/parsers/monthly-report-excel.parser';
 
 @Injectable()
@@ -52,6 +54,10 @@ export class MonthlyReportService {
     private readonly getBugsByParentUseCase: GetBugsByParentUseCase,
     @Inject(GetIncidentsByDayUseCase)
     private readonly getIncidentsByDayUseCase: GetIncidentsByDayUseCase,
+    @Inject(GetIncidentsByReleaseByDayUseCase)
+    private readonly getIncidentsByReleaseByDayUseCase: GetIncidentsByReleaseByDayUseCase,
+    @Inject(GetChangeReleaseByModuleUseCase)
+    private readonly getChangeReleaseByModuleUseCase: GetChangeReleaseByModuleUseCase,
     private readonly excelParser: MonthlyReportExcelParser,
   ) {}
 
@@ -129,5 +135,13 @@ export class MonthlyReportService {
 
   async getIncidentsByDay(app?: string) {
     return this.getIncidentsByDayUseCase.execute(app);
+  }
+
+  async getIncidentsByReleaseByDay(app?: string, month?: string) {
+    return this.getIncidentsByReleaseByDayUseCase.execute(app, month);
+  }
+
+  async getChangeReleaseByModule(app?: string, month?: string) {
+    return this.getChangeReleaseByModuleUseCase.execute(app, month);
   }
 }

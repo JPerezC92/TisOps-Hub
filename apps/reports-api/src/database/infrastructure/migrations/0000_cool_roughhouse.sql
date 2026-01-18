@@ -24,6 +24,32 @@ CREATE TABLE `application_registry` (
 CREATE UNIQUE INDEX `application_registry_code_unique` ON `application_registry` (`code`);--> statement-breakpoint
 CREATE INDEX `application_registry_code_idx` ON `application_registry` (`code`);--> statement-breakpoint
 CREATE INDEX `application_registry_is_active_idx` ON `application_registry` (`is_active`);--> statement-breakpoint
+CREATE TABLE `categorization_registry` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`source_value` text NOT NULL,
+	`display_value` text NOT NULL,
+	`is_active` integer DEFAULT true NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `categorization_registry_source_value_unique` ON `categorization_registry` (`source_value`);--> statement-breakpoint
+CREATE INDEX `categorization_registry_source_value_idx` ON `categorization_registry` (`source_value`);--> statement-breakpoint
+CREATE INDEX `categorization_registry_display_value_idx` ON `categorization_registry` (`display_value`);--> statement-breakpoint
+CREATE INDEX `categorization_registry_is_active_idx` ON `categorization_registry` (`is_active`);--> statement-breakpoint
+CREATE TABLE `corrective_status_registry` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`raw_status` text NOT NULL,
+	`display_status` text NOT NULL,
+	`is_active` integer DEFAULT true NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `corrective_status_registry_raw_status_unique` ON `corrective_status_registry` (`raw_status`);--> statement-breakpoint
+CREATE INDEX `corrective_status_registry_raw_status_idx` ON `corrective_status_registry` (`raw_status`);--> statement-breakpoint
+CREATE INDEX `corrective_status_registry_display_status_idx` ON `corrective_status_registry` (`display_status`);--> statement-breakpoint
+CREATE INDEX `corrective_status_registry_is_active_idx` ON `corrective_status_registry` (`is_active`);--> statement-breakpoint
 CREATE TABLE `error_logs` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`timestamp` integer NOT NULL,
@@ -36,11 +62,40 @@ CREATE TABLE `error_logs` (
 	`metadata` text
 );
 --> statement-breakpoint
+CREATE TABLE `module_registry` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`source_value` text NOT NULL,
+	`display_value` text NOT NULL,
+	`application` text NOT NULL,
+	`is_active` integer DEFAULT true NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `module_registry_source_value_unique` ON `module_registry` (`source_value`);--> statement-breakpoint
+CREATE INDEX `module_registry_source_value_idx` ON `module_registry` (`source_value`);--> statement-breakpoint
+CREATE INDEX `module_registry_display_value_idx` ON `module_registry` (`display_value`);--> statement-breakpoint
+CREATE INDEX `module_registry_application_idx` ON `module_registry` (`application`);--> statement-breakpoint
+CREATE INDEX `module_registry_is_active_idx` ON `module_registry` (`is_active`);--> statement-breakpoint
+CREATE TABLE `monthly_report_status_registry` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`raw_status` text NOT NULL,
+	`display_status` text NOT NULL,
+	`is_active` integer DEFAULT true NOT NULL,
+	`created_at` integer NOT NULL,
+	`updated_at` integer NOT NULL
+);
+--> statement-breakpoint
+CREATE UNIQUE INDEX `monthly_report_status_registry_raw_status_unique` ON `monthly_report_status_registry` (`raw_status`);--> statement-breakpoint
+CREATE INDEX `monthly_report_status_registry_raw_status_idx` ON `monthly_report_status_registry` (`raw_status`);--> statement-breakpoint
+CREATE INDEX `monthly_report_status_registry_display_status_idx` ON `monthly_report_status_registry` (`display_status`);--> statement-breakpoint
+CREATE INDEX `monthly_report_status_registry_is_active_idx` ON `monthly_report_status_registry` (`is_active`);--> statement-breakpoint
 CREATE TABLE `monthly_reports` (
 	`request_id` integer PRIMARY KEY NOT NULL,
+	`request_id_link` text,
 	`aplicativos` text NOT NULL,
 	`categorizacion` text NOT NULL,
-	`created_time` text NOT NULL,
+	`created_time` integer NOT NULL,
 	`request_status` text NOT NULL,
 	`modulo` text NOT NULL,
 	`subject` text NOT NULL,
@@ -54,6 +109,7 @@ CREATE TABLE `monthly_reports` (
 	`jira` text NOT NULL,
 	`problem_id` text NOT NULL,
 	`linked_request_id` text NOT NULL,
+	`linked_request_id_link` text,
 	`request_ola_status` text NOT NULL,
 	`grupo_escalamiento` text NOT NULL,
 	`aplicactivos_afectados` text NOT NULL,
@@ -87,11 +143,13 @@ CREATE TABLE `problems` (
 	`request_id` integer PRIMARY KEY NOT NULL,
 	`request_id_link` text,
 	`service_category` text NOT NULL,
+	`request_status` text NOT NULL,
 	`subject` text NOT NULL,
 	`subject_link` text,
 	`created_time` text NOT NULL,
 	`aplicativos` text NOT NULL,
 	`created_by` text NOT NULL,
+	`technician` text NOT NULL,
 	`planes_de_accion` text NOT NULL,
 	`observaciones` text NOT NULL,
 	`due_by_time` text NOT NULL
@@ -141,6 +199,7 @@ CREATE TABLE `sessions_orders` (
 	`peak` integer NOT NULL,
 	`dia` integer NOT NULL,
 	`incidentes` integer NOT NULL,
+	`sessions` integer NOT NULL,
 	`placed_orders` integer NOT NULL,
 	`billed_orders` integer NOT NULL
 );
@@ -196,6 +255,7 @@ CREATE INDEX `war_rooms_priority_idx` ON `war_rooms` (`initial_priority`);--> st
 CREATE INDEX `war_rooms_date_idx` ON `war_rooms` (`date`);--> statement-breakpoint
 CREATE TABLE `weekly_correctives` (
 	`request_id` text PRIMARY KEY NOT NULL,
+	`request_id_link` text,
 	`technician` text NOT NULL,
 	`aplicativos` text NOT NULL,
 	`categorizacion` text NOT NULL,
