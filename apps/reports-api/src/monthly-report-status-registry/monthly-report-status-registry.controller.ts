@@ -8,6 +8,7 @@ import {
   Param,
   Query,
   ParseIntPipe,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -16,11 +17,13 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
+import type { JSendSuccess } from '@repo/reports/common';
 import { MonthlyReportStatusRegistryService } from './monthly-report-status-registry.service';
 import type {
   CreateMonthlyReportStatusDto,
   UpdateMonthlyReportStatusDto,
 } from './domain/repositories/monthly-report-status-registry.repository.interface';
+import type { MonthlyReportStatus } from './domain/entities/monthly-report-status.entity';
 
 @ApiTags('monthly-report-status-registry')
 @Controller('monthly-report-status-registry')
@@ -32,8 +35,12 @@ export class MonthlyReportStatusRegistryController {
   @Get()
   @ApiOperation({ summary: 'Get all monthly report status mappings' })
   @ApiResponse({ status: 200, description: 'Returns all active status mappings' })
-  async findAll() {
-    return this.monthlyReportStatusRegistryService.findAll();
+  async findAll(): Promise<JSendSuccess<MonthlyReportStatus[]>> {
+    const statuses = await this.monthlyReportStatusRegistryService.findAll();
+    return {
+      status: 'success',
+      data: statuses,
+    };
   }
 
   @Get('map')
@@ -47,9 +54,12 @@ export class MonthlyReportStatusRegistryController {
     status: 200,
     description: 'Returns the mapped display status',
   })
-  async mapStatus(@Query('status') status: string) {
+  async mapStatus(@Query('status') status: string): Promise<JSendSuccess<{ rawStatus: string; displayStatus: string }>> {
     const displayStatus = await this.monthlyReportStatusRegistryService.mapRawStatus(status);
-    return { rawStatus: status, displayStatus };
+    return {
+      status: 'success',
+      data: { rawStatus: status, displayStatus },
+    };
   }
 
   @Get(':id')
@@ -57,15 +67,26 @@ export class MonthlyReportStatusRegistryController {
   @ApiParam({ name: 'id', description: 'Status mapping ID' })
   @ApiResponse({ status: 200, description: 'Returns the status mapping' })
   @ApiResponse({ status: 404, description: 'Status mapping not found' })
-  async findById(@Param('id', ParseIntPipe) id: number) {
-    return this.monthlyReportStatusRegistryService.findById(id);
+  async findById(@Param('id', ParseIntPipe) id: number): Promise<JSendSuccess<MonthlyReportStatus>> {
+    const statusMapping = await this.monthlyReportStatusRegistryService.findById(id);
+    if (!statusMapping) {
+      throw new NotFoundException(`Monthly report status with ID ${id} not found`);
+    }
+    return {
+      status: 'success',
+      data: statusMapping,
+    };
   }
 
   @Post()
   @ApiOperation({ summary: 'Create new monthly report status mapping' })
   @ApiResponse({ status: 201, description: 'Status mapping created successfully' })
-  async create(@Body() data: CreateMonthlyReportStatusDto) {
-    return this.monthlyReportStatusRegistryService.create(data);
+  async create(@Body() data: CreateMonthlyReportStatusDto): Promise<JSendSuccess<MonthlyReportStatus>> {
+    const statusMapping = await this.monthlyReportStatusRegistryService.create(data);
+    return {
+      status: 'success',
+      data: statusMapping,
+    };
   }
 
   @Put(':id')
@@ -76,8 +97,12 @@ export class MonthlyReportStatusRegistryController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() data: UpdateMonthlyReportStatusDto,
-  ) {
-    return this.monthlyReportStatusRegistryService.update(id, data);
+  ): Promise<JSendSuccess<MonthlyReportStatus>> {
+    const statusMapping = await this.monthlyReportStatusRegistryService.update(id, data);
+    return {
+      status: 'success',
+      data: statusMapping,
+    };
   }
 
   @Delete(':id')
@@ -85,8 +110,11 @@ export class MonthlyReportStatusRegistryController {
   @ApiParam({ name: 'id', description: 'Status mapping ID' })
   @ApiResponse({ status: 200, description: 'Status mapping deleted successfully' })
   @ApiResponse({ status: 404, description: 'Status mapping not found' })
-  async delete(@Param('id', ParseIntPipe) id: number) {
+  async delete(@Param('id', ParseIntPipe) id: number): Promise<JSendSuccess<{ deleted: boolean }>> {
     await this.monthlyReportStatusRegistryService.delete(id);
-    return { message: 'Monthly report status mapping deleted successfully' };
+    return {
+      status: 'success',
+      data: { deleted: true },
+    };
   }
 }

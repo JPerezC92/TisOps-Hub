@@ -45,7 +45,8 @@
       "Bash(pnpm --filter web test:*)",
       "Bash(pnpm exec playwright test:*)",
       "mcp__ide__getDiagnostics",
-      "mcp__chrome-devtools__get_network_request"
+      "mcp__chrome-devtools__get_network_request",
+      "Bash(pnpm --filter web typecheck:*)"
     ],
     "deny": [],
     "ask": []
