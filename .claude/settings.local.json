@@ -38,7 +38,14 @@
       "Bash(mkdir:*)",
       "Bash(pnpm --filter web test -- --run)",
       "Bash(pnpm run build)",
-      "Bash(pnpm run test:*)"
+      "Bash(pnpm run test:*)",
+      "Bash(wc:*)",
+      "Bash(grep:*)",
+      "Bash(pnpm vitest run:*)",
+      "Bash(pnpm --filter web test:*)",
+      "Bash(pnpm exec playwright test:*)",
+      "mcp__ide__getDiagnostics",
+      "mcp__chrome-devtools__get_network_request"
     ],
     "deny": [],
     "ask": []
