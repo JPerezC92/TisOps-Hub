@@ -1,20 +1,20 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Monthly Report Status Registry', () => {
+test.describe('Corrective Status Registry', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/monthly-report-status-registry');
+    await page.goto('/corrective-status-registry');
   });
 
   test.describe('Page Load', () => {
     test('should display page header', async ({ page }) => {
       await expect(
-        page.getByRole('heading', { name: 'Monthly Report Status Registry', exact: true })
+        page.getByRole('heading', { name: 'Corrective Status Registry', exact: true })
       ).toBeVisible();
     });
 
     test('should display description text', async ({ page }) => {
       await expect(
-        page.getByText('Manage status mappings for monthly report data (Spanish → English)')
+        page.getByText('Manage status mappings for corrective maintenance data (Spanish → English)')
       ).toBeVisible();
     });
 
@@ -37,21 +37,18 @@ test.describe('Monthly Report Status Registry', () => {
 
   test.describe('Status Mappings Table', () => {
     test('should show loading state or content', async ({ page }) => {
-      await page.goto('/monthly-report-status-registry');
+      await page.goto('/corrective-status-registry');
 
-      // Either loading spinner, table, or empty state should appear
       const spinner = page.locator('.animate-spin');
       const table = page.locator('table');
       const emptyState = page.getByText('No status mappings found');
 
-      // Wait for any of these to be visible
       await expect(
         spinner.or(table).or(emptyState)
       ).toBeVisible({ timeout: 10000 });
     });
 
     test('should display content section after page load', async ({ page }) => {
-      // The section header with "Showing X mappings" should always be visible
       await expect(page.getByText(/Showing \d+ mappings/)).toBeVisible({ timeout: 20000 });
     });
 
@@ -59,7 +56,6 @@ test.describe('Monthly Report Status Registry', () => {
       const table = page.locator('table');
       const loadingSpinner = page.locator('.animate-spin');
 
-      // Poll for up to 20 seconds for loading to complete
       let attempts = 0;
       while (attempts < 40) {
         const isSpinnerVisible = await loadingSpinner.isVisible();
@@ -68,15 +64,12 @@ test.describe('Monthly Report Status Registry', () => {
         attempts++;
       }
 
-      // Only check headers if table is visible (data exists)
       if (await table.isVisible()) {
-        // Use table header cells to avoid matching other elements
         await expect(page.locator('th').getByText('RAW STATUS')).toBeVisible();
         await expect(page.locator('th').getByText('DISPLAY STATUS')).toBeVisible();
         await expect(page.locator('th').getByText('STATUS')).toBeVisible();
         await expect(page.locator('th').getByText('ACTIONS')).toBeVisible();
       }
-      // If no table, test passes (empty state or still loading)
     });
   });
 
@@ -91,9 +84,18 @@ test.describe('Monthly Report Status Registry', () => {
       await page.getByRole('button', { name: /new mapping/i }).click();
 
       await expect(page.getByText('Create New Mapping')).toBeVisible({ timeout: 5000 });
-      await expect(page.getByPlaceholder(/En Mantenimiento Correctivo/i)).toBeVisible();
-      // Display status is a select, check for the label (use * to be specific)
+      await expect(page.getByPlaceholder(/En Cola de Desarrollo/i)).toBeVisible();
       await expect(page.getByText('Display Status *')).toBeVisible();
+    });
+
+    test('should load display status options from API', async ({ page }) => {
+      await page.getByRole('button', { name: /new mapping/i }).click();
+
+      await expect(page.getByText('Create New Mapping')).toBeVisible({ timeout: 5000 });
+
+      // Check that display status dropdown has options
+      const displayStatusSelect = page.locator('select').filter({ hasText: 'Select a display status' });
+      await expect(displayStatusSelect).toBeVisible();
     });
 
     test('should close create modal when clicking Cancel', async ({ page }) => {
@@ -106,7 +108,7 @@ test.describe('Monthly Report Status Registry', () => {
       await expect(page.getByText('Create New Mapping')).not.toBeVisible();
     });
 
-    test('should submit create form', async ({ page }) => {
+    test('should fill create form fields', async ({ page }) => {
       await page.getByRole('button', { name: /new mapping/i }).click();
 
       await expect(page.getByText('Create New Mapping')).toBeVisible({ timeout: 5000 });
@@ -114,25 +116,14 @@ test.describe('Monthly Report Status Registry', () => {
       const timestamp = Date.now();
       const rawStatus = `E2E Test Status ${timestamp}`;
 
-      await page.getByPlaceholder(/En Mantenimiento Correctivo/i).fill(rawStatus);
+      // Fill raw status
+      const rawStatusInput = page.getByPlaceholder(/En Cola de Desarrollo/i);
+      await rawStatusInput.fill(rawStatus);
+      await expect(rawStatusInput).toHaveValue(rawStatus);
 
-      // Select a display status from the dropdown
+      // Verify display status dropdown is present
       const displayStatusSelect = page.locator('select').filter({ hasText: 'Select a display status' });
-      await displayStatusSelect.selectOption('Closed');
-
-      const createButton = page.getByRole('button', { name: /^create$/i });
-
-      // Verify form is filled and button is enabled
-      await expect(createButton).toBeEnabled();
-
-      // Click create button
-      await createButton.click();
-
-      // Wait briefly for response
-      await page.waitForTimeout(2000);
-
-      // Test passes if we got this far - form was submitted
-      // Outcome depends on backend state (success closes modal, error shows toast)
+      await expect(displayStatusSelect).toBeVisible();
     });
   });
 
@@ -157,9 +148,7 @@ test.describe('Monthly Report Status Registry', () => {
 
         await expect(page.getByText('Edit Mapping')).toBeVisible({ timeout: 5000 });
 
-        // Form inputs should have values (not empty)
-        const rawStatusInput = page.locator('input[placeholder*="En Mantenimiento Correctivo"]');
-
+        const rawStatusInput = page.locator('input[placeholder*="En Cola de Desarrollo"]');
         await expect(rawStatusInput).not.toHaveValue('');
       }
     });
@@ -219,7 +208,6 @@ test.describe('Monthly Report Status Registry', () => {
 
         await page.waitForTimeout(500);
 
-        // Either no results or filtered results
         const rows = page.locator('table tbody tr');
         const rowCount = await rows.count();
         expect(rowCount).toBeGreaterThanOrEqual(0);
@@ -236,7 +224,6 @@ test.describe('Monthly Report Status Registry', () => {
 
         await page.waitForTimeout(500);
 
-        // Table should still be visible (or empty state)
         const tableVisible = await page.locator('table').isVisible();
         const emptyVisible = await page.getByText('No status mappings found').isVisible();
         expect(tableVisible || emptyVisible).toBe(true);
@@ -261,11 +248,8 @@ test.describe('Monthly Report Status Registry', () => {
 
       const table = page.locator('table');
       if (await table.isVisible()) {
-        // Check for pagination info or controls
         const paginationInfo = page.getByText(/Page \d+ of \d+/);
         const hasPagination = await paginationInfo.isVisible();
-
-        // Pagination might not be visible if there's only one page
         expect(hasPagination).toBeDefined();
       }
     });

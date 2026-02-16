@@ -94,8 +94,9 @@ describe('CorrectiveStatusRegistryController (Integration)', () => {
         .get('/corrective-status-registry')
         .expect(200);
 
-      expect(response.body).toHaveLength(3);
-      expect(response.body[0]).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveLength(3);
+      expect(response.body.data[0]).toMatchObject({
         id: mockStatuses[0].id,
         rawStatus: mockStatuses[0].rawStatus,
         displayStatus: mockStatuses[0].displayStatus,
@@ -110,7 +111,8 @@ describe('CorrectiveStatusRegistryController (Integration)', () => {
         .get('/corrective-status-registry')
         .expect(200);
 
-      expect(response.body).toEqual([]);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toEqual([]);
       expect(mockRepository.findAll).toHaveBeenCalledOnce();
     });
   });
@@ -130,8 +132,9 @@ describe('CorrectiveStatusRegistryController (Integration)', () => {
         .get('/corrective-status-registry/display-statuses')
         .expect(200);
 
-      expect(response.body).toEqual(mockDisplayStatuses);
-      expect(response.body).toHaveLength(4);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toEqual(mockDisplayStatuses);
+      expect(response.body.data).toHaveLength(4);
       expect(mockRepository.findDistinctDisplayStatuses).toHaveBeenCalledOnce();
     });
 
@@ -142,7 +145,8 @@ describe('CorrectiveStatusRegistryController (Integration)', () => {
         .get('/corrective-status-registry/display-statuses')
         .expect(200);
 
-      expect(response.body).toEqual([]);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toEqual([]);
       expect(mockRepository.findDistinctDisplayStatuses).toHaveBeenCalledOnce();
     });
   });
@@ -157,7 +161,8 @@ describe('CorrectiveStatusRegistryController (Integration)', () => {
         .get('/corrective-status-registry/1')
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         id: 1,
         rawStatus: mockStatus.rawStatus,
         displayStatus: mockStatus.displayStatus,
@@ -213,7 +218,8 @@ describe('CorrectiveStatusRegistryController (Integration)', () => {
         .send(createDto)
         .expect(201);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         id: 1,
         rawStatus: 'Dev in Progress',
         displayStatus: 'Development in Progress',
@@ -243,7 +249,8 @@ describe('CorrectiveStatusRegistryController (Integration)', () => {
         .send(updateDto)
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         id: 1,
         displayStatus: 'Updated Display',
         isActive: false,
@@ -272,8 +279,9 @@ describe('CorrectiveStatusRegistryController (Integration)', () => {
         .delete('/corrective-status-registry/1')
         .expect(200);
 
-      expect(response.body).toMatchObject({
-        message: 'Corrective status mapping deleted successfully',
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
+        deleted: true,
       });
       expect(mockRepository.delete).toHaveBeenCalledWith(1);
     });
