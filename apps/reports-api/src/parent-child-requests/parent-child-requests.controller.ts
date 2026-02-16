@@ -19,8 +19,10 @@ import {
   ApiConsumes,
   ApiBody,
 } from '@nestjs/swagger';
+import type { JSendSuccess } from '@repo/reports/common';
 import { ParentChildRequestsService } from '@parent-child-requests/parent-child-requests.service';
 import { ExcelParserService } from '@parent-child-requests/infrastructure/services/excel-parser.service';
+import type { ParentChildRequest } from '@parent-child-requests/domain/entities/parent-child-request.entity';
 
 @ApiTags('parent-child-requests')
 @Controller('parent-child-requests')
@@ -41,11 +43,15 @@ export class ParentChildRequestsController {
   async findAll(
     @Query('limit') limit?: number,
     @Query('offset') offset?: number,
-  ) {
-    return this.parentChildRequestsService.findAll(
+  ): Promise<JSendSuccess<{ data: ParentChildRequest[]; total: number }>> {
+    const result = await this.parentChildRequestsService.findAll(
       limit ? Number(limit) : undefined,
       offset ? Number(offset) : undefined,
     );
+    return {
+      status: 'success',
+      data: result,
+    };
   }
 
   @Get('stats')
@@ -55,16 +61,28 @@ export class ParentChildRequestsController {
     description:
       'Statistics including total records, unique parents, and top parents',
   })
-  async getStats() {
-    return this.parentChildRequestsService.getStats();
+  async getStats(): Promise<JSendSuccess<{
+    totalRecords: number;
+    uniqueParents: number;
+    topParents: Array<{ parentId: string; childCount: number; link: string | null }>;
+  }>> {
+    const stats = await this.parentChildRequestsService.getStats();
+    return {
+      status: 'success',
+      data: stats,
+    };
   }
 
   @Get('parent/:id')
   @ApiOperation({ summary: 'Get all child requests for a specific parent' })
   @ApiParam({ name: 'id', type: String, description: 'Parent request ID' })
   @ApiResponse({ status: 200, description: 'List of child requests' })
-  async findChildrenByParent(@Param('id') parentId: string) {
-    return this.parentChildRequestsService.findChildrenByParent(parentId);
+  async findChildrenByParent(@Param('id') parentId: string): Promise<JSendSuccess<ParentChildRequest[]>> {
+    const children = await this.parentChildRequestsService.findChildrenByParent(parentId);
+    return {
+      status: 'success',
+      data: children,
+    };
   }
 
   @Post('upload')
@@ -97,7 +115,12 @@ export class ParentChildRequestsController {
   })
   @ApiResponse({ status: 400, description: 'Invalid file or format' })
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file: any) {
+  async uploadFile(@UploadedFile() file: any): Promise<JSendSuccess<{
+    message: string;
+    imported: number;
+    skipped: number;
+    total: number;
+  }>> {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
@@ -122,10 +145,13 @@ export class ParentChildRequestsController {
       const result = await this.parentChildRequestsService.importFromExcel(data);
 
       return {
-        message: 'File processed successfully',
-        imported: result.imported,
-        skipped: result.skipped,
-        total: data.length,
+        status: 'success',
+        data: {
+          message: 'File processed successfully',
+          imported: result.imported,
+          skipped: result.skipped,
+          total: data.length,
+        },
       };
     } catch (error) {
       if (error instanceof BadRequestException) {
@@ -143,8 +169,14 @@ export class ParentChildRequestsController {
     status: 200,
     description: 'All parent-child relationships deleted successfully',
   })
-  async deleteAll() {
+  async deleteAll(): Promise<JSendSuccess<{ deleted: boolean; message: string }>> {
     await this.parentChildRequestsService.deleteAll();
-    return { message: 'All parent-child relationships deleted successfully' };
+    return {
+      status: 'success',
+      data: {
+        deleted: true,
+        message: 'All parent-child relationships deleted successfully',
+      },
+    };
   }
 }

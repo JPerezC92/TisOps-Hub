@@ -51,50 +51,53 @@ describe('Parent Child Requests (E2E)', () => {
 
       expect(uploadResponse.status).toBe(201);
 
-      // Verify upload response
-      expect(uploadResponse.body).toMatchObject({
+      // Verify upload response (JSend format)
+      expect(uploadResponse.body.status).toBe('success');
+      expect(uploadResponse.body.data).toMatchObject({
         message: 'File processed successfully',
         imported: expect.any(Number),
         skipped: expect.any(Number),
         total: expect.any(Number),
       });
 
-      const importedCount = uploadResponse.body.imported;
+      const importedCount = uploadResponse.body.data.imported;
       expect(importedCount).toBeGreaterThan(0);
 
-      // Step 2: Retrieve all records to verify they were created
+      // Step 2: Retrieve all records to verify they were created (JSend format)
       const getAllResponse = await request(app.getHttpServer())
         .get('/parent-child-requests')
         .expect(200);
 
-      expect(getAllResponse.body).toMatchObject({
+      expect(getAllResponse.body.status).toBe('success');
+      expect(getAllResponse.body.data).toMatchObject({
         data: expect.any(Array),
         total: expect.any(Number),
       });
 
-      expect(getAllResponse.body.data.length).toBeGreaterThan(0);
-      expect(getAllResponse.body.total).toBe(importedCount);
+      expect(getAllResponse.body.data.data.length).toBeGreaterThan(0);
+      expect(getAllResponse.body.data.total).toBe(importedCount);
 
       // Verify record structure
-      const firstRecord = getAllResponse.body.data[0];
+      const firstRecord = getAllResponse.body.data.data[0];
       expect(firstRecord).toMatchObject({
         id: expect.any(Number),
         requestId: expect.any(String),
         linkedRequestId: expect.any(String),
       });
 
-      // Step 3: Check stats
+      // Step 3: Check stats (JSend format)
       const statsResponse = await request(app.getHttpServer())
         .get('/parent-child-requests/stats')
         .expect(200);
 
-      expect(statsResponse.body).toMatchObject({
+      expect(statsResponse.body.status).toBe('success');
+      expect(statsResponse.body.data).toMatchObject({
         totalRecords: importedCount,
         uniqueParents: expect.any(Number),
         topParents: expect.any(Array),
       });
 
-      expect(statsResponse.body.uniqueParents).toBeGreaterThan(0);
+      expect(statsResponse.body.data.uniqueParents).toBeGreaterThan(0);
     });
   });
 });
