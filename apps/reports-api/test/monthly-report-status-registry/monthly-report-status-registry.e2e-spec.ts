@@ -32,7 +32,8 @@ describe('MonthlyReportStatusRegistryController (E2E)', () => {
         .get('/monthly-report-status-registry')
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
   });
 
@@ -42,9 +43,10 @@ describe('MonthlyReportStatusRegistryController (E2E)', () => {
         .get('/monthly-report-status-registry/map?status=UnknownStatus')
         .expect(200);
 
-      expect(response.body).toHaveProperty('rawStatus');
-      expect(response.body).toHaveProperty('displayStatus');
-      expect(response.body.rawStatus).toBe('UnknownStatus');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('rawStatus');
+      expect(response.body.data).toHaveProperty('displayStatus');
+      expect(response.body.data.rawStatus).toBe('UnknownStatus');
     });
 
     it('should return fallback for unknown status', async () => {
@@ -52,7 +54,8 @@ describe('MonthlyReportStatusRegistryController (E2E)', () => {
         .get('/monthly-report-status-registry/map?status=NonExistentStatus')
         .expect(200);
 
-      expect(response.body.displayStatus).toBe('In L3 Backlog');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.displayStatus).toBe('In L3 Backlog');
     });
   });
 
@@ -91,18 +94,20 @@ describe('MonthlyReportStatusRegistryController (E2E)', () => {
         .send(createDto)
         .expect(201);
 
-      expect(createResponse.body).toHaveProperty('id');
-      expect(createResponse.body.rawStatus).toBe('E2E Test Status');
-      expect(createResponse.body.displayStatus).toBe('E2E Display Status');
-      createdId = createResponse.body.id;
+      expect(createResponse.body.status).toBe('success');
+      expect(createResponse.body.data).toHaveProperty('id');
+      expect(createResponse.body.data.rawStatus).toBe('E2E Test Status');
+      expect(createResponse.body.data.displayStatus).toBe('E2E Display Status');
+      createdId = createResponse.body.data.id;
 
       // 2. Read the created status mapping
       const getResponse = await request(app.getHttpServer())
         .get(`/monthly-report-status-registry/${createdId}`)
         .expect(200);
 
-      expect(getResponse.body.id).toBe(createdId);
-      expect(getResponse.body.rawStatus).toBe('E2E Test Status');
+      expect(getResponse.body.status).toBe('success');
+      expect(getResponse.body.data.id).toBe(createdId);
+      expect(getResponse.body.data.rawStatus).toBe('E2E Test Status');
 
       // 3. Update the status mapping
       const updateDto = {
@@ -114,36 +119,41 @@ describe('MonthlyReportStatusRegistryController (E2E)', () => {
         .send(updateDto)
         .expect(200);
 
-      expect(updateResponse.body.displayStatus).toBe('Updated E2E Display Status');
+      expect(updateResponse.body.status).toBe('success');
+      expect(updateResponse.body.data.displayStatus).toBe('Updated E2E Display Status');
 
       // 4. Verify the map endpoint works with the new status
       const mapResponse = await request(app.getHttpServer())
         .get('/monthly-report-status-registry/map?status=E2E Test Status')
         .expect(200);
 
-      expect(mapResponse.body.displayStatus).toBe('Updated E2E Display Status');
+      expect(mapResponse.body.status).toBe('success');
+      expect(mapResponse.body.data.displayStatus).toBe('Updated E2E Display Status');
 
       // 5. Delete the status mapping (soft delete)
       const deleteResponse = await request(app.getHttpServer())
         .delete(`/monthly-report-status-registry/${createdId}`)
         .expect(200);
 
-      expect(deleteResponse.body).toHaveProperty('message');
-      expect(deleteResponse.body.message).toContain('deleted successfully');
+      expect(deleteResponse.body.status).toBe('success');
+      expect(deleteResponse.body.data).toHaveProperty('deleted');
+      expect(deleteResponse.body.data.deleted).toBe(true);
 
       // 6. Verify the mapping is soft deleted (isActive = false)
       const verifyResponse = await request(app.getHttpServer())
         .get(`/monthly-report-status-registry/${createdId}`)
         .expect(200);
 
-      expect(verifyResponse.body.isActive).toBe(false);
+      expect(verifyResponse.body.status).toBe('success');
+      expect(verifyResponse.body.data.isActive).toBe(false);
 
       // 7. Verify the mapping is no longer in findAll results (filters by isActive)
       const allResponse = await request(app.getHttpServer())
         .get('/monthly-report-status-registry')
         .expect(200);
 
-      const deletedMapping = allResponse.body.find(
+      expect(allResponse.body.status).toBe('success');
+      const deletedMapping = allResponse.body.data.find(
         (m: { id: number }) => m.id === createdId,
       );
       expect(deletedMapping).toBeUndefined();
