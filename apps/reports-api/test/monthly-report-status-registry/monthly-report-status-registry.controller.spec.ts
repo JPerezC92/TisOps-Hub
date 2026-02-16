@@ -94,8 +94,9 @@ describe('MonthlyReportStatusRegistryController (Integration)', () => {
         .get('/monthly-report-status-registry')
         .expect(200);
 
-      expect(response.body).toHaveLength(3);
-      expect(response.body[0]).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveLength(3);
+      expect(response.body.data[0]).toMatchObject({
         id: mockStatuses[0].id,
         rawStatus: mockStatuses[0].rawStatus,
         displayStatus: mockStatuses[0].displayStatus,
@@ -110,7 +111,8 @@ describe('MonthlyReportStatusRegistryController (Integration)', () => {
         .get('/monthly-report-status-registry')
         .expect(200);
 
-      expect(response.body).toEqual([]);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toEqual([]);
       expect(mockRepository.findAll).toHaveBeenCalledOnce();
     });
   });
@@ -128,7 +130,8 @@ describe('MonthlyReportStatusRegistryController (Integration)', () => {
         .get('/monthly-report-status-registry/map?status=Pendiente')
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         rawStatus: 'Pendiente',
         displayStatus: 'In L3 Backlog',
       });
@@ -142,7 +145,8 @@ describe('MonthlyReportStatusRegistryController (Integration)', () => {
         .get('/monthly-report-status-registry/map?status=UnknownStatus')
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         rawStatus: 'UnknownStatus',
         displayStatus: 'In L3 Backlog',
       });
@@ -160,7 +164,8 @@ describe('MonthlyReportStatusRegistryController (Integration)', () => {
         .get('/monthly-report-status-registry/1')
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         id: 1,
         rawStatus: mockStatus.rawStatus,
         displayStatus: mockStatus.displayStatus,
@@ -216,7 +221,8 @@ describe('MonthlyReportStatusRegistryController (Integration)', () => {
         .send(createDto)
         .expect(201);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         id: 1,
         rawStatus: 'Nuevo',
         displayStatus: 'New',
@@ -246,7 +252,8 @@ describe('MonthlyReportStatusRegistryController (Integration)', () => {
         .send(updateDto)
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         id: 1,
         displayStatus: 'Updated Display',
         isActive: false,
@@ -275,8 +282,9 @@ describe('MonthlyReportStatusRegistryController (Integration)', () => {
         .delete('/monthly-report-status-registry/1')
         .expect(200);
 
-      expect(response.body).toMatchObject({
-        message: 'Monthly report status mapping deleted successfully',
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
+        deleted: true,
       });
       expect(mockRepository.delete).toHaveBeenCalledWith(1);
     });

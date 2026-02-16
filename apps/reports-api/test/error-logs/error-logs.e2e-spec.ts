@@ -32,7 +32,10 @@ describe('ErrorLogsController (E2E)', () => {
         .get('/error-logs')
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('logs');
+      expect(response.body.data).toHaveProperty('total');
+      expect(Array.isArray(response.body.data.logs)).toBe(true);
     });
 
     it('should return error logs with custom limit', async () => {
@@ -40,8 +43,10 @@ describe('ErrorLogsController (E2E)', () => {
         .get('/error-logs?limit=5')
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.length).toBeLessThanOrEqual(5);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('logs');
+      expect(Array.isArray(response.body.data.logs)).toBe(true);
+      expect(response.body.data.logs.length).toBeLessThanOrEqual(5);
     });
   });
 
