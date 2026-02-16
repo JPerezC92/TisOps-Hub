@@ -104,8 +104,9 @@ describe('ParentChildRequestsController (Integration)', () => {
         .get('/parent-child-requests')
         .expect(200);
 
-      expect(response.body.data).toHaveLength(3);
-      expect(response.body.total).toBe(3);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toHaveLength(3);
+      expect(response.body.data.total).toBe(3);
       expect(mockRepository.findAll).toHaveBeenCalled();
       expect(mockRepository.countAll).toHaveBeenCalledOnce();
     });
@@ -120,8 +121,9 @@ describe('ParentChildRequestsController (Integration)', () => {
         .get('/parent-child-requests?limit=2&offset=5')
         .expect(200);
 
-      expect(response.body.data).toHaveLength(2);
-      expect(response.body.total).toBe(10);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toHaveLength(2);
+      expect(response.body.data.total).toBe(10);
       expect(mockRepository.findAll).toHaveBeenCalledWith(2, 5);
       expect(mockRepository.countAll).toHaveBeenCalledOnce();
     });
@@ -134,8 +136,9 @@ describe('ParentChildRequestsController (Integration)', () => {
         .get('/parent-child-requests')
         .expect(200);
 
-      expect(response.body.data).toEqual([]);
-      expect(response.body.total).toBe(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toEqual([]);
+      expect(response.body.data.total).toBe(0);
     });
   });
 
@@ -156,7 +159,8 @@ describe('ParentChildRequestsController (Integration)', () => {
         .get('/parent-child-requests/stats')
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         totalRecords: 100,
         uniqueParents: 25,
         topParents: expect.arrayContaining([
@@ -179,7 +183,8 @@ describe('ParentChildRequestsController (Integration)', () => {
         .get('/parent-child-requests/stats')
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         totalRecords: 0,
         uniqueParents: 0,
         topParents: [],
@@ -202,8 +207,9 @@ describe('ParentChildRequestsController (Integration)', () => {
         .get(`/parent-child-requests/parent/${parentId}`)
         .expect(200);
 
-      expect(response.body).toHaveLength(2);
-      expect(response.body[0].linkedRequestId).toBe(parentId);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveLength(2);
+      expect(response.body.data[0].linkedRequestId).toBe(parentId);
       expect(mockRepository.findByParentId).toHaveBeenCalledWith(parentId);
     });
 
@@ -216,7 +222,8 @@ describe('ParentChildRequestsController (Integration)', () => {
         .get(`/parent-child-requests/parent/${parentId}`)
         .expect(200);
 
-      expect(response.body).toEqual([]);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toEqual([]);
       expect(mockRepository.findByParentId).toHaveBeenCalledWith(parentId);
     });
   });
@@ -239,7 +246,8 @@ describe('ParentChildRequestsController (Integration)', () => {
         })
         .expect(201);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         message: 'File processed successfully',
         imported: expect.any(Number),
         skipped: expect.any(Number),
@@ -309,7 +317,9 @@ describe('ParentChildRequestsController (Integration)', () => {
         .delete('/parent-child-requests')
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
+        deleted: true,
         message: 'All parent-child relationships deleted successfully',
       });
       expect(mockRepository.deleteAll).toHaveBeenCalledOnce();
