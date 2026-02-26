@@ -29,15 +29,16 @@ describe('ProblemsController (e2e)', () => {
   });
 
   describe('GET /problems', () => {
-    it('should return all problems', async () => {
+    it('should return all problems in JSend format', async () => {
       const response = await request(app.getHttpServer())
         .get('/problems')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('total');
-      expect(Array.isArray(response.body.data)).toBe(true);
-      expect(typeof response.body.total).toBe('number');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('total');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
+      expect(typeof response.body.data.total).toBe('number');
     });
   });
 
@@ -55,10 +56,11 @@ describe('ProblemsController (e2e)', () => {
         })
         .expect(201);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body).toHaveProperty('imported');
-      expect(response.body).toHaveProperty('total');
-      expect(response.body.imported).toBeGreaterThan(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('message');
+      expect(response.body.data).toHaveProperty('imported');
+      expect(response.body.data).toHaveProperty('total');
+      expect(response.body.data.imported).toBeGreaterThan(0);
     });
 
     it('should return 400 when no file is uploaded', async () => {
@@ -95,8 +97,9 @@ describe('ProblemsController (e2e)', () => {
         })
         .expect(201);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.imported).toBeGreaterThan(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('message');
+      expect(response.body.data.imported).toBeGreaterThan(0);
     });
   });
 
@@ -106,9 +109,10 @@ describe('ProblemsController (e2e)', () => {
         .delete('/problems')
         .expect(200);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body).toHaveProperty('deleted');
-      expect(typeof response.body.deleted).toBe('number');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('message');
+      expect(response.body.data).toHaveProperty('deleted');
+      expect(typeof response.body.data.deleted).toBe('number');
     });
   });
 
@@ -126,29 +130,33 @@ describe('ProblemsController (e2e)', () => {
         })
         .expect(201);
 
-      expect(uploadResponse.body.imported).toBeGreaterThan(0);
+      expect(uploadResponse.body.status).toBe('success');
+      expect(uploadResponse.body.data.imported).toBeGreaterThan(0);
 
       // 2. Retrieve problems
       const getResponse = await request(app.getHttpServer())
         .get('/problems')
         .expect(200);
 
-      expect(Array.isArray(getResponse.body.data)).toBe(true);
+      expect(getResponse.body.status).toBe('success');
+      expect(Array.isArray(getResponse.body.data.data)).toBe(true);
 
       // 3. Delete all problems
       const deleteResponse = await request(app.getHttpServer())
         .delete('/problems')
         .expect(200);
 
-      expect(deleteResponse.body.deleted).toBeGreaterThanOrEqual(0);
+      expect(deleteResponse.body.status).toBe('success');
+      expect(deleteResponse.body.data.deleted).toBeGreaterThanOrEqual(0);
 
       // 4. Verify deletion
       const verifyResponse = await request(app.getHttpServer())
         .get('/problems')
         .expect(200);
 
-      expect(verifyResponse.body.data).toHaveLength(0);
-      expect(verifyResponse.body.total).toBe(0);
+      expect(verifyResponse.body.status).toBe('success');
+      expect(verifyResponse.body.data.data).toHaveLength(0);
+      expect(verifyResponse.body.data.total).toBe(0);
     });
   });
 });
