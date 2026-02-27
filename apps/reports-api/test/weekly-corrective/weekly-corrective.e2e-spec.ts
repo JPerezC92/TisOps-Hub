@@ -34,9 +34,10 @@ describe('WeeklyCorrectiveController (E2E)', () => {
         .get('/weekly-corrective')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('total');
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('total');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
     });
   });
 
@@ -53,9 +54,10 @@ describe('WeeklyCorrectiveController (E2E)', () => {
         })
         .expect(201);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body).toHaveProperty('imported');
-      expect(response.body.imported).toBeGreaterThan(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('message');
+      expect(response.body.data).toHaveProperty('imported');
+      expect(response.body.data.imported).toBeGreaterThan(0);
     });
 
     it('should return 400 when no file is uploaded', async () => {
@@ -86,9 +88,10 @@ describe('WeeklyCorrectiveController (E2E)', () => {
         .delete('/weekly-corrective')
         .expect(200);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body).toHaveProperty('deleted');
-      expect(typeof response.body.deleted).toBe('number');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('message');
+      expect(response.body.data).toHaveProperty('deleted');
+      expect(typeof response.body.data.deleted).toBe('number');
     });
   });
 
@@ -98,12 +101,13 @@ describe('WeeklyCorrectiveController (E2E)', () => {
         .get('/weekly-corrective/l3-tickets-by-status')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('statusColumns');
-      expect(response.body).toHaveProperty('monthName');
-      expect(response.body).toHaveProperty('totalL3Tickets');
-      expect(Array.isArray(response.body.data)).toBe(true);
-      expect(Array.isArray(response.body.statusColumns)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('statusColumns');
+      expect(response.body.data).toHaveProperty('monthName');
+      expect(response.body.data).toHaveProperty('totalL3Tickets');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
+      expect(Array.isArray(response.body.data.statusColumns)).toBe(true);
     });
 
     it('should return L3 tickets by status with app filter', async () => {
@@ -111,8 +115,9 @@ describe('WeeklyCorrectiveController (E2E)', () => {
         .get('/weekly-corrective/l3-tickets-by-status?app=SB')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('statusColumns');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('statusColumns');
     });
 
     it('should return L3 tickets by status with month filter', async () => {
@@ -120,8 +125,9 @@ describe('WeeklyCorrectiveController (E2E)', () => {
         .get('/weekly-corrective/l3-tickets-by-status?month=2024-10')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('monthName');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('monthName');
     });
 
     it('should return L3 tickets by status with both filters', async () => {
@@ -129,10 +135,11 @@ describe('WeeklyCorrectiveController (E2E)', () => {
         .get('/weekly-corrective/l3-tickets-by-status?app=SB&month=2024-10')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('statusColumns');
-      expect(response.body).toHaveProperty('monthName');
-      expect(response.body).toHaveProperty('totalL3Tickets');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('statusColumns');
+      expect(response.body.data).toHaveProperty('monthName');
+      expect(response.body.data).toHaveProperty('totalL3Tickets');
     });
   });
 
@@ -150,29 +157,33 @@ describe('WeeklyCorrectiveController (E2E)', () => {
         })
         .expect(201);
 
-      expect(uploadResponse.body.imported).toBeGreaterThan(0);
+      expect(uploadResponse.body.status).toBe('success');
+      expect(uploadResponse.body.data.imported).toBeGreaterThan(0);
 
       // 2. Retrieve weekly-corrective records
       const getResponse = await request(app.getHttpServer())
         .get('/weekly-corrective')
         .expect(200);
 
-      expect(Array.isArray(getResponse.body.data)).toBe(true);
+      expect(getResponse.body.status).toBe('success');
+      expect(Array.isArray(getResponse.body.data.data)).toBe(true);
 
       // 3. Delete all weekly-corrective records
       const deleteResponse = await request(app.getHttpServer())
         .delete('/weekly-corrective')
         .expect(200);
 
-      expect(deleteResponse.body.deleted).toBeGreaterThanOrEqual(0);
+      expect(deleteResponse.body.status).toBe('success');
+      expect(deleteResponse.body.data.deleted).toBeGreaterThanOrEqual(0);
 
       // 4. Verify deletion
       const verifyResponse = await request(app.getHttpServer())
         .get('/weekly-corrective')
         .expect(200);
 
-      expect(verifyResponse.body.data).toHaveLength(0);
-      expect(verifyResponse.body.total).toBe(0);
+      expect(verifyResponse.body.status).toBe('success');
+      expect(verifyResponse.body.data.data).toHaveLength(0);
+      expect(verifyResponse.body.data.total).toBe(0);
     });
   });
 });

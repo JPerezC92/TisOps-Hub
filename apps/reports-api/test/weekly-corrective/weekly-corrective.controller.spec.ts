@@ -51,8 +51,9 @@ describe('WeeklyCorrectiveController (Integration)', () => {
         .get('/weekly-corrective')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data).toHaveLength(3);
-      expect(response.body.total).toBe(3);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toHaveLength(3);
+      expect(response.body.data.total).toBe(3);
       expect(mockService.findAll).toHaveBeenCalledOnce();
     });
 
@@ -65,8 +66,9 @@ describe('WeeklyCorrectiveController (Integration)', () => {
         .get('/weekly-corrective')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data).toEqual([]);
-      expect(response.body.total).toBe(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toEqual([]);
+      expect(response.body.data.total).toBe(0);
     });
 
     it('should validate response structure', async () => {
@@ -78,12 +80,13 @@ describe('WeeklyCorrectiveController (Integration)', () => {
         .get('/weekly-corrective')
         .expect(HttpStatus.OK);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('total');
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('total');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
 
-      if (response.body.data.length > 0) {
-        const record = response.body.data[0];
+      if (response.body.data.data.length > 0) {
+        const record = response.body.data.data[0];
         expect(record).toHaveProperty('requestId');
         expect(record).toHaveProperty('technician');
         expect(record).toHaveProperty('aplicativos');
@@ -105,7 +108,8 @@ describe('WeeklyCorrectiveController (Integration)', () => {
         .get('/weekly-corrective')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.every((r: any) => r.requestStatus === 'En Pruebas')).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.every((r: any) => r.requestStatus === 'En Pruebas')).toBe(true);
     });
 
     it('should return records with specific priority', async () => {
@@ -120,7 +124,8 @@ describe('WeeklyCorrectiveController (Integration)', () => {
         .get('/weekly-corrective')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.every((r: any) => r.priority === 'Alta')).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.every((r: any) => r.priority === 'Alta')).toBe(true);
     });
   });
 
@@ -144,7 +149,8 @@ describe('WeeklyCorrectiveController (Integration)', () => {
         })
         .expect(HttpStatus.CREATED);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         message: 'File uploaded and parsed successfully',
         imported: 35,
         total: 35,
@@ -219,7 +225,8 @@ describe('WeeklyCorrectiveController (Integration)', () => {
         })
         .expect(HttpStatus.CREATED);
 
-      expect(response.body.imported).toBe(150);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.imported).toBe(150);
     });
   });
 
@@ -235,7 +242,8 @@ describe('WeeklyCorrectiveController (Integration)', () => {
         .delete('/weekly-corrective')
         .expect(HttpStatus.OK);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         message: 'All weekly corrective records deleted successfully',
         deleted: 45,
       });
@@ -253,7 +261,8 @@ describe('WeeklyCorrectiveController (Integration)', () => {
         .delete('/weekly-corrective')
         .expect(HttpStatus.OK);
 
-      expect(response.body.deleted).toBe(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.deleted).toBe(0);
     });
   });
 
@@ -270,7 +279,8 @@ describe('WeeklyCorrectiveController (Integration)', () => {
         .get('/weekly-corrective')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.every((r: any) => r.rca === 'No asignado')).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.every((r: any) => r.rca === 'No asignado')).toBe(true);
     });
 
     it('should handle mixed priority records', async () => {
@@ -291,9 +301,10 @@ describe('WeeklyCorrectiveController (Integration)', () => {
         .get('/weekly-corrective')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.length).toBe(4);
-      expect(response.body.data.filter((r: any) => r.priority === 'Alta').length).toBe(2);
-      expect(response.body.data.filter((r: any) => r.priority === 'Baja').length).toBe(2);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.length).toBe(4);
+      expect(response.body.data.data.filter((r: any) => r.priority === 'Alta').length).toBe(2);
+      expect(response.body.data.data.filter((r: any) => r.priority === 'Baja').length).toBe(2);
     });
 
     it('should handle different technicians', async () => {
@@ -306,8 +317,9 @@ describe('WeeklyCorrectiveController (Integration)', () => {
         .get('/weekly-corrective')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.length).toBe(3);
-      expect(response.body.data.every((r: any) => typeof r.technician === 'string')).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.length).toBe(3);
+      expect(response.body.data.data.every((r: any) => typeof r.technician === 'string')).toBe(true);
     });
   });
 });
