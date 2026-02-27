@@ -671,7 +671,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setCriticalIncidents(result || []);
+        setCriticalIncidents(result.data || []);
       }
     } catch (error) {
       console.error('Failed to fetch critical incidents:', error);
@@ -701,7 +701,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setModuleEvolutionData(result);
+        setModuleEvolutionData(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch module evolution:', error);
@@ -724,7 +724,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setStabilityIndicators(result);
+        setStabilityIndicators(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch stability indicators:', error);
@@ -747,7 +747,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setCategoryDistribution(result);
+        setCategoryDistribution(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch category distribution:', error);
@@ -770,7 +770,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setBusinessFlowPriority(result);
+        setBusinessFlowPriority(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch business flow priority:', error);
@@ -793,7 +793,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setPriorityByApp(result);
+        setPriorityByApp(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch priority by app:', error);
@@ -839,7 +839,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setIncidentsByWeek(result);
+        setIncidentsByWeek(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch incidents by week:', error);
@@ -861,7 +861,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setIncidentsByDay(result);
+        setIncidentsByDay(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch incidents by day:', error);
@@ -891,7 +891,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setIncidentOverview(result);
+        setIncidentOverview(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch incident overview:', error);
@@ -913,7 +913,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setL3Summary(result);
+        setL3Summary(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch L3 summary:', error);
@@ -935,7 +935,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setL3RequestsByStatus(result);
+        setL3RequestsByStatus(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch L3 requests by status:', error);
@@ -958,7 +958,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setMissingScopeByParent(result);
+        setMissingScopeByParent(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch missing scope by parent:', error);
@@ -981,7 +981,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setBugsByParent(result);
+        setBugsByParent(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch bugs by parent:', error);
@@ -1042,7 +1042,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setIncidentsByReleaseByDayData(result);
+        setIncidentsByReleaseByDayData(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch incidents by release by day:', error);
@@ -1065,7 +1065,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setChangeReleaseByModuleData(result);
+        setChangeReleaseByModuleData(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch change release by module:', error);

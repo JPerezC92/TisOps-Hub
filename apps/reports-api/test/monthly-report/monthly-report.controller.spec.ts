@@ -52,8 +52,9 @@ describe('MonthlyReportController (Integration)', () => {
         .get('/monthly-report')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data).toHaveLength(3);
-      expect(response.body.total).toBe(3);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toHaveLength(3);
+      expect(response.body.data.total).toBe(3);
       expect(mockService.findAll).toHaveBeenCalledOnce();
     });
 
@@ -66,8 +67,9 @@ describe('MonthlyReportController (Integration)', () => {
         .get('/monthly-report')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data).toEqual([]);
-      expect(response.body.total).toBe(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toEqual([]);
+      expect(response.body.data.total).toBe(0);
     });
 
     it('should validate response structure', async () => {
@@ -79,13 +81,14 @@ describe('MonthlyReportController (Integration)', () => {
         .get('/monthly-report')
         .expect(HttpStatus.OK);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('total');
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('total');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
 
       // Validate first record structure
-      if (response.body.data.length > 0) {
-        const record = response.body.data[0];
+      if (response.body.data.data.length > 0) {
+        const record = response.body.data.data[0];
         expect(record).toHaveProperty('requestId');
         expect(record).toHaveProperty('aplicativos');
         expect(record).toHaveProperty('categorizacion');
@@ -108,7 +111,8 @@ describe('MonthlyReportController (Integration)', () => {
         .get('/monthly-report')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.every((r: any) => r.requestStatus === 'Cerrado')).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.every((r: any) => r.requestStatus === 'Cerrado')).toBe(true);
     });
 
     it('should return reports with specific priority', async () => {
@@ -123,7 +127,8 @@ describe('MonthlyReportController (Integration)', () => {
         .get('/monthly-report')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.every((r: any) => r.priority === 'Alta')).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.every((r: any) => r.priority === 'Alta')).toBe(true);
     });
   });
 
@@ -149,7 +154,8 @@ describe('MonthlyReportController (Integration)', () => {
         })
         .expect(HttpStatus.CREATED);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         message: 'File uploaded and parsed successfully',
         imported: 47,
         total: 50,
@@ -228,9 +234,10 @@ describe('MonthlyReportController (Integration)', () => {
         })
         .expect(HttpStatus.CREATED);
 
-      expect(response.body.merged).toBe(5);
-      expect(response.body.unique).toBe(45);
-      expect(response.body.total).toBe(50);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.merged).toBe(5);
+      expect(response.body.data.unique).toBe(45);
+      expect(response.body.data.total).toBe(50);
     });
 
     it('should process large datasets efficiently', async () => {
@@ -254,7 +261,8 @@ describe('MonthlyReportController (Integration)', () => {
         })
         .expect(HttpStatus.CREATED);
 
-      expect(response.body.imported).toBe(500);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.imported).toBe(500);
     });
 
     it('should validate required fields', async () => {
@@ -288,7 +296,8 @@ describe('MonthlyReportController (Integration)', () => {
         .delete('/monthly-report')
         .expect(HttpStatus.OK);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         message: 'All monthly reports deleted successfully',
         deleted: 150,
       });
@@ -306,7 +315,8 @@ describe('MonthlyReportController (Integration)', () => {
         .delete('/monthly-report')
         .expect(HttpStatus.OK);
 
-      expect(response.body.deleted).toBe(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.deleted).toBe(0);
     });
 
     it('should delete large dataset', async () => {
@@ -320,7 +330,8 @@ describe('MonthlyReportController (Integration)', () => {
         .delete('/monthly-report')
         .expect(HttpStatus.OK);
 
-      expect(response.body.deleted).toBe(10000);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.deleted).toBe(10000);
     });
   });
 
@@ -339,7 +350,8 @@ describe('MonthlyReportController (Integration)', () => {
         .get('/monthly-report')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.every((r: any) =>
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.every((r: any) =>
         r.eta === 'No asignado' &&
         r.resolvedTime === 'No asignado' &&
         r.problemId === 'No asignado'
@@ -358,7 +370,8 @@ describe('MonthlyReportController (Integration)', () => {
         .get('/monthly-report')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.every((r: any) => r.nivelUno === 'No Validado')).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.every((r: any) => r.nivelUno === 'No Validado')).toBe(true);
     });
 
     it('should handle mixed OLA status records', async () => {
@@ -379,9 +392,10 @@ describe('MonthlyReportController (Integration)', () => {
         .get('/monthly-report')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.length).toBe(4);
-      expect(response.body.data.filter((r: any) => r.requestOlaStatus === 'Violated').length).toBe(2);
-      expect(response.body.data.filter((r: any) => r.requestOlaStatus === 'Not Violated').length).toBe(2);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.length).toBe(4);
+      expect(response.body.data.data.filter((r: any) => r.requestOlaStatus === 'Violated').length).toBe(2);
+      expect(response.body.data.data.filter((r: any) => r.requestOlaStatus === 'Not Violated').length).toBe(2);
     });
   });
 });
