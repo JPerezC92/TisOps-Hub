@@ -34,9 +34,10 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('total');
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('total');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
     });
   });
 
@@ -46,7 +47,8 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/analytics')
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
 
     it('should return analytics with app filter', async () => {
@@ -54,7 +56,8 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/analytics?app=SB')
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
 
     it('should return analytics with month filter', async () => {
@@ -62,7 +65,8 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/analytics?month=2024-10')
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
 
     it('should return analytics with both filters', async () => {
@@ -70,7 +74,8 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/analytics?app=SB&month=2024-10')
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
   });
 
@@ -80,9 +85,10 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/module-evolution')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('total');
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('total');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
     });
 
     it('should return module evolution with filters', async () => {
@@ -90,8 +96,9 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/module-evolution?app=SB&startDate=2024-10-01&endDate=2024-10-31')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('total');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('total');
     });
   });
 
@@ -101,9 +108,10 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/stability-indicators')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('hasUnmappedStatuses');
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('hasUnmappedStatuses');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
     });
 
     it('should return stability indicators with filters', async () => {
@@ -111,8 +119,9 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/stability-indicators?app=SB&month=2024-10')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('hasUnmappedStatuses');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('hasUnmappedStatuses');
     });
   });
 
@@ -122,10 +131,11 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/category-distribution')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('monthName');
-      expect(response.body).toHaveProperty('totalIncidents');
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('monthName');
+      expect(response.body.data).toHaveProperty('totalIncidents');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
     });
 
     it('should return category distribution with filters', async () => {
@@ -133,8 +143,9 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/category-distribution?app=SB&month=2024-10')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('monthName');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('monthName');
     });
   });
 
@@ -144,10 +155,11 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/business-flow-priority')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('monthName');
-      expect(response.body).toHaveProperty('totalIncidents');
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('monthName');
+      expect(response.body.data).toHaveProperty('totalIncidents');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
     });
 
     it('should return business flow priority with filters', async () => {
@@ -155,8 +167,9 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/business-flow-priority?app=SB&month=2024-10')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('monthName');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('monthName');
     });
   });
 
@@ -166,10 +179,11 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/priority-by-app')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('monthName');
-      expect(response.body).toHaveProperty('totalIncidents');
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('monthName');
+      expect(response.body.data).toHaveProperty('totalIncidents');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
     });
 
     it('should return priority by app with filters', async () => {
@@ -177,8 +191,9 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/priority-by-app?app=SB&month=2024-10')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('monthName');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('monthName');
     });
   });
 
@@ -188,10 +203,11 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/incidents-by-week')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('year');
-      expect(response.body).toHaveProperty('totalIncidents');
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('year');
+      expect(response.body.data).toHaveProperty('totalIncidents');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
     });
 
     it('should return incidents by week with filters', async () => {
@@ -199,8 +215,9 @@ describe('MonthlyReportController (E2E)', () => {
         .get('/monthly-report/incidents-by-week?app=SB&year=2024')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('year');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('year');
     });
   });
 
@@ -217,9 +234,10 @@ describe('MonthlyReportController (E2E)', () => {
         })
         .expect(201);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body).toHaveProperty('imported');
-      expect(response.body.imported).toBeGreaterThan(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('message');
+      expect(response.body.data).toHaveProperty('imported');
+      expect(response.body.data.imported).toBeGreaterThan(0);
     });
 
     it('should return 400 when no file is uploaded', async () => {
@@ -250,9 +268,10 @@ describe('MonthlyReportController (E2E)', () => {
         .delete('/monthly-report')
         .expect(200);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body).toHaveProperty('deleted');
-      expect(typeof response.body.deleted).toBe('number');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('message');
+      expect(response.body.data).toHaveProperty('deleted');
+      expect(typeof response.body.data.deleted).toBe('number');
     });
   });
 
@@ -270,37 +289,42 @@ describe('MonthlyReportController (E2E)', () => {
         })
         .expect(201);
 
-      expect(uploadResponse.body.imported).toBeGreaterThan(0);
+      expect(uploadResponse.body.status).toBe('success');
+      expect(uploadResponse.body.data.imported).toBeGreaterThan(0);
 
       // 2. Retrieve all records
       const getResponse = await request(app.getHttpServer())
         .get('/monthly-report')
         .expect(200);
 
-      expect(Array.isArray(getResponse.body.data)).toBe(true);
-      expect(getResponse.body.total).toBeGreaterThan(0);
+      expect(getResponse.body.status).toBe('success');
+      expect(Array.isArray(getResponse.body.data.data)).toBe(true);
+      expect(getResponse.body.data.total).toBeGreaterThan(0);
 
       // 3. Get analytics data
       const analyticsResponse = await request(app.getHttpServer())
         .get('/monthly-report/analytics')
         .expect(200);
 
-      expect(Array.isArray(analyticsResponse.body)).toBe(true);
+      expect(analyticsResponse.body.status).toBe('success');
+      expect(Array.isArray(analyticsResponse.body.data)).toBe(true);
 
       // 4. Delete all records
       const deleteResponse = await request(app.getHttpServer())
         .delete('/monthly-report')
         .expect(200);
 
-      expect(deleteResponse.body.deleted).toBeGreaterThanOrEqual(0);
+      expect(deleteResponse.body.status).toBe('success');
+      expect(deleteResponse.body.data.deleted).toBeGreaterThanOrEqual(0);
 
       // 5. Verify deletion
       const verifyResponse = await request(app.getHttpServer())
         .get('/monthly-report')
         .expect(200);
 
-      expect(verifyResponse.body.data).toHaveLength(0);
-      expect(verifyResponse.body.total).toBe(0);
+      expect(verifyResponse.body.status).toBe('success');
+      expect(verifyResponse.body.data.data).toHaveLength(0);
+      expect(verifyResponse.body.data.total).toBe(0);
     });
   });
 });

@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { warRoomsService } from '@/modules/war-rooms/services/war-rooms.service';
-import { createManyWarRooms } from '../helpers/war-rooms.factory';
+import { monthlyReportService } from '@/modules/monthly-report/services/monthly-report.service';
+import { createManyMonthlyReports } from '../helpers/monthly-report.factory';
 
-describe('warRoomsService (Integration)', () => {
+describe('monthlyReportService (Integration)', () => {
   const mockFetch = vi.fn();
 
   beforeEach(() => {
@@ -15,22 +15,22 @@ describe('warRoomsService (Integration)', () => {
   });
 
   describe('getAll', () => {
-    it('should fetch all war rooms and unwrap JSend response', async () => {
-      const mockWarRooms = createManyWarRooms(5);
+    it('should fetch all monthly reports and unwrap JSend response', async () => {
+      const mockReports = createManyMonthlyReports(5);
 
       mockFetch.mockResolvedValue({
         ok: true,
         json: () =>
           Promise.resolve({
             status: 'success',
-            data: { data: mockWarRooms, total: 5 },
+            data: { data: mockReports, total: 5 },
           }),
       });
 
-      const result = await warRoomsService.getAll();
+      const result = await monthlyReportService.getAll();
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/war-rooms'),
+        expect.stringContaining('/monthly-report'),
         expect.objectContaining({ cache: 'no-store' })
       );
       expect(result.data).toHaveLength(5);
@@ -47,7 +47,7 @@ describe('warRoomsService (Integration)', () => {
           }),
       });
 
-      const result = await warRoomsService.getAll();
+      const result = await monthlyReportService.getAll();
 
       expect(result.data).toHaveLength(0);
       expect(result.total).toBe(0);
@@ -59,7 +59,7 @@ describe('warRoomsService (Integration)', () => {
         json: () => Promise.resolve({ message: 'Internal server error' }),
       });
 
-      await expect(warRoomsService.getAll()).rejects.toThrow();
+      await expect(monthlyReportService.getAll()).rejects.toThrow();
     });
   });
 
@@ -70,25 +70,26 @@ describe('warRoomsService (Integration)', () => {
         json: () =>
           Promise.resolve({
             status: 'success',
-            data: { message: 'File uploaded', imported: 10, total: 10 },
+            data: { message: 'File uploaded', imported: 47, total: 50, merged: 3, unique: 47 },
           }),
       });
 
-      const file = new File(['content'], 'EDWarRooms2025.xlsx', {
+      const file = new File(['content'], 'XD 2025 DATA INFORME MENSUAL.xlsx', {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
 
-      const result = await warRoomsService.upload(file);
+      const result = await monthlyReportService.upload(file);
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/war-rooms/upload'),
+        expect.stringContaining('/monthly-report/upload'),
         expect.objectContaining({
           method: 'POST',
           body: expect.any(FormData),
         })
       );
       expect(result.message).toBe('File uploaded');
-      expect(result.imported).toBe(10);
+      expect(result.imported).toBe(47);
+      expect(result.merged).toBe(3);
     });
 
     it('should throw error on upload failure', async () => {
@@ -99,7 +100,7 @@ describe('warRoomsService (Integration)', () => {
 
       const file = new File(['content'], 'test.txt', { type: 'text/plain' });
 
-      await expect(warRoomsService.upload(file)).rejects.toThrow();
+      await expect(monthlyReportService.upload(file)).rejects.toThrow();
     });
 
     it('should throw error on network failure', async () => {
@@ -109,29 +110,29 @@ describe('warRoomsService (Integration)', () => {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       });
 
-      await expect(warRoomsService.upload(file)).rejects.toThrow('Network error');
+      await expect(monthlyReportService.upload(file)).rejects.toThrow('Network error');
     });
   });
 
   describe('deleteAll', () => {
-    it('should delete all war rooms and unwrap JSend response', async () => {
+    it('should delete all monthly reports and unwrap JSend response', async () => {
       mockFetch.mockResolvedValue({
         ok: true,
         json: () =>
           Promise.resolve({
             status: 'success',
-            data: { message: 'All deleted', deleted: 50 },
+            data: { message: 'All deleted', deleted: 150 },
           }),
       });
 
-      const result = await warRoomsService.deleteAll();
+      const result = await monthlyReportService.deleteAll();
 
       expect(mockFetch).toHaveBeenCalledWith(
-        expect.stringContaining('/war-rooms'),
+        expect.stringContaining('/monthly-report'),
         expect.objectContaining({ method: 'DELETE' })
       );
       expect(result.message).toBe('All deleted');
-      expect(result.deleted).toBe(50);
+      expect(result.deleted).toBe(150);
     });
 
     it('should throw error on delete failure', async () => {
@@ -140,7 +141,7 @@ describe('warRoomsService (Integration)', () => {
         json: () => Promise.resolve({ message: 'Delete failed' }),
       });
 
-      await expect(warRoomsService.deleteAll()).rejects.toThrow();
+      await expect(monthlyReportService.deleteAll()).rejects.toThrow();
     });
   });
 });

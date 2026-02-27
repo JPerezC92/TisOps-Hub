@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import type { JSendSuccess } from '@repo/reports/common';
 import { MonthlyReportService } from './monthly-report.service';
 
 @ApiTags('monthly-report')
@@ -21,8 +22,9 @@ export class MonthlyReportController {
   @Get()
   @ApiOperation({ summary: 'Get all monthly report records' })
   @ApiResponse({ status: 200, description: 'Returns all records' })
-  async findAll() {
-    return this.monthlyReportService.findAll();
+  async findAll(): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.findAll();
+    return { status: 'success', data: result };
   }
 
   @Get('analytics')
@@ -31,8 +33,9 @@ export class MonthlyReportController {
   async getCriticalIncidentsAnalytics(
     @Query('app') app?: string,
     @Query('month') month?: string,
-  ) {
-    return this.monthlyReportService.getCriticalIncidentsAnalytics(app, month);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.getCriticalIncidentsAnalytics(app, month);
+    return { status: 'success', data: result };
   }
 
   @Get('module-evolution')
@@ -42,8 +45,9 @@ export class MonthlyReportController {
     @Query('app') app?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-  ) {
-    return this.monthlyReportService.getModuleEvolution(app, startDate, endDate);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.getModuleEvolution(app, startDate, endDate);
+    return { status: 'success', data: result };
   }
 
   @Get('stability-indicators')
@@ -52,8 +56,9 @@ export class MonthlyReportController {
   async getStabilityIndicators(
     @Query('app') app?: string,
     @Query('month') month?: string,
-  ) {
-    return this.monthlyReportService.getStabilityIndicators(app, month);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.getStabilityIndicators(app, month);
+    return { status: 'success', data: result };
   }
 
   @Get('category-distribution')
@@ -62,8 +67,9 @@ export class MonthlyReportController {
   async getCategoryDistribution(
     @Query('app') app?: string,
     @Query('month') month?: string,
-  ) {
-    return this.monthlyReportService.getCategoryDistribution(app, month);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.getCategoryDistribution(app, month);
+    return { status: 'success', data: result };
   }
 
   @Get('business-flow-priority')
@@ -72,8 +78,9 @@ export class MonthlyReportController {
   async getBusinessFlowPriority(
     @Query('app') app?: string,
     @Query('month') month?: string,
-  ) {
-    return this.monthlyReportService.getBusinessFlowPriority(app, month);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.getBusinessFlowPriority(app, month);
+    return { status: 'success', data: result };
   }
 
   @Get('priority-by-app')
@@ -82,8 +89,9 @@ export class MonthlyReportController {
   async getPriorityByApp(
     @Query('app') app?: string,
     @Query('month') month?: string,
-  ) {
-    return this.monthlyReportService.getPriorityByApp(app, month);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.getPriorityByApp(app, month);
+    return { status: 'success', data: result };
   }
 
   @Get('incidents-by-week')
@@ -92,9 +100,10 @@ export class MonthlyReportController {
   async getIncidentsByWeek(
     @Query('app') app?: string,
     @Query('year') year?: string,
-  ) {
+  ): Promise<JSendSuccess<any>> {
     const yearNum = year ? parseInt(year, 10) : undefined;
-    return this.monthlyReportService.getIncidentsByWeek(app, yearNum);
+    const result = await this.monthlyReportService.getIncidentsByWeek(app, yearNum);
+    return { status: 'success', data: result };
   }
 
   @Get('incidents-by-day')
@@ -102,8 +111,9 @@ export class MonthlyReportController {
   @ApiResponse({ status: 200, description: 'Returns incidents count per day' })
   async getIncidentsByDay(
     @Query('app') app?: string,
-  ) {
-    return this.monthlyReportService.getIncidentsByDay(app);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.getIncidentsByDay(app);
+    return { status: 'success', data: result };
   }
 
   @Get('incident-overview-by-category')
@@ -113,8 +123,9 @@ export class MonthlyReportController {
     @Query('app') app?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-  ) {
-    return this.monthlyReportService.getIncidentOverviewByCategory(app, startDate, endDate);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.getIncidentOverviewByCategory(app, startDate, endDate);
+    return { status: 'success', data: result };
   }
 
   @Get('l3-summary')
@@ -122,8 +133,9 @@ export class MonthlyReportController {
   @ApiResponse({ status: 200, description: 'Returns L3 summary data grouped by status with priority breakdown' })
   async getL3Summary(
     @Query('app') app?: string,
-  ) {
-    return this.monthlyReportService.getL3Summary(app);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.getL3Summary(app);
+    return { status: 'success', data: result };
   }
 
   @Get('l3-requests-by-status')
@@ -131,8 +143,9 @@ export class MonthlyReportController {
   @ApiResponse({ status: 200, description: 'Returns L3 requests grouped by status (Dev in Progress, In Backlog, In Testing, PRD Deployment)' })
   async getL3RequestsByStatus(
     @Query('app') app?: string,
-  ) {
-    return this.monthlyReportService.getL3RequestsByStatus(app);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.getL3RequestsByStatus(app);
+    return { status: 'success', data: result };
   }
 
   @Get('missing-scope-by-parent')
@@ -141,8 +154,9 @@ export class MonthlyReportController {
   async getMissingScopeByParent(
     @Query('app') app?: string,
     @Query('month') month?: string,
-  ) {
-    return this.monthlyReportService.getMissingScopeByParent(app, month);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.getMissingScopeByParent(app, month);
+    return { status: 'success', data: result };
   }
 
   @Get('bugs-by-parent')
@@ -151,8 +165,9 @@ export class MonthlyReportController {
   async getBugsByParent(
     @Query('app') app?: string,
     @Query('month') month?: string,
-  ) {
-    return this.monthlyReportService.getBugsByParent(app, month);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.getBugsByParent(app, month);
+    return { status: 'success', data: result };
   }
 
   @Get('incidents-by-release-by-day')
@@ -161,8 +176,9 @@ export class MonthlyReportController {
   async getIncidentsByReleaseByDay(
     @Query('app') app?: string,
     @Query('month') month?: string,
-  ) {
-    return this.monthlyReportService.getIncidentsByReleaseByDay(app, month);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.getIncidentsByReleaseByDay(app, month);
+    return { status: 'success', data: result };
   }
 
   @Get('change-release-by-module')
@@ -171,8 +187,9 @@ export class MonthlyReportController {
   async getChangeReleaseByModule(
     @Query('app') app?: string,
     @Query('month') month?: string,
-  ) {
-    return this.monthlyReportService.getChangeReleaseByModule(app, month);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.getChangeReleaseByModule(app, month);
+    return { status: 'success', data: result };
   }
 
   @Post('upload')
@@ -192,7 +209,7 @@ export class MonthlyReportController {
   })
   @ApiResponse({ status: 201, description: 'File uploaded and parsed successfully' })
   @ApiResponse({ status: 400, description: 'Invalid file or format' })
-  async uploadFile(@UploadedFile() file: any) {
+  async uploadFile(@UploadedFile() file: any): Promise<JSendSuccess<any>> {
     if (!file) {
       throw new HttpException('No file uploaded', HttpStatus.BAD_REQUEST);
     }
@@ -207,13 +224,15 @@ export class MonthlyReportController {
       );
     }
 
-    return this.monthlyReportService.uploadAndParse(file.buffer);
+    const result = await this.monthlyReportService.uploadAndParse(file.buffer);
+    return { status: 'success', data: result };
   }
 
   @Delete()
   @ApiOperation({ summary: 'Delete all monthly report records' })
   @ApiResponse({ status: 200, description: 'All records deleted' })
-  async deleteAll() {
-    return this.monthlyReportService.deleteAll();
+  async deleteAll(): Promise<JSendSuccess<any>> {
+    const result = await this.monthlyReportService.deleteAll();
+    return { status: 'success', data: result };
   }
 }
