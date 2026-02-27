@@ -648,7 +648,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setData(result.data || []);
+        setData(result.data?.data || []);
       }
     } catch (error) {
       console.error('Failed to fetch war rooms:', error);
@@ -816,7 +816,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setL3TicketsByStatus(result);
+        setL3TicketsByStatus(result.data || result);
       }
     } catch (error) {
       console.error('Failed to fetch L3 tickets by status:', error);

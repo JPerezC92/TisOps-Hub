@@ -42,7 +42,7 @@ describe('WarRoomsController (Integration)', () => {
   });
 
   describe('GET /war-rooms', () => {
-    it('should return all war rooms', async () => {
+    it('should return all war rooms with JSend format', async () => {
       const mockResponse = WarRoomsFactory.createFindAllResponse({ count: 3 });
 
       mockService.findAll.mockResolvedValue(mockResponse);
@@ -51,8 +51,9 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data).toHaveLength(3);
-      expect(response.body.total).toBe(3);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toHaveLength(3);
+      expect(response.body.data.total).toBe(3);
       expect(mockService.findAll).toHaveBeenCalledOnce();
     });
 
@@ -65,8 +66,9 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data).toEqual([]);
-      expect(response.body.total).toBe(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toEqual([]);
+      expect(response.body.data.total).toBe(0);
     });
 
     it('should validate response structure', async () => {
@@ -78,12 +80,13 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms')
         .expect(HttpStatus.OK);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('total');
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('total');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
 
-      if (response.body.data.length > 0) {
-        const record = response.body.data[0];
+      if (response.body.data.data.length > 0) {
+        const record = response.body.data.data[0];
         expect(record).toHaveProperty('requestId');
         expect(record).toHaveProperty('application');
         expect(record).toHaveProperty('date');
@@ -105,7 +108,8 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.every((r: any) => r.application === 'FFVV')).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.every((r: any) => r.application === 'FFVV')).toBe(true);
     });
 
     it('should return war rooms with specific priority', async () => {
@@ -120,7 +124,8 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.every((r: any) => r.initialPriority === 'CRITICAL')).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.every((r: any) => r.initialPriority === 'CRITICAL')).toBe(true);
     });
 
     it('should return war rooms with specific status', async () => {
@@ -135,7 +140,8 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.every((r: any) => r.status === 'Closed')).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.every((r: any) => r.status === 'Closed')).toBe(true);
     });
   });
 
@@ -159,7 +165,8 @@ describe('WarRoomsController (Integration)', () => {
         })
         .expect(HttpStatus.CREATED);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         message: 'File uploaded and parsed successfully',
         imported: 50,
         total: 50,
@@ -234,7 +241,8 @@ describe('WarRoomsController (Integration)', () => {
         })
         .expect(HttpStatus.CREATED);
 
-      expect(response.body.imported).toBe(200);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.imported).toBe(200);
     });
   });
 
@@ -250,7 +258,8 @@ describe('WarRoomsController (Integration)', () => {
         .delete('/war-rooms')
         .expect(HttpStatus.OK);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         message: 'All war rooms deleted successfully',
         deleted: 75,
       });
@@ -268,7 +277,8 @@ describe('WarRoomsController (Integration)', () => {
         .delete('/war-rooms')
         .expect(HttpStatus.OK);
 
-      expect(response.body.deleted).toBe(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.deleted).toBe(0);
     });
   });
 
@@ -285,8 +295,9 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms/analytics?app=FFVV')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data).toHaveLength(3);
-      expect(response.body.total).toBe(3);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toHaveLength(3);
+      expect(response.body.data.total).toBe(3);
       expect(mockService.getAnalytics).toHaveBeenCalledWith('FFVV', undefined);
     });
 
@@ -299,8 +310,9 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms/analytics?month=2025-01')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data).toHaveLength(5);
-      expect(response.body.total).toBe(5);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toHaveLength(5);
+      expect(response.body.data.total).toBe(5);
       expect(mockService.getAnalytics).toHaveBeenCalledWith(undefined, '2025-01');
     });
 
@@ -316,8 +328,9 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms/analytics?app=B2B&month=2025-02')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data).toHaveLength(2);
-      expect(response.body.total).toBe(2);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toHaveLength(2);
+      expect(response.body.data.total).toBe(2);
       expect(mockService.getAnalytics).toHaveBeenCalledWith('B2B', '2025-02');
     });
 
@@ -330,8 +343,9 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms/analytics')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data).toHaveLength(10);
-      expect(response.body.total).toBe(10);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toHaveLength(10);
+      expect(response.body.data.total).toBe(10);
       expect(mockService.getAnalytics).toHaveBeenCalledWith(undefined, undefined);
     });
 
@@ -347,12 +361,13 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms/analytics?app=FFVV')
         .expect(HttpStatus.OK);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('total');
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('total');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
 
-      if (response.body.data.length > 0) {
-        const record = response.body.data[0];
+      if (response.body.data.data.length > 0) {
+        const record = response.body.data.data[0];
         expect(record).toHaveProperty('requestId');
         expect(record).toHaveProperty('application');
         expect(record).toHaveProperty('app');
@@ -374,6 +389,7 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms/analytics?app=all')
         .expect(HttpStatus.OK);
 
+      expect(response.body.status).toBe('success');
       expect(mockService.getAnalytics).toHaveBeenCalledWith('all', undefined);
     });
 
@@ -386,8 +402,9 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms/analytics?app=UNKNOWN&month=2025-12')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data).toEqual([]);
-      expect(response.body.total).toBe(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toEqual([]);
+      expect(response.body.data.total).toBe(0);
     });
 
     it('should handle war rooms with null app', async () => {
@@ -402,9 +419,10 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms/analytics?month=2025-03')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data).toHaveLength(2);
-      if (response.body.data.length > 0) {
-        expect(response.body.data[0].app).toBeNull();
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toHaveLength(2);
+      if (response.body.data.data.length > 0) {
+        expect(response.body.data.data[0].app).toBeNull();
       }
     });
   });
@@ -422,7 +440,8 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.every((r: any) => r.priorityChanged === 'Yes')).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.every((r: any) => r.priorityChanged === 'Yes')).toBe(true);
     });
 
     it('should handle records with resolution team changes', async () => {
@@ -437,7 +456,8 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.every((r: any) => r.resolutionTeamChanged === 'Yes')).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.every((r: any) => r.resolutionTeamChanged === 'Yes')).toBe(true);
     });
 
     it('should handle mixed RCA status records', async () => {
@@ -458,9 +478,10 @@ describe('WarRoomsController (Integration)', () => {
         .get('/war-rooms')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.length).toBe(4);
-      expect(response.body.data.filter((r: any) => r.rcaStatus === 'Completed').length).toBe(2);
-      expect(response.body.data.filter((r: any) => r.rcaStatus === 'Pending').length).toBe(2);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data.length).toBe(4);
+      expect(response.body.data.data.filter((r: any) => r.rcaStatus === 'Completed').length).toBe(2);
+      expect(response.body.data.data.filter((r: any) => r.rcaStatus === 'Pending').length).toBe(2);
     });
   });
 });
