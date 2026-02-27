@@ -49,7 +49,8 @@
       "Bash(pnpm --filter web typecheck:*)",
       "Bash(pnpm --filter web exec playwright test:*)",
       "Bash(pnpm turbo test:*)",
-      "Bash(pnpm turbo:*)"
+      "Bash(pnpm turbo:*)",
+      "Bash(turbo run:*)"
     ],
     "deny": [],
     "ask": []

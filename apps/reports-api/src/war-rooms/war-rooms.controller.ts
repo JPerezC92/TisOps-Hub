@@ -12,6 +12,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { WarRoomsService } from './war-rooms.service';
+import type { JSendSuccess } from '@repo/reports/common';
 
 @ApiTags('war-rooms')
 @Controller('war-rooms')
@@ -21,8 +22,9 @@ export class WarRoomsController {
   @Get()
   @ApiOperation({ summary: 'Get all war rooms records' })
   @ApiResponse({ status: 200, description: 'Returns all records' })
-  async findAll() {
-    return this.warRoomsService.findAll();
+  async findAll(): Promise<JSendSuccess<{ data: any[]; total: number }>> {
+    const result = await this.warRoomsService.findAll();
+    return { status: 'success', data: result };
   }
 
   @Get('analytics')
@@ -31,8 +33,9 @@ export class WarRoomsController {
   async getAnalytics(
     @Query('app') app?: string,
     @Query('month') month?: string,
-  ) {
-    return this.warRoomsService.getAnalytics(app, month);
+  ): Promise<JSendSuccess<any>> {
+    const result = await this.warRoomsService.getAnalytics(app, month);
+    return { status: 'success', data: result };
   }
 
   @Post('upload')
@@ -52,7 +55,7 @@ export class WarRoomsController {
   })
   @ApiResponse({ status: 201, description: 'File uploaded and parsed successfully' })
   @ApiResponse({ status: 400, description: 'Invalid file or format' })
-  async uploadFile(@UploadedFile() file: any) {
+  async uploadFile(@UploadedFile() file: any): Promise<JSendSuccess<{ message: string; imported: number; total: number }>> {
     if (!file) {
       throw new HttpException('No file uploaded', HttpStatus.BAD_REQUEST);
     }
@@ -67,13 +70,15 @@ export class WarRoomsController {
       );
     }
 
-    return this.warRoomsService.uploadAndParse(file.buffer);
+    const result = await this.warRoomsService.uploadAndParse(file.buffer);
+    return { status: 'success', data: result };
   }
 
   @Delete()
   @ApiOperation({ summary: 'Delete all war rooms records' })
   @ApiResponse({ status: 200, description: 'All records deleted' })
-  async deleteAll() {
-    return this.warRoomsService.deleteAll();
+  async deleteAll(): Promise<JSendSuccess<{ message: string; deleted: number }>> {
+    const result = await this.warRoomsService.deleteAll();
+    return { status: 'success', data: result };
   }
 }
