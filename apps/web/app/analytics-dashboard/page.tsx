@@ -1000,7 +1000,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setSessionsOrdersData(result);
+        setSessionsOrdersData(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch sessions orders last 30 days:', error);
@@ -1019,7 +1019,7 @@ function AnalyticsDashboardContent() {
       );
       if (response.ok) {
         const result = await response.json();
-        setIncidentsVsOrdersData(result);
+        setIncidentsVsOrdersData(result.data);
       }
     } catch (error) {
       console.error('Failed to fetch incidents vs orders by month:', error);

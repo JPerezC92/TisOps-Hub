@@ -58,10 +58,11 @@ describe('SessionsOrdersController (Integration)', () => {
         .get('/sessions-orders')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data).toHaveLength(3);
-      expect(response.body.releases).toHaveLength(2);
-      expect(response.body.total).toBe(3);
-      expect(response.body.totalReleases).toBe(2);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toHaveLength(3);
+      expect(response.body.data.releases).toHaveLength(2);
+      expect(response.body.data.total).toBe(3);
+      expect(response.body.data.totalReleases).toBe(2);
       expect(mockService.findAll).toHaveBeenCalledOnce();
     });
 
@@ -77,10 +78,11 @@ describe('SessionsOrdersController (Integration)', () => {
         .get('/sessions-orders')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data).toEqual([]);
-      expect(response.body.releases).toEqual([]);
-      expect(response.body.total).toBe(0);
-      expect(response.body.totalReleases).toBe(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.data).toEqual([]);
+      expect(response.body.data.releases).toEqual([]);
+      expect(response.body.data.total).toBe(0);
+      expect(response.body.data.totalReleases).toBe(0);
       expect(mockService.findAll).toHaveBeenCalledOnce();
     });
 
@@ -99,7 +101,7 @@ describe('SessionsOrdersController (Integration)', () => {
         .get('/sessions-orders')
         .expect(HttpStatus.OK);
 
-      const record = response.body.data[0];
+      const record = response.body.data.data[0];
       expect(record).toHaveProperty('id');
       expect(record).toHaveProperty('ano');
       expect(record).toHaveProperty('mes');
@@ -127,7 +129,7 @@ describe('SessionsOrdersController (Integration)', () => {
         .get('/sessions-orders')
         .expect(HttpStatus.OK);
 
-      const release = response.body.releases[0];
+      const release = response.body.data.releases[0];
       expect(release).toHaveProperty('id');
       expect(release).toHaveProperty('semana');
       expect(release).toHaveProperty('aplicacion');
@@ -157,7 +159,7 @@ describe('SessionsOrdersController (Integration)', () => {
         .get('/sessions-orders')
         .expect(HttpStatus.OK);
 
-      const release = response.body.releases[0];
+      const release = response.body.data.releases[0];
       const tickets = JSON.parse(release.ticketsData);
       expect(Array.isArray(tickets)).toBe(true);
       expect(tickets).toContain('TICKET-001');
@@ -183,8 +185,8 @@ describe('SessionsOrdersController (Integration)', () => {
         .get('/sessions-orders')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.every((r: any) => r.ano === 2025)).toBe(true);
-      expect(response.body.data.every((r: any) => r.mes === 6)).toBe(true);
+      expect(response.body.data.data.every((r: any) => r.ano === 2025)).toBe(true);
+      expect(response.body.data.data.every((r: any) => r.mes === 6)).toBe(true);
     });
 
     it('should return releases for specific application', async () => {
@@ -205,7 +207,7 @@ describe('SessionsOrdersController (Integration)', () => {
         .get('/sessions-orders')
         .expect(HttpStatus.OK);
 
-      expect(response.body.releases.every((r: any) => r.aplicacion === 'SB')).toBe(true);
+      expect(response.body.data.releases.every((r: any) => r.aplicacion === 'SB')).toBe(true);
     });
   });
 
@@ -238,7 +240,8 @@ describe('SessionsOrdersController (Integration)', () => {
         })
         .expect(HttpStatus.CREATED);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         message: 'File uploaded and parsed successfully',
         importedMain: 510,
         importedReleases: 35,
@@ -334,8 +337,9 @@ describe('SessionsOrdersController (Integration)', () => {
         })
         .expect(HttpStatus.CREATED);
 
-      expect(response.body.importedMain).toBe(100);
-      expect(response.body.importedReleases).toBe(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.importedMain).toBe(100);
+      expect(response.body.data.importedReleases).toBe(0);
       expect(mockService.uploadAndParse).toHaveBeenCalledOnce();
     });
 
@@ -361,8 +365,9 @@ describe('SessionsOrdersController (Integration)', () => {
         .expect(HttpStatus.CREATED);
 
       // Verify all records were imported (batch size 150 as per optimization)
-      expect(response.body.importedMain).toBe(response.body.totalMain);
-      expect(response.body.importedReleases).toBe(response.body.totalReleases);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.importedMain).toBe(response.body.data.totalMain);
+      expect(response.body.data.importedReleases).toBe(response.body.data.totalReleases);
       expect(mockService.uploadAndParse).toHaveBeenCalledOnce();
     });
 
@@ -400,7 +405,8 @@ describe('SessionsOrdersController (Integration)', () => {
         .delete('/sessions-orders')
         .expect(HttpStatus.OK);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         message: 'All sessions/orders records deleted successfully',
         deletedMain: 510,
         deletedReleases: 35,
@@ -420,8 +426,9 @@ describe('SessionsOrdersController (Integration)', () => {
         .delete('/sessions-orders')
         .expect(HttpStatus.OK);
 
-      expect(response.body.deletedMain).toBe(0);
-      expect(response.body.deletedReleases).toBe(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.deletedMain).toBe(0);
+      expect(response.body.data.deletedReleases).toBe(0);
       expect(mockService.deleteAll).toHaveBeenCalledOnce();
     });
 
@@ -438,8 +445,9 @@ describe('SessionsOrdersController (Integration)', () => {
         .expect(HttpStatus.OK);
 
       // Both counts should be present in response
-      expect(response.body).toHaveProperty('deletedMain');
-      expect(response.body).toHaveProperty('deletedReleases');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('deletedMain');
+      expect(response.body.data).toHaveProperty('deletedReleases');
       expect(mockService.deleteAll).toHaveBeenCalledOnce();
     });
 
@@ -455,8 +463,9 @@ describe('SessionsOrdersController (Integration)', () => {
         .delete('/sessions-orders')
         .expect(HttpStatus.OK);
 
-      expect(response.body.deletedMain).toBe(1000);
-      expect(response.body.deletedReleases).toBe(100);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.deletedMain).toBe(1000);
+      expect(response.body.data.deletedReleases).toBe(100);
       expect(mockService.deleteAll).toHaveBeenCalledOnce();
     });
   });
@@ -476,8 +485,8 @@ describe('SessionsOrdersController (Integration)', () => {
         .expect(HttpStatus.OK);
       const duration = Date.now() - startTime;
 
-      expect(response.body.data).toHaveLength(500);
-      expect(response.body.releases).toHaveLength(30);
+      expect(response.body.data.data).toHaveLength(500);
+      expect(response.body.data.releases).toHaveLength(30);
       expect(duration).toBeLessThan(5000); // Should complete in under 5 seconds
       expect(mockService.findAll).toHaveBeenCalledOnce();
     });
@@ -504,8 +513,8 @@ describe('SessionsOrdersController (Integration)', () => {
         .expect(HttpStatus.CREATED);
 
       // Verify all records were imported (batch size optimizations applied)
-      expect(response.body.importedMain).toBe(response.body.totalMain);
-      expect(response.body.importedReleases).toBe(response.body.totalReleases);
+      expect(response.body.data.importedMain).toBe(response.body.data.totalMain);
+      expect(response.body.data.importedReleases).toBe(response.body.data.totalReleases);
     });
   });
 
@@ -529,7 +538,7 @@ describe('SessionsOrdersController (Integration)', () => {
         .get('/sessions-orders')
         .expect(HttpStatus.OK);
 
-      const release = response.body.releases[0];
+      const release = response.body.data.releases[0];
       expect(release.ticketsCount).toBe(0);
       const tickets = JSON.parse(release.ticketsData);
       expect(tickets).toEqual([]);
@@ -555,7 +564,7 @@ describe('SessionsOrdersController (Integration)', () => {
         .get('/sessions-orders')
         .expect(HttpStatus.OK);
 
-      expect(response.body.data.every((r: any) => r.incidentes === 0)).toBe(true);
+      expect(response.body.data.data.every((r: any) => r.incidentes === 0)).toBe(true);
     });
 
     it('should handle mixed SB and FFVV releases', async () => {
@@ -579,8 +588,8 @@ describe('SessionsOrdersController (Integration)', () => {
         .get('/sessions-orders')
         .expect(HttpStatus.OK);
 
-      const sbCount = response.body.releases.filter((r: any) => r.aplicacion === 'SB').length;
-      const ffvvCount = response.body.releases.filter((r: any) => r.aplicacion === 'FFVV').length;
+      const sbCount = response.body.data.releases.filter((r: any) => r.aplicacion === 'SB').length;
+      const ffvvCount = response.body.data.releases.filter((r: any) => r.aplicacion === 'FFVV').length;
       expect(sbCount).toBe(2);
       expect(ffvvCount).toBe(2);
     });

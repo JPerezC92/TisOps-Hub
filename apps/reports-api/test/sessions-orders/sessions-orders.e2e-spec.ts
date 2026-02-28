@@ -34,9 +34,10 @@ describe('SessionsOrdersController (E2E)', () => {
         .get('/sessions-orders')
         .expect(200);
 
-      expect(response.body).toHaveProperty('data');
-      expect(response.body).toHaveProperty('total');
-      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('total');
+      expect(Array.isArray(response.body.data.data)).toBe(true);
     });
   });
 
@@ -53,10 +54,11 @@ describe('SessionsOrdersController (E2E)', () => {
         })
         .expect(201);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body).toHaveProperty('importedMain');
-      expect(response.body).toHaveProperty('importedReleases');
-      expect(response.body.importedMain).toBeGreaterThanOrEqual(0);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('message');
+      expect(response.body.data).toHaveProperty('importedMain');
+      expect(response.body.data).toHaveProperty('importedReleases');
+      expect(response.body.data.importedMain).toBeGreaterThanOrEqual(0);
     });
 
     it('should return 400 when no file is uploaded', async () => {
@@ -87,10 +89,11 @@ describe('SessionsOrdersController (E2E)', () => {
         .delete('/sessions-orders')
         .expect(200);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body).toHaveProperty('deletedMain');
-      expect(response.body).toHaveProperty('deletedReleases');
-      expect(typeof response.body.deletedMain).toBe('number');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('message');
+      expect(response.body.data).toHaveProperty('deletedMain');
+      expect(response.body.data).toHaveProperty('deletedReleases');
+      expect(typeof response.body.data.deletedMain).toBe('number');
     });
   });
 
@@ -108,29 +111,33 @@ describe('SessionsOrdersController (E2E)', () => {
         })
         .expect(201);
 
-      expect(uploadResponse.body.importedMain).toBeGreaterThanOrEqual(0);
+      expect(uploadResponse.body.status).toBe('success');
+      expect(uploadResponse.body.data.importedMain).toBeGreaterThanOrEqual(0);
 
       // 2. Retrieve sessions-orders
       const getResponse = await request(app.getHttpServer())
         .get('/sessions-orders')
         .expect(200);
 
-      expect(Array.isArray(getResponse.body.data)).toBe(true);
+      expect(getResponse.body.status).toBe('success');
+      expect(Array.isArray(getResponse.body.data.data)).toBe(true);
 
       // 3. Delete all sessions-orders
       const deleteResponse = await request(app.getHttpServer())
         .delete('/sessions-orders')
         .expect(200);
 
-      expect(deleteResponse.body.deletedMain).toBeGreaterThanOrEqual(0);
+      expect(deleteResponse.body.status).toBe('success');
+      expect(deleteResponse.body.data.deletedMain).toBeGreaterThanOrEqual(0);
 
       // 4. Verify deletion
       const verifyResponse = await request(app.getHttpServer())
         .get('/sessions-orders')
         .expect(200);
 
-      expect(verifyResponse.body.data).toHaveLength(0);
-      expect(verifyResponse.body.total).toBe(0);
+      expect(verifyResponse.body.status).toBe('success');
+      expect(verifyResponse.body.data.data).toHaveLength(0);
+      expect(verifyResponse.body.data.total).toBe(0);
     });
   });
 });
