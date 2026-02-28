@@ -12,6 +12,7 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody } from '@nestjs/swagger';
 import { SessionsOrdersService } from './sessions-orders.service';
+import type { JSendSuccess } from '@repo/reports/common';
 
 @ApiTags('sessions-orders')
 @Controller('sessions-orders')
@@ -21,8 +22,9 @@ export class SessionsOrdersController {
   @Get()
   @ApiOperation({ summary: 'Get all sessions/orders records (both sheets)' })
   @ApiResponse({ status: 200, description: 'Returns all records' })
-  async findAll() {
-    return this.sessionsOrdersService.findAll();
+  async findAll(): Promise<JSendSuccess<any>> {
+    const result = await this.sessionsOrdersService.findAll();
+    return { status: 'success', data: result };
   }
 
   @Post('upload')
@@ -57,28 +59,32 @@ export class SessionsOrdersController {
       );
     }
 
-    return this.sessionsOrdersService.uploadAndParse(file.buffer);
+    const result = await this.sessionsOrdersService.uploadAndParse(file.buffer);
+    return { status: 'success', data: result };
   }
 
   @Delete()
   @ApiOperation({ summary: 'Delete all sessions/orders records' })
   @ApiResponse({ status: 200, description: 'All records deleted' })
-  async deleteAll() {
-    return this.sessionsOrdersService.deleteAll();
+  async deleteAll(): Promise<JSendSuccess<any>> {
+    const result = await this.sessionsOrdersService.deleteAll();
+    return { status: 'success', data: result };
   }
 
   @Get('last-30-days')
   @ApiOperation({ summary: 'Get sessions and orders data for the last 30 records' })
   @ApiResponse({ status: 200, description: 'Returns sessions/orders data with day, incidents, sessions, and placed orders' })
-  async getLast30Days() {
-    return this.sessionsOrdersService.getLast30Days();
+  async getLast30Days(): Promise<JSendSuccess<any>> {
+    const result = await this.sessionsOrdersService.getLast30Days();
+    return { status: 'success', data: result };
   }
 
   @Get('incidents-vs-orders-by-month')
   @ApiOperation({ summary: 'Get incidents vs placed orders aggregated by month' })
   @ApiResponse({ status: 200, description: 'Returns incidents and placed orders grouped by month' })
-  async getIncidentsVsOrdersByMonth(@Query('year') year?: string) {
+  async getIncidentsVsOrdersByMonth(@Query('year') year?: string): Promise<JSendSuccess<any>> {
     const yearNum = year ? parseInt(year, 10) : undefined;
-    return this.sessionsOrdersService.getIncidentsVsOrdersByMonth(yearNum);
+    const result = await this.sessionsOrdersService.getIncidentsVsOrdersByMonth(yearNum);
+    return { status: 'success', data: result };
   }
 }
