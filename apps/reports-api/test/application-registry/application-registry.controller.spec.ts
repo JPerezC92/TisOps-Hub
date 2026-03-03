@@ -122,8 +122,9 @@ describe('ApplicationRegistryController (Integration)', () => {
         .get('/application-registry')
         .expect(200);
 
-      expect(response.body).toHaveLength(2);
-      expect(response.body[0]).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveLength(2);
+      expect(response.body.data[0]).toMatchObject({
         id: mockApplications[0].id,
         code: mockApplications[0].code,
         name: mockApplications[0].name,
@@ -138,7 +139,8 @@ describe('ApplicationRegistryController (Integration)', () => {
         .get('/application-registry')
         .expect(200);
 
-      expect(response.body).toEqual([]);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toEqual([]);
       expect(mockRepository.findAll).toHaveBeenCalledOnce();
     });
   });
@@ -153,8 +155,9 @@ describe('ApplicationRegistryController (Integration)', () => {
         .get('/application-registry/with-patterns')
         .expect(200);
 
-      expect(response.body).toHaveLength(2);
-      expect(response.body[0].patterns).toBeDefined();
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveLength(2);
+      expect(response.body.data[0].patterns).toBeDefined();
       expect(mockRepository.findAllWithPatterns).toHaveBeenCalledOnce();
     });
   });
@@ -169,7 +172,8 @@ describe('ApplicationRegistryController (Integration)', () => {
         .get('/application-registry/match?name=Test App')
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         id: mockApplication.id,
         name: mockApplication.name,
       });
@@ -183,7 +187,8 @@ describe('ApplicationRegistryController (Integration)', () => {
         .get('/application-registry/match?name=NonExistent')
         .expect(200);
 
-      expect(response.body).toEqual({});
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toBeNull();
       expect(mockRepository.findByPattern).toHaveBeenCalledWith('NonExistent');
     });
   });
@@ -198,7 +203,8 @@ describe('ApplicationRegistryController (Integration)', () => {
         .get('/application-registry/1')
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         id: 1,
         code: mockApplication.code,
         name: mockApplication.name,
@@ -254,7 +260,8 @@ describe('ApplicationRegistryController (Integration)', () => {
         .send(createDto)
         .expect(201);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         id: 1,
         code: 'TEST',
         name: 'Test Application',
@@ -284,7 +291,8 @@ describe('ApplicationRegistryController (Integration)', () => {
         .send(updateDto)
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         id: 1,
         name: 'Updated Application',
         isActive: false,
@@ -313,7 +321,8 @@ describe('ApplicationRegistryController (Integration)', () => {
         .delete('/application-registry/1')
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         message: 'Application deleted successfully',
       });
       expect(mockRepository.delete).toHaveBeenCalledWith(1);
@@ -354,7 +363,8 @@ describe('ApplicationRegistryController (Integration)', () => {
         .send(patternDto)
         .expect(201);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         id: 1,
         applicationId: 1,
         pattern: 'test-pattern',
@@ -376,7 +386,8 @@ describe('ApplicationRegistryController (Integration)', () => {
         .delete('/application-registry/patterns/1')
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         message: 'Pattern deleted successfully',
       });
       expect(mockRepository.deletePattern).toHaveBeenCalledWith(1);

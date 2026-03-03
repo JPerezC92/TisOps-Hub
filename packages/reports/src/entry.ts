@@ -90,6 +90,26 @@ export type {
   RequestTagResponse,
 } from './request-tags';
 
+// Application Registry Types and Schemas
+export type {
+  Application as AppRegistryApplication,
+  ApplicationPattern as AppRegistryPattern,
+  ApplicationWithPatterns as AppRegistryWithPatterns,
+  ApplicationResponse,
+  ApplicationPatternResponse,
+  ApplicationWithPatternsResponse,
+  AppRegistryDeleteMessage,
+} from './application-registry';
+
+export {
+  applicationSchema,
+  applicationPatternSchema,
+  applicationWithPatternsSchema,
+  applicationArraySchema,
+  applicationWithPatternsArraySchema,
+  appRegistryDeleteMessageSchema,
+} from './application-registry';
+
 // Error Logs Types
 export type {
   ErrorLog,

@@ -65,6 +65,26 @@ export {
   missingIdsResponseSchema,
 } from './request-tags/frontend';
 
+// Application Registry (frontend-safe barrel, no DTOs)
+export type {
+  Application as AppRegistryApplication,
+  ApplicationPattern as AppRegistryPattern,
+  ApplicationWithPatterns as AppRegistryWithPatterns,
+  ApplicationResponse,
+  ApplicationPatternResponse,
+  ApplicationWithPatternsResponse,
+  AppRegistryDeleteMessage,
+} from './application-registry/frontend';
+
+export {
+  applicationSchema,
+  applicationPatternSchema,
+  applicationWithPatternsSchema,
+  applicationArraySchema,
+  applicationWithPatternsArraySchema,
+  appRegistryDeleteMessageSchema,
+} from './application-registry/frontend';
+
 // Error Logs
 export type {
   ErrorLog,

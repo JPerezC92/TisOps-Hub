@@ -32,7 +32,8 @@ describe('ApplicationRegistryController (E2E)', () => {
         .get('/application-registry')
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
   });
 
@@ -42,7 +43,8 @@ describe('ApplicationRegistryController (E2E)', () => {
         .get('/application-registry/with-patterns')
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
   });
 
@@ -52,8 +54,8 @@ describe('ApplicationRegistryController (E2E)', () => {
         .get('/application-registry/match?name=NonExistentApp')
         .expect(200);
 
-      // Returns empty object when no match
-      expect(response.body).toEqual({});
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toBeNull();
     });
   });
 
@@ -70,11 +72,12 @@ describe('ApplicationRegistryController (E2E)', () => {
         .send(createDto)
         .expect(201);
 
-      expect(response.body).toHaveProperty('id');
-      expect(response.body.code).toBe('TEST');
-      expect(response.body.name).toBe('Test Application');
-      expect(response.body.description).toBe('E2E Test Application');
-      expect(response.body.isActive).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('id');
+      expect(response.body.data.code).toBe('TEST');
+      expect(response.body.data.name).toBe('Test Application');
+      expect(response.body.data.description).toBe('E2E Test Application');
+      expect(response.body.data.isActive).toBe(true);
     });
   });
 
@@ -89,15 +92,16 @@ describe('ApplicationRegistryController (E2E)', () => {
         })
         .expect(201);
 
-      const appId = createResponse.body.id;
+      const appId = createResponse.body.data.id;
 
       // Then get it by id
       const response = await request(app.getHttpServer())
         .get(`/application-registry/${appId}`)
         .expect(200);
 
-      expect(response.body.id).toBe(appId);
-      expect(response.body.code).toBe('GETID');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.id).toBe(appId);
+      expect(response.body.data.code).toBe('GETID');
     });
 
     it('should return 404 when application not found', async () => {
@@ -130,7 +134,7 @@ describe('ApplicationRegistryController (E2E)', () => {
         })
         .expect(201);
 
-      const appId = createResponse.body.id;
+      const appId = createResponse.body.data.id;
 
       // Then update it
       const response = await request(app.getHttpServer())
@@ -141,9 +145,10 @@ describe('ApplicationRegistryController (E2E)', () => {
         })
         .expect(200);
 
-      expect(response.body.id).toBe(appId);
-      expect(response.body.name).toBe('Updated App Name');
-      expect(response.body.isActive).toBe(false);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.id).toBe(appId);
+      expect(response.body.data.name).toBe('Updated App Name');
+      expect(response.body.data.isActive).toBe(false);
     });
   });
 
@@ -158,15 +163,16 @@ describe('ApplicationRegistryController (E2E)', () => {
         })
         .expect(201);
 
-      const appId = createResponse.body.id;
+      const appId = createResponse.body.data.id;
 
       // Then delete it
       const response = await request(app.getHttpServer())
         .delete(`/application-registry/${appId}`)
         .expect(200);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('deleted');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('message');
+      expect(response.body.data.message).toContain('deleted');
     });
   });
 
@@ -181,7 +187,7 @@ describe('ApplicationRegistryController (E2E)', () => {
         })
         .expect(201);
 
-      const appId = createAppResponse.body.id;
+      const appId = createAppResponse.body.data.id;
 
       // Then create a pattern for it
       const response = await request(app.getHttpServer())
@@ -193,9 +199,10 @@ describe('ApplicationRegistryController (E2E)', () => {
         })
         .expect(201);
 
-      expect(response.body).toHaveProperty('id');
-      expect(response.body.applicationId).toBe(appId);
-      expect(response.body.pattern).toBe('test-pattern');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('id');
+      expect(response.body.data.applicationId).toBe(appId);
+      expect(response.body.data.pattern).toBe('test-pattern');
     });
   });
 
@@ -210,7 +217,7 @@ describe('ApplicationRegistryController (E2E)', () => {
         })
         .expect(201);
 
-      const appId = createAppResponse.body.id;
+      const appId = createAppResponse.body.data.id;
 
       // Then create a pattern
       const createPatternResponse = await request(app.getHttpServer())
@@ -220,15 +227,16 @@ describe('ApplicationRegistryController (E2E)', () => {
         })
         .expect(201);
 
-      const patternId = createPatternResponse.body.id;
+      const patternId = createPatternResponse.body.data.id;
 
       // Then delete the pattern
       const response = await request(app.getHttpServer())
         .delete(`/application-registry/patterns/${patternId}`)
         .expect(200);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('deleted');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('message');
+      expect(response.body.data.message).toContain('deleted');
     });
   });
 
@@ -244,8 +252,8 @@ describe('ApplicationRegistryController (E2E)', () => {
         })
         .expect(201);
 
-      const appId = createAppResponse.body.id;
-      expect(createAppResponse.body.code).toBe('INTG');
+      const appId = createAppResponse.body.data.id;
+      expect(createAppResponse.body.data.code).toBe('INTG');
 
       // 2. Add a pattern
       const createPatternResponse = await request(app.getHttpServer())
@@ -257,15 +265,15 @@ describe('ApplicationRegistryController (E2E)', () => {
         })
         .expect(201);
 
-      const patternId = createPatternResponse.body.id;
-      expect(createPatternResponse.body.pattern).toBe('integration-test');
+      const patternId = createPatternResponse.body.data.id;
+      expect(createPatternResponse.body.data.pattern).toBe('integration-test');
 
       // 3. Get applications with patterns
       const withPatternsResponse = await request(app.getHttpServer())
         .get('/application-registry/with-patterns')
         .expect(200);
 
-      const createdApp = withPatternsResponse.body.find(
+      const createdApp = withPatternsResponse.body.data.find(
         (a: { id: number }) => a.id === appId,
       );
       expect(createdApp).toBeDefined();
@@ -277,7 +285,7 @@ describe('ApplicationRegistryController (E2E)', () => {
         .send({ description: 'Updated description' })
         .expect(200);
 
-      expect(updateResponse.body.description).toBe('Updated description');
+      expect(updateResponse.body.data.description).toBe('Updated description');
 
       // 5. Delete the pattern
       await request(app.getHttpServer())
@@ -294,7 +302,7 @@ describe('ApplicationRegistryController (E2E)', () => {
         .get(`/application-registry/${appId}`)
         .expect(200);
 
-      expect(deletedAppResponse.body.isActive).toBe(false);
+      expect(deletedAppResponse.body.data.isActive).toBe(false);
     });
   });
 });
