@@ -34,7 +34,8 @@ describe('RequestCategorizationController (E2E)', () => {
         .get('/request-categorization')
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
   });
 
@@ -44,7 +45,8 @@ describe('RequestCategorizationController (E2E)', () => {
         .get('/request-categorization/summary')
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
   });
 
@@ -72,8 +74,9 @@ describe('RequestCategorizationController (E2E)', () => {
         .get('/request-categorization/request-ids-by-categorization?linkedRequestId=123&categorizacion=test')
         .expect(200);
 
-      expect(response.body).toHaveProperty('requestIds');
-      expect(Array.isArray(response.body.requestIds)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('requestIds');
+      expect(Array.isArray(response.body.data.requestIds)).toBe(true);
     });
   });
 
@@ -90,10 +93,11 @@ describe('RequestCategorizationController (E2E)', () => {
         })
         .expect(201);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body).toHaveProperty('recordsCreated');
-      expect(response.body).toHaveProperty('recordsUpdated');
-      expect(response.body).toHaveProperty('totalRecords');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('message');
+      expect(response.body.data).toHaveProperty('recordsCreated');
+      expect(response.body.data).toHaveProperty('recordsUpdated');
+      expect(response.body.data).toHaveProperty('totalRecords');
     });
 
     it('should return 400 when no file is uploaded', async () => {
@@ -124,7 +128,8 @@ describe('RequestCategorizationController (E2E)', () => {
         .delete('/request-categorization')
         .expect(200);
 
-      expect(response.body).toHaveProperty('message');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('message');
     });
   });
 
@@ -142,35 +147,40 @@ describe('RequestCategorizationController (E2E)', () => {
         })
         .expect(201);
 
-      expect(uploadResponse.body.totalRecords).toBeGreaterThanOrEqual(0);
+      expect(uploadResponse.body.status).toBe('success');
+      expect(uploadResponse.body.data.totalRecords).toBeGreaterThanOrEqual(0);
 
       // 2. Retrieve records
       const getResponse = await request(app.getHttpServer())
         .get('/request-categorization')
         .expect(200);
 
-      expect(Array.isArray(getResponse.body)).toBe(true);
+      expect(getResponse.body.status).toBe('success');
+      expect(Array.isArray(getResponse.body.data)).toBe(true);
 
       // 3. Get summary
       const summaryResponse = await request(app.getHttpServer())
         .get('/request-categorization/summary')
         .expect(200);
 
-      expect(Array.isArray(summaryResponse.body)).toBe(true);
+      expect(summaryResponse.body.status).toBe('success');
+      expect(Array.isArray(summaryResponse.body.data)).toBe(true);
 
       // 4. Delete all records
       const deleteResponse = await request(app.getHttpServer())
         .delete('/request-categorization')
         .expect(200);
 
-      expect(deleteResponse.body).toHaveProperty('message');
+      expect(deleteResponse.body.status).toBe('success');
+      expect(deleteResponse.body.data).toHaveProperty('message');
 
       // 5. Verify deletion
       const verifyResponse = await request(app.getHttpServer())
         .get('/request-categorization')
         .expect(200);
 
-      expect(verifyResponse.body).toHaveLength(0);
+      expect(verifyResponse.body.status).toBe('success');
+      expect(verifyResponse.body.data).toHaveLength(0);
     });
   });
 });

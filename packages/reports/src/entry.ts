@@ -48,6 +48,21 @@ export type {
   RequestCategorization,
   RequestCategorizationResponse,
   CategorySummary,
+  RequestCategorizationWithInfo,
+  CategorySummaryResponse,
+  UploadResult as RequestCategorizationUploadResult,
+  DeleteResult as RequestCategorizationDeleteResult,
+  RequestIdEntry,
+  RequestIdsByCategorization,
+} from './request-categorization';
+
+export {
+  requestCategorizationWithInfoSchema,
+  categorySummarySchema,
+  uploadResultSchema as requestCategorizationUploadResultSchema,
+  deleteResultSchema as requestCategorizationDeleteResultSchema,
+  requestIdEntrySchema,
+  requestIdsByCategorizationResponseSchema,
 } from './request-categorization';
 
 // Parent-Child Requests validation schemas, DTOs and Types

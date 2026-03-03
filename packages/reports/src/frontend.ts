@@ -21,23 +21,51 @@ export type {
   TaskListResponse,
 } from './tasks';
 
+// Request Categorization (frontend-safe barrel, no DTOs)
 export type {
   RequestCategorization,
   RequestCategorizationResponse,
   CategorySummary,
-} from './request-categorization';
+  RequestCategorizationWithInfo,
+  CategorySummaryResponse,
+  UploadResult,
+  DeleteResult,
+  RequestIdEntry,
+  RequestIdsByCategorization,
+} from './request-categorization/frontend';
 
+export {
+  requestCategorizationWithInfoSchema,
+  requestCategorizationWithInfoArraySchema,
+  categorySummarySchema,
+  categorySummaryArraySchema,
+  uploadResultSchema,
+  deleteResultSchema,
+  requestIdEntrySchema,
+  requestIdsByCategorizationResponseSchema,
+} from './request-categorization/frontend';
+
+// Parent-Child Requests
 export type {
   ParentChildRequest,
   ParentChildRequestStats,
   ParentChildRequestResponse,
 } from './parent-child-requests';
 
+// Request Tags (frontend-safe barrel, no DTOs)
 export type {
   RequestTag,
   RequestTagResponse,
-} from './request-tags';
+  ByAdditionalInfoResponse,
+  MissingIdsResponse,
+} from './request-tags/frontend';
 
+export {
+  byAdditionalInfoResponseSchema,
+  missingIdsResponseSchema,
+} from './request-tags/frontend';
+
+// Error Logs
 export type {
   ErrorLog,
   ErrorLogResponse,

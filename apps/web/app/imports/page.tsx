@@ -32,13 +32,14 @@ export default function ImportsPage() {
         if (reqRelResponse.ok) {
           const reqRelData = await reqRelResponse.json();
           console.log('Request Relationships data:', reqRelData);
-          // API returns { data: [], total: number }
-          if (reqRelData.data && reqRelData.data.length > 0) {
+          // API returns JSend: { status: 'success', data: { data: [], total: number } }
+          const reqRelInner = reqRelData.data;
+          if (reqRelInner?.data && reqRelInner.data.length > 0) {
             imports.push({
               id: '1',
               filename: 'REP02 padre hijo.xlsx',
               uploadedAt: new Date().toISOString(),
-              recordCount: reqRelData.total || reqRelData.data.length,
+              recordCount: reqRelInner.total || reqRelInner.data.length,
               status: 'success',
               source: 'request-relationships',
               sourceLabel: 'Request Relationships',
@@ -50,13 +51,13 @@ export default function ImportsPage() {
         if (errorCatResponse.ok) {
           const errorCatData = await errorCatResponse.json();
           console.log('Error Categorization data:', errorCatData);
-          // API returns a direct array [{...}, {...}]
-          if (Array.isArray(errorCatData) && errorCatData.length > 0) {
+          // API returns JSend: { status: 'success', data: [...] }
+          if (Array.isArray(errorCatData.data) && errorCatData.data.length > 0) {
             imports.push({
               id: '2',
               filename: 'REP001 PARA ETIQUETAR.xlsx',
               uploadedAt: new Date().toISOString(),
-              recordCount: errorCatData.length,
+              recordCount: errorCatData.data.length,
               status: 'success',
               source: 'error-categorization',
               sourceLabel: 'Error Categorization',
@@ -68,13 +69,14 @@ export default function ImportsPage() {
         if (requestTagsResponse.ok) {
           const requestTagsData = await requestTagsResponse.json();
           console.log('Request Tags data:', requestTagsData);
-          // API returns { data: [], total: number }
-          if (requestTagsData.data && requestTagsData.data.length > 0) {
+          // API returns JSend: { status: 'success', data: { tags: [], total: number } }
+          const requestTagsInner = requestTagsData.data;
+          if (requestTagsInner?.tags && requestTagsInner.tags.length > 0) {
             imports.push({
               id: '3',
               filename: 'REP01 XD TAG 2025.xlsx',
               uploadedAt: new Date().toISOString(),
-              recordCount: requestTagsData.total || requestTagsData.data.length,
+              recordCount: requestTagsInner.total || requestTagsInner.tags.length,
               status: 'success',
               source: 'request-tags',
               sourceLabel: 'Request Tags',
@@ -210,7 +212,7 @@ export default function ImportsPage() {
       }
 
       const result = await response.json();
-      setRequestTagsSuccess(`File uploaded successfully! Imported: ${result.imported || 0} records, Skipped: ${result.skipped || 0} duplicates`);
+      setRequestTagsSuccess(`File uploaded successfully! Imported: ${result.data?.imported || 0} records, Skipped: ${result.data?.skipped || 0} duplicates`);
       // Reset the input
       e.target.value = '';
       // Auto-hide success after 5 seconds
