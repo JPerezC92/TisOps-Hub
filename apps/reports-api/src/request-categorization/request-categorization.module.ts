@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { REQUEST_CATEGORIZATION_REPOSITORY } from './domain/repositories/request-categorization.repository.interface';
 import { RequestCategorizationRepository } from './infrastructure/repositories/request-categorization.repository';
-import { GetAllRequestCategorizationsUseCase } from './application/use-cases/get-all-request-categorizations.use-case';
 import { GetAllRequestCategorizationsWithAdditionalInfoUseCase } from './application/use-cases/get-all-with-additional-info.use-case';
 import { DeleteAllRequestCategorizationsUseCase } from './application/use-cases/delete-all-request-categorizations.use-case';
 import { UpsertManyRequestCategorizationsUseCase } from './application/use-cases/upsert-many-request-categorizations.use-case';
@@ -19,12 +18,6 @@ import { DATABASE_CONNECTION } from '@repo/database';
       provide: REQUEST_CATEGORIZATION_REPOSITORY,
       useFactory: (db) => new RequestCategorizationRepository(db),
       inject: [DATABASE_CONNECTION],
-    },
-    {
-      provide: GetAllRequestCategorizationsUseCase,
-      useFactory: (repository) =>
-        new GetAllRequestCategorizationsUseCase(repository),
-      inject: [REQUEST_CATEGORIZATION_REPOSITORY],
     },
     {
       provide: GetAllRequestCategorizationsWithAdditionalInfoUseCase,

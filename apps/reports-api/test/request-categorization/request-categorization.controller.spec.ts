@@ -12,7 +12,6 @@ import { RequestCategorizationService } from '@request-categorization/request-ca
 import { ExcelParserService } from '@request-categorization/infrastructure/services/excel-parser.service';
 import { REQUEST_CATEGORIZATION_REPOSITORY } from '@request-categorization/domain/repositories/request-categorization.repository.interface';
 import type { IRequestCategorizationRepository } from '@request-categorization/domain/repositories/request-categorization.repository.interface';
-import { GetAllRequestCategorizationsUseCase } from '@request-categorization/application/use-cases/get-all-request-categorizations.use-case';
 import { GetAllRequestCategorizationsWithAdditionalInfoUseCase } from '@request-categorization/application/use-cases/get-all-with-additional-info.use-case';
 import { DeleteAllRequestCategorizationsUseCase } from '@request-categorization/application/use-cases/delete-all-request-categorizations.use-case';
 import { UpsertManyRequestCategorizationsUseCase } from '@request-categorization/application/use-cases/upsert-many-request-categorizations.use-case';
@@ -46,13 +45,6 @@ describe('RequestCategorizationController (Integration)', () => {
           useValue: mockRepository,
         },
         // Use Cases
-        {
-          provide: GetAllRequestCategorizationsUseCase,
-          useFactory: (repository: IRequestCategorizationRepository) => {
-            return new GetAllRequestCategorizationsUseCase(repository);
-          },
-          inject: [REQUEST_CATEGORIZATION_REPOSITORY],
-        },
         {
           provide: GetAllRequestCategorizationsWithAdditionalInfoUseCase,
           useFactory: (repository: IRequestCategorizationRepository) => {
@@ -109,9 +101,10 @@ describe('RequestCategorizationController (Integration)', () => {
         .get('/request-categorization')
         .expect(200);
 
-      expect(response.body).toBeInstanceOf(Array);
-      expect(response.body).toHaveLength(1);
-      expect(response.body[0]).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toBeInstanceOf(Array);
+      expect(response.body.data).toHaveLength(1);
+      expect(response.body.data[0]).toMatchObject({
         requestId: mockData[0].requestId,
         category: mockData[0].category,
         technician: mockData[0].technician,
@@ -126,7 +119,8 @@ describe('RequestCategorizationController (Integration)', () => {
         .get('/request-categorization')
         .expect(200);
 
-      expect(response.body).toEqual([]);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toEqual([]);
     });
   });
 
@@ -143,8 +137,9 @@ describe('RequestCategorizationController (Integration)', () => {
         .get('/request-categorization/summary')
         .expect(200);
 
-      expect(response.body).toBeInstanceOf(Array);
-      expect(response.body).toEqual(
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toBeInstanceOf(Array);
+      expect(response.body.data).toEqual(
         expect.arrayContaining([
           expect.objectContaining({ category: 'Incident', count: 10 }),
           expect.objectContaining({ category: 'Service Request', count: 5 }),
@@ -160,7 +155,8 @@ describe('RequestCategorizationController (Integration)', () => {
         .get('/request-categorization/summary')
         .expect(200);
 
-      expect(response.body).toEqual([]);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toEqual([]);
     });
   });
 
@@ -177,7 +173,8 @@ describe('RequestCategorizationController (Integration)', () => {
         .get('/request-categorization/request-ids-by-categorization?linkedRequestId=REQ123&categorizacion=Incident')
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         requestIds: expect.arrayContaining([
           expect.objectContaining({ requestId: 'REQ001' }),
         ]),
@@ -217,7 +214,8 @@ describe('RequestCategorizationController (Integration)', () => {
         .get('/request-categorization/request-ids-by-categorization?linkedRequestId=REQ999&categorizacion=NoMatch')
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         requestIds: [],
       });
     });
@@ -239,7 +237,8 @@ describe('RequestCategorizationController (Integration)', () => {
         })
         .expect(201);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         message: 'File uploaded and parsed successfully',
         recordsCreated: expect.any(Number),
         recordsUpdated: expect.any(Number),
@@ -285,7 +284,8 @@ describe('RequestCategorizationController (Integration)', () => {
         .delete('/request-categorization')
         .expect(200);
 
-      expect(response.body).toMatchObject({
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toMatchObject({
         message: 'All records deleted successfully',
       });
       expect(mockRepository.deleteAll).toHaveBeenCalledOnce();

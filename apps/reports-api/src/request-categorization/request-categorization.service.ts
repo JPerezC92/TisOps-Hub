@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { GetAllRequestCategorizationsUseCase } from './application/use-cases/get-all-request-categorizations.use-case';
 import { GetAllRequestCategorizationsWithAdditionalInfoUseCase } from './application/use-cases/get-all-with-additional-info.use-case';
 import { DeleteAllRequestCategorizationsUseCase } from './application/use-cases/delete-all-request-categorizations.use-case';
 import { UpsertManyRequestCategorizationsUseCase } from './application/use-cases/upsert-many-request-categorizations.use-case';
@@ -10,7 +9,6 @@ import { ExcelParserService } from './infrastructure/services/excel-parser.servi
 @Injectable()
 export class RequestCategorizationService {
   constructor(
-    private readonly getAllUseCase: GetAllRequestCategorizationsUseCase,
     private readonly getAllWithAdditionalInfoUseCase: GetAllRequestCategorizationsWithAdditionalInfoUseCase,
     private readonly deleteAllUseCase: DeleteAllRequestCategorizationsUseCase,
     private readonly upsertManyUseCase: UpsertManyRequestCategorizationsUseCase,
