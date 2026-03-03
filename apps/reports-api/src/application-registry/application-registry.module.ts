@@ -3,7 +3,10 @@ import { ApplicationRegistryController } from './application-registry.controller
 import { ApplicationRegistryService } from './application-registry.service';
 import { DatabaseModule } from '../database/infrastructure/database.module';
 import { ApplicationRegistryRepository } from './infrastructure/repositories/application-registry.repository';
-import { APPLICATION_REGISTRY_REPOSITORY } from './domain/repositories/application-registry.repository.interface';
+import {
+  APPLICATION_REGISTRY_REPOSITORY,
+  type IApplicationRegistryRepository,
+} from './domain/repositories/application-registry.repository.interface';
 import { GetAllApplicationsUseCase } from './application/use-cases/get-all-applications.use-case';
 import { GetApplicationByIdUseCase } from './application/use-cases/get-application-by-id.use-case';
 import { FindApplicationByNameUseCase } from './application/use-cases/find-application-by-name.use-case';
@@ -25,47 +28,47 @@ import { DeletePatternUseCase } from './application/use-cases/delete-pattern.use
     },
     {
       provide: GetAllApplicationsUseCase,
-      useFactory: (repository: any) => new GetAllApplicationsUseCase(repository),
+      useFactory: (repository: IApplicationRegistryRepository) => new GetAllApplicationsUseCase(repository),
       inject: [APPLICATION_REGISTRY_REPOSITORY],
     },
     {
       provide: GetApplicationByIdUseCase,
-      useFactory: (repository: any) => new GetApplicationByIdUseCase(repository),
+      useFactory: (repository: IApplicationRegistryRepository) => new GetApplicationByIdUseCase(repository),
       inject: [APPLICATION_REGISTRY_REPOSITORY],
     },
     {
       provide: FindApplicationByNameUseCase,
-      useFactory: (repository: any) => new FindApplicationByNameUseCase(repository),
+      useFactory: (repository: IApplicationRegistryRepository) => new FindApplicationByNameUseCase(repository),
       inject: [APPLICATION_REGISTRY_REPOSITORY],
     },
     {
       provide: GetApplicationsWithPatternsUseCase,
-      useFactory: (repository: any) => new GetApplicationsWithPatternsUseCase(repository),
+      useFactory: (repository: IApplicationRegistryRepository) => new GetApplicationsWithPatternsUseCase(repository),
       inject: [APPLICATION_REGISTRY_REPOSITORY],
     },
     {
       provide: CreateApplicationUseCase,
-      useFactory: (repository: any) => new CreateApplicationUseCase(repository),
+      useFactory: (repository: IApplicationRegistryRepository) => new CreateApplicationUseCase(repository),
       inject: [APPLICATION_REGISTRY_REPOSITORY],
     },
     {
       provide: UpdateApplicationUseCase,
-      useFactory: (repository: any) => new UpdateApplicationUseCase(repository),
+      useFactory: (repository: IApplicationRegistryRepository) => new UpdateApplicationUseCase(repository),
       inject: [APPLICATION_REGISTRY_REPOSITORY],
     },
     {
       provide: DeleteApplicationUseCase,
-      useFactory: (repository: any) => new DeleteApplicationUseCase(repository),
+      useFactory: (repository: IApplicationRegistryRepository) => new DeleteApplicationUseCase(repository),
       inject: [APPLICATION_REGISTRY_REPOSITORY],
     },
     {
       provide: CreatePatternUseCase,
-      useFactory: (repository: any) => new CreatePatternUseCase(repository),
+      useFactory: (repository: IApplicationRegistryRepository) => new CreatePatternUseCase(repository),
       inject: [APPLICATION_REGISTRY_REPOSITORY],
     },
     {
       provide: DeletePatternUseCase,
-      useFactory: (repository: any) => new DeletePatternUseCase(repository),
+      useFactory: (repository: IApplicationRegistryRepository) => new DeletePatternUseCase(repository),
       inject: [APPLICATION_REGISTRY_REPOSITORY],
     },
   ],
