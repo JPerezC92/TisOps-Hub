@@ -13,7 +13,12 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiResponse, ApiConsumes, ApiBody, ApiQuery } from '@nestjs/swagger';
 import type { JSendSuccess } from '@repo/reports/common';
 import type { RequestCategorization, CategorySummary } from '@repo/reports';
-import { RequestCategorizationService } from './request-categorization.service';
+import { GetAllRequestCategorizationsWithAdditionalInfoUseCase } from '@request-categorization/application/use-cases/get-all-with-additional-info.use-case';
+import { DeleteAllRequestCategorizationsUseCase } from '@request-categorization/application/use-cases/delete-all-request-categorizations.use-case';
+import { UpsertManyRequestCategorizationsUseCase } from '@request-categorization/application/use-cases/upsert-many-request-categorizations.use-case';
+import { GetCategorySummaryUseCase } from '@request-categorization/application/use-cases/get-category-summary.use-case';
+import { GetRequestIdsByCategorizacionUseCase } from '@request-categorization/application/use-cases/get-request-ids-by-categorizacion.use-case';
+import { ExcelParserService } from '@request-categorization/infrastructure/services/excel-parser.service';
 
 interface RequestCategorizationWithInfo extends RequestCategorization {
   additionalInformation: string[];
@@ -45,14 +50,19 @@ interface MulterFile {
 @Controller('request-categorization')
 export class RequestCategorizationController {
   constructor(
-    private readonly requestCategorizationService: RequestCategorizationService,
+    private readonly getAllWithAdditionalInfoUseCase: GetAllRequestCategorizationsWithAdditionalInfoUseCase,
+    private readonly deleteAllUseCase: DeleteAllRequestCategorizationsUseCase,
+    private readonly upsertManyUseCase: UpsertManyRequestCategorizationsUseCase,
+    private readonly getCategorySummaryUseCase: GetCategorySummaryUseCase,
+    private readonly getRequestIdsByCategorizacionUseCase: GetRequestIdsByCategorizacionUseCase,
+    private readonly excelParser: ExcelParserService,
   ) {}
 
   @Get()
   @ApiOperation({ summary: 'Get all request categorization records' })
   @ApiResponse({ status: 200, description: 'Returns all records' })
   async findAll(): Promise<JSendSuccess<RequestCategorizationWithInfo[]>> {
-    const result = await this.requestCategorizationService.findAll();
+    const result = await this.getAllWithAdditionalInfoUseCase.execute();
     return { status: 'success', data: result };
   }
 
@@ -60,7 +70,7 @@ export class RequestCategorizationController {
   @ApiOperation({ summary: 'Get category summary with counts' })
   @ApiResponse({ status: 200, description: 'Returns category summary' })
   async getCategorySummary(): Promise<JSendSuccess<CategorySummary[]>> {
-    const result = await this.requestCategorizationService.getCategorySummary();
+    const result = await this.getCategorySummaryUseCase.execute();
     return { status: 'success', data: result };
   }
 
@@ -109,11 +119,12 @@ export class RequestCategorizationController {
       );
     }
 
-    const result = await this.requestCategorizationService.getRequestIdsByCategorizacion(
-      linkedRequestId,
-      categorizacion,
-    );
-    return { status: 'success' as const, data: result } satisfies JSendSuccess<{ requestIds: RequestIdEntry[] }>;
+    const requestIds =
+      await this.getRequestIdsByCategorizacionUseCase.execute(
+        linkedRequestId,
+        categorizacion,
+      );
+    return { status: 'success' as const, data: { requestIds } } satisfies JSendSuccess<{ requestIds: RequestIdEntry[] }>;
   }
 
   @Post('upload')
@@ -149,8 +160,18 @@ export class RequestCategorizationController {
     }
 
     try {
-      const result = await this.requestCategorizationService.uploadAndParse(file.buffer);
-      return { status: 'success' as const, data: result } satisfies JSendSuccess<UploadResult>;
+      const entities = this.excelParser.parseExcelFile(file.buffer);
+      const result = await this.upsertManyUseCase.execute(entities);
+
+      return {
+        status: 'success' as const,
+        data: {
+          message: 'File uploaded and parsed successfully',
+          recordsCreated: result.created,
+          recordsUpdated: result.updated,
+          totalRecords: result.created + result.updated,
+        },
+      } satisfies JSendSuccess<UploadResult>;
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';
       throw new HttpException(
@@ -164,7 +185,7 @@ export class RequestCategorizationController {
   @ApiOperation({ summary: 'Delete all request categorization records' })
   @ApiResponse({ status: 200, description: 'All records deleted' })
   async deleteAll(): Promise<JSendSuccess<{ message: string }>> {
-    const result = await this.requestCategorizationService.deleteAll();
-    return { status: 'success', data: result };
+    await this.deleteAllUseCase.execute();
+    return { status: 'success', data: { message: 'All records deleted successfully' } };
   }
 }

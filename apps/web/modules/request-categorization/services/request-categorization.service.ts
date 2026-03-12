@@ -2,7 +2,7 @@ import { apiClient } from '@/shared/api/client';
 import { parseJsendData } from '@repo/reports/common';
 import {
   requestCategorizationWithInfoArraySchema,
-  categorySummaryArraySchema,
+  reqCatCategorySummaryArraySchema,
   requestIdsByCategorizationResponseSchema,
   uploadResultSchema,
   deleteResultSchema,
@@ -31,7 +31,7 @@ export const requestCategorizationService = {
 
   getSummary: async (): Promise<CategorySummaryResponse[]> => {
     const raw = await apiClient.get<unknown>('/request-categorization/summary');
-    return parseJsendData(categorySummaryArraySchema, raw);
+    return parseJsendData(reqCatCategorySummaryArraySchema, raw);
   },
 
   getRequestIdsByCategorization: async (

@@ -4,7 +4,7 @@ import { ZodValidationPipe } from 'nestjs-zod';
 
 import { TasksModule } from './tasks/tasks.module';
 import { ParentChildRequestsModule } from './parent-child-requests/parent-child-requests.module';
-import { RequestCategorizationModule } from './request-categorization/request-categorization.module';
+import { RequestCategorizationModule } from './request-categorization/infrastructure/module';
 import { RequestTagsModule } from './request-tags/request-tags.module';
 import { ErrorLogsModule } from './error-logs/error-logs.module';
 import { WarRoomsModule } from './war-rooms/war-rooms.module';

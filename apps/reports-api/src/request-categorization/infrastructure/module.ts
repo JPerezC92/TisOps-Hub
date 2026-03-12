@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common';
-import { REQUEST_CATEGORIZATION_REPOSITORY } from './domain/repositories/request-categorization.repository.interface';
-import { RequestCategorizationRepository } from './infrastructure/repositories/request-categorization.repository';
-import { GetAllRequestCategorizationsWithAdditionalInfoUseCase } from './application/use-cases/get-all-with-additional-info.use-case';
-import { DeleteAllRequestCategorizationsUseCase } from './application/use-cases/delete-all-request-categorizations.use-case';
-import { UpsertManyRequestCategorizationsUseCase } from './application/use-cases/upsert-many-request-categorizations.use-case';
-import { GetCategorySummaryUseCase } from './application/use-cases/get-category-summary.use-case';
-import { GetRequestIdsByCategorizacionUseCase } from './application/use-cases/get-request-ids-by-categorizacion.use-case';
-import { ExcelParserService } from './infrastructure/services/excel-parser.service';
-import { RequestCategorizationService } from './request-categorization.service';
-import { RequestCategorizationController } from './request-categorization.controller';
 import { DATABASE_CONNECTION } from '@repo/database';
+import { REQUEST_CATEGORIZATION_REPOSITORY } from '@request-categorization/domain/repositories/request-categorization.repository.interface';
+import { RequestCategorizationRepository } from '@request-categorization/infrastructure/repositories/request-categorization.repository';
+import { GetAllRequestCategorizationsWithAdditionalInfoUseCase } from '@request-categorization/application/use-cases/get-all-with-additional-info.use-case';
+import { DeleteAllRequestCategorizationsUseCase } from '@request-categorization/application/use-cases/delete-all-request-categorizations.use-case';
+import { UpsertManyRequestCategorizationsUseCase } from '@request-categorization/application/use-cases/upsert-many-request-categorizations.use-case';
+import { GetCategorySummaryUseCase } from '@request-categorization/application/use-cases/get-category-summary.use-case';
+import { GetRequestIdsByCategorizacionUseCase } from '@request-categorization/application/use-cases/get-request-ids-by-categorizacion.use-case';
+import { ExcelParserService } from '@request-categorization/infrastructure/services/excel-parser.service';
+import { RequestCategorizationController } from '@request-categorization/infrastructure/controller';
 
 @Module({
   controllers: [RequestCategorizationController],
@@ -21,10 +20,8 @@ import { DATABASE_CONNECTION } from '@repo/database';
     },
     {
       provide: GetAllRequestCategorizationsWithAdditionalInfoUseCase,
-      useFactory: (requestCategorizationRepository) =>
-        new GetAllRequestCategorizationsWithAdditionalInfoUseCase(
-          requestCategorizationRepository,
-        ),
+      useFactory: (repository) =>
+        new GetAllRequestCategorizationsWithAdditionalInfoUseCase(repository),
       inject: [REQUEST_CATEGORIZATION_REPOSITORY],
     },
     {
@@ -51,7 +48,6 @@ import { DATABASE_CONNECTION } from '@repo/database';
       inject: [REQUEST_CATEGORIZATION_REPOSITORY],
     },
     ExcelParserService,
-    RequestCategorizationService,
   ],
 })
 export class RequestCategorizationModule {}

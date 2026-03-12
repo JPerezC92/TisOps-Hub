@@ -37,8 +37,8 @@ export type {
 export {
   requestCategorizationWithInfoSchema,
   requestCategorizationWithInfoArraySchema,
-  categorySummarySchema,
-  categorySummaryArraySchema,
+  reqCatCategorySummarySchema,
+  reqCatCategorySummaryArraySchema,
   uploadResultSchema,
   deleteResultSchema,
   requestIdEntrySchema,
@@ -55,14 +55,20 @@ export type {
 // Request Tags (frontend-safe barrel, no DTOs)
 export type {
   RequestTag,
-  RequestTagResponse,
-  ByAdditionalInfoResponse,
-  MissingIdsResponse,
+  RequestTagListResponse,
+  RequestTagUploadResult,
+  RequestTagDeleteResult,
+  RequestTagByAdditionalInfoResponse,
+  RequestTagMissingIdsResponse,
 } from './request-tags/frontend';
 
 export {
-  byAdditionalInfoResponseSchema,
-  missingIdsResponseSchema,
+  requestTagSchema,
+  requestTagListResponseSchema,
+  requestTagUploadResultSchema,
+  requestTagDeleteResultSchema,
+  requestTagByAdditionalInfoResponseSchema,
+  requestTagMissingIdsResponseSchema,
 } from './request-tags/frontend';
 
 // Application Registry (frontend-safe barrel, no DTOs)
@@ -70,19 +76,19 @@ export type {
   Application as AppRegistryApplication,
   ApplicationPattern as AppRegistryPattern,
   ApplicationWithPatterns as AppRegistryWithPatterns,
-  ApplicationResponse,
-  ApplicationPatternResponse,
-  ApplicationWithPatternsResponse,
-  AppRegistryDeleteMessage,
+  AppRegistryApplicationResponse,
+  AppRegistryPatternResponse,
+  AppRegistryWithPatternsResponse,
+  AppRegistryDeleteResult,
 } from './application-registry/frontend';
 
 export {
-  applicationSchema,
-  applicationPatternSchema,
-  applicationWithPatternsSchema,
-  applicationArraySchema,
-  applicationWithPatternsArraySchema,
-  appRegistryDeleteMessageSchema,
+  appRegistryApplicationSchema,
+  appRegistryPatternSchema,
+  appRegistryWithPatternsSchema,
+  appRegistryApplicationArraySchema,
+  appRegistryWithPatternsArraySchema,
+  appRegistryDeleteResultSchema,
 } from './application-registry/frontend';
 
 // Error Logs

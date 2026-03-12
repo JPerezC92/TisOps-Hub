@@ -20,7 +20,7 @@ export const requestCategorizationWithInfoSchema = z.object({
   tagCategorizacion: z.array(z.string()),
 });
 
-export const categorySummarySchema = z.object({
+export const reqCatCategorySummarySchema = z.object({
   category: z.string(),
   count: z.number(),
 });
@@ -42,10 +42,10 @@ export const requestIdsByCategorizationResponseSchema = z.object({
 
 // Pre-composed array schemas (avoids cross-package type inference issues with z.array())
 export const requestCategorizationWithInfoArraySchema = z.array(requestCategorizationWithInfoSchema);
-export const categorySummaryArraySchema = z.array(categorySummarySchema);
+export const reqCatCategorySummaryArraySchema = z.array(reqCatCategorySummarySchema);
 
 export type RequestCategorizationWithInfo = z.infer<typeof requestCategorizationWithInfoSchema>;
-export type CategorySummaryResponse = z.infer<typeof categorySummarySchema>;
+export type CategorySummaryResponse = z.infer<typeof reqCatCategorySummarySchema>;
 export type UploadResult = z.infer<typeof uploadResultSchema>;
 export type DeleteResult = z.infer<typeof deleteResultSchema>;
 export type RequestIdEntry = z.infer<typeof requestIdEntrySchema>;
