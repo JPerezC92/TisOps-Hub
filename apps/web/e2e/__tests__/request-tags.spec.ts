@@ -129,37 +129,37 @@ test.describe('Request Tags', () => {
 
     test('should show confirmation dialog when delete clicked', async ({ page }) => {
       const deleteButton = page.getByRole('button', { name: /clear all data/i });
+      await expect(deleteButton).toBeVisible({ timeout: 10000 });
 
-      if (await deleteButton.isVisible()) {
-        await deleteButton.click();
-        await expect(page.getByText('Delete all request tags?')).toBeVisible();
-      }
+      await deleteButton.click();
+      await expect(page.getByText('Delete all request tags?')).toBeVisible();
     });
 
     test('should close dialog on cancel', async ({ page }) => {
       const deleteButton = page.getByRole('button', { name: /clear all data/i });
+      await expect(deleteButton).toBeVisible({ timeout: 10000 });
 
-      if (await deleteButton.isVisible()) {
-        await deleteButton.click();
-        await expect(page.getByText('Delete all request tags?')).toBeVisible();
+      await deleteButton.click();
+      await expect(page.getByText('Delete all request tags?')).toBeVisible();
 
-        await page.getByRole('button', { name: /cancel/i }).click();
-        await expect(page.getByText('Delete all request tags?')).not.toBeVisible();
-      }
+      await page.getByRole('button', { name: /cancel/i }).click();
+      await expect(page.getByText('Delete all request tags?')).not.toBeVisible();
     });
 
     test('should delete all records when confirmed', async ({ page }) => {
       const deleteButton = page.getByRole('button', { name: /clear all data/i });
 
-      if (await deleteButton.isVisible()) {
-        await deleteButton.click();
-        await page.getByRole('button', { name: /delete all/i }).click();
+      // Wait for the delete button to appear (confirms upload data loaded)
+      await expect(deleteButton).toBeVisible({ timeout: 10000 });
 
-        // Wait for deletion and verify success toast or empty state
-        await page.waitForTimeout(2000);
-        // After deletion, the delete button should not be visible (no data)
-        await expect(deleteButton).not.toBeVisible({ timeout: 5000 });
-      }
+      await deleteButton.click();
+      await page.getByRole('button', { name: /delete all/i }).click();
+
+      // Wait for success toast confirming deletion
+      await expect(page.getByText(/successfully deleted/i)).toBeVisible({ timeout: 10000 });
+
+      // After deletion and refetch, the delete button should be gone (no data = not rendered)
+      await expect(deleteButton).not.toBeVisible({ timeout: 10000 });
     });
   });
 
@@ -180,16 +180,15 @@ test.describe('Request Tags', () => {
       // 4. Verify Tag Records section is visible
       await expect(page.getByText('Tag Records')).toBeVisible({ timeout: 10000 });
 
-      // 5. Delete all data (only if delete button is visible - means data exists)
+      // 5. Delete all data
       const deleteButton = page.getByRole('button', { name: /clear all data/i });
-      if (await deleteButton.isVisible()) {
-        await deleteButton.click();
-        await page.getByRole('button', { name: /delete all/i }).click();
-        await page.waitForTimeout(2000);
+      await expect(deleteButton).toBeVisible({ timeout: 10000 });
+      await deleteButton.click();
+      await page.getByRole('button', { name: /delete all/i }).click();
 
-        // 6. Verify data was deleted (delete button should be hidden or empty state shown)
-        await expect(deleteButton).not.toBeVisible({ timeout: 5000 });
-      }
+      // 6. Verify data was deleted
+      await expect(page.getByText(/successfully deleted/i)).toBeVisible({ timeout: 10000 });
+      await expect(deleteButton).not.toBeVisible({ timeout: 10000 });
     });
   });
 });

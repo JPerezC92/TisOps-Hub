@@ -19,6 +19,7 @@
     "db:migrate": "dotenv -e .env -- drizzle-kit migrate",
     "db:studio": "dotenv -e .env -- drizzle-kit studio",
     "db:reset": "dotenv -e .env -- node reset-db.js && pnpm run db:migrate && pnpm run db:seed",
+    "db:reset:e2e": "dotenv -e .env.e2e -- node reset-db.js && dotenv -e .env.e2e -- drizzle-kit migrate && dotenv -e .env.e2e -- tsx src/database/seeds/seed-all.ts",
     "db:seed": "dotenv -e .env -- tsx src/database/seeds/seed-all.ts",
     "parse:war-rooms": "node scripts/parse-war-rooms.js",
     "parse:sessions-orders": "node scripts/parse-sessions-orders.js",

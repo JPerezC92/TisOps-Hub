@@ -50,7 +50,9 @@
       "Bash(pnpm --filter web exec playwright test:*)",
       "Bash(pnpm turbo test:*)",
       "Bash(pnpm turbo:*)",
-      "Bash(turbo run:*)"
+      "Bash(turbo run:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(turbo test:e2e:*)"
     ],
     "deny": [],
     "ask": []

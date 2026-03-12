@@ -87,6 +87,7 @@
     "@types/react-dom": "19.2.2",
     "@vitejs/plugin-react": "4.5.2",
     "@vitest/ui": "4.0.8",
+    "cross-env": "10.1.0",
     "eslint": "9.38.0",
     "jsdom": "26.1.0",
     "postcss": "8.5.6",

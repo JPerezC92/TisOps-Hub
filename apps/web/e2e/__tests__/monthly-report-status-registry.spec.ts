@@ -55,28 +55,13 @@ test.describe('Monthly Report Status Registry', () => {
       await expect(page.getByText(/Showing \d+ mappings/)).toBeVisible({ timeout: 20000 });
     });
 
-    test('should display table headers when data exists', async ({ page }) => {
-      const table = page.locator('table');
-      const loadingSpinner = page.locator('.animate-spin');
+    test('should display table headers', async ({ page }) => {
+      await expect(page.locator('table')).toBeVisible({ timeout: 20000 });
 
-      // Poll for up to 20 seconds for loading to complete
-      let attempts = 0;
-      while (attempts < 40) {
-        const isSpinnerVisible = await loadingSpinner.isVisible();
-        if (!isSpinnerVisible) break;
-        await page.waitForTimeout(500);
-        attempts++;
-      }
-
-      // Only check headers if table is visible (data exists)
-      if (await table.isVisible()) {
-        // Use table header cells to avoid matching other elements
-        await expect(page.locator('th').getByText('RAW STATUS')).toBeVisible();
-        await expect(page.locator('th').getByText('DISPLAY STATUS')).toBeVisible();
-        await expect(page.locator('th').getByText('STATUS')).toBeVisible();
-        await expect(page.locator('th').getByText('ACTIONS')).toBeVisible();
-      }
-      // If no table, test passes (empty state or still loading)
+      await expect(page.locator('th').getByText('RAW STATUS')).toBeVisible();
+      await expect(page.locator('th').getByText('DISPLAY STATUS')).toBeVisible();
+      await expect(page.locator('th').getByText('STATUS', { exact: true })).toBeVisible();
+      await expect(page.locator('th').getByText('ACTIONS')).toBeVisible();
     });
   });
 
