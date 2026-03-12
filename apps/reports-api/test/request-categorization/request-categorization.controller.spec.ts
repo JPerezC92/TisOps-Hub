@@ -7,8 +7,7 @@ import { mock, MockProxy } from 'vitest-mock-extended';
 import request from 'supertest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { RequestCategorizationController } from '@request-categorization/request-categorization.controller';
-import { RequestCategorizationService } from '@request-categorization/request-categorization.service';
+import { RequestCategorizationController } from '@request-categorization/infrastructure/controller';
 import { ExcelParserService } from '@request-categorization/infrastructure/services/excel-parser.service';
 import { REQUEST_CATEGORIZATION_REPOSITORY } from '@request-categorization/domain/repositories/request-categorization.repository.interface';
 import type { IRequestCategorizationRepository } from '@request-categorization/domain/repositories/request-categorization.repository.interface';
@@ -37,7 +36,6 @@ describe('RequestCategorizationController (Integration)', () => {
       ],
       controllers: [RequestCategorizationController],
       providers: [
-        RequestCategorizationService,
         ExcelParserService,
         // Mock repository
         {

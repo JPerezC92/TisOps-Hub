@@ -58,7 +58,7 @@ export type {
 
 export {
   requestCategorizationWithInfoSchema,
-  categorySummarySchema,
+  reqCatCategorySummarySchema,
   uploadResultSchema as requestCategorizationUploadResultSchema,
   deleteResultSchema as requestCategorizationDeleteResultSchema,
   requestIdEntrySchema,
@@ -95,19 +95,19 @@ export type {
   Application as AppRegistryApplication,
   ApplicationPattern as AppRegistryPattern,
   ApplicationWithPatterns as AppRegistryWithPatterns,
-  ApplicationResponse,
-  ApplicationPatternResponse,
-  ApplicationWithPatternsResponse,
-  AppRegistryDeleteMessage,
+  AppRegistryApplicationResponse,
+  AppRegistryPatternResponse,
+  AppRegistryWithPatternsResponse,
+  AppRegistryDeleteResult,
 } from './application-registry';
 
 export {
-  applicationSchema,
-  applicationPatternSchema,
-  applicationWithPatternsSchema,
-  applicationArraySchema,
-  applicationWithPatternsArraySchema,
-  appRegistryDeleteMessageSchema,
+  appRegistryApplicationSchema,
+  appRegistryPatternSchema,
+  appRegistryWithPatternsSchema,
+  appRegistryApplicationArraySchema,
+  appRegistryWithPatternsArraySchema,
+  appRegistryDeleteResultSchema,
 } from './application-registry';
 
 // Error Logs Types
