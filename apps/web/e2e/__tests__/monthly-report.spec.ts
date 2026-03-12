@@ -78,17 +78,18 @@ test.describe('Monthly Report Dashboard', () => {
       await expect(loadingOrContent.first()).toBeVisible({ timeout: 10000 });
     });
 
-    test('should display table headers when data exists', async ({ page }) => {
-      await page.waitForTimeout(3000);
-
+    test('should display table headers or empty state', async ({ page }) => {
       const table = page.locator('table');
-      const tableExists = await table.count();
+      const emptyState = page.getByText('No monthly reports found');
 
-      if (tableExists > 0) {
+      await expect(table.or(emptyState)).toBeVisible({ timeout: 10000 });
+
+      // TODO: header assertions only run when data exists — needs DB seeding (see docs/e2e-test-database-problem.md)
+      if (await table.isVisible()) {
         await expect(page.locator('th').getByText('Request ID')).toBeVisible();
         await expect(page.locator('th').getByText('Aplicativos')).toBeVisible();
         await expect(page.locator('th').getByText('Categorization')).toBeVisible();
-        await expect(page.locator('th').getByText('Status')).toBeVisible();
+        await expect(page.locator('th').getByText('Status', { exact: true })).toBeVisible();
         await expect(page.locator('th').getByText('Display Status')).toBeVisible();
         await expect(page.locator('th').getByText('Priority')).toBeVisible();
         await expect(page.locator('th').getByText('Technician')).toBeVisible();
@@ -127,15 +128,15 @@ test.describe('Monthly Report Dashboard', () => {
   });
 
   test.describe('Pagination', () => {
-    test('should display pagination controls when data exists', async ({ page }) => {
-      await page.waitForTimeout(3000);
+    test('should display pagination or empty state', async ({ page }) => {
+      const table = page.locator('table');
+      const emptyState = page.getByText('No monthly reports found');
 
-      const tableRows = page.locator('tbody tr');
-      const rowCount = await tableRows.count();
+      await expect(table.or(emptyState)).toBeVisible({ timeout: 10000 });
 
-      if (rowCount > 0) {
-        const paginationSelect = page.locator('select').filter({ hasText: /per page/ });
-        await expect(paginationSelect.first()).toBeVisible();
+      // TODO: pagination assertion only runs when data exists — needs DB seeding (see docs/e2e-test-database-problem.md)
+      if (await table.isVisible()) {
+        await expect(page.getByText(/Page \d+ of \d+/)).toBeVisible({ timeout: 5000 });
       }
     });
   });

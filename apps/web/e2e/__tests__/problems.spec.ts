@@ -102,20 +102,13 @@ test.describe('Problems Dashboard', () => {
       expect(rowCount).toBeGreaterThanOrEqual(0);
     });
 
-    test('should display table headers when data exists', async ({ page }) => {
-      // Wait for data to load
-      await page.waitForTimeout(3000);
+    test('should display table headers', async ({ page }) => {
+      await expect(page.locator('table')).toBeVisible({ timeout: 10000 });
 
-      const tableRows = page.locator('tbody tr');
-      const rowCount = await tableRows.count();
-
-      if (rowCount > 0) {
-        await expect(page.getByText('Request ID', { exact: true })).toBeVisible();
-        await expect(page.getByText('Subject', { exact: true })).toBeVisible();
-        await expect(page.getByText('Application', { exact: true })).toBeVisible();
-        await expect(page.getByText('Category', { exact: true })).toBeVisible();
-      }
-      // If no data, just pass — table headers may still be visible but not required
+      await expect(page.locator('th').getByText('Request ID', { exact: true })).toBeVisible();
+      await expect(page.locator('th').getByText('Subject', { exact: true })).toBeVisible();
+      await expect(page.locator('th').getByText('Application', { exact: true })).toBeVisible();
+      await expect(page.locator('th').getByText('Category', { exact: true })).toBeVisible();
     });
   });
 

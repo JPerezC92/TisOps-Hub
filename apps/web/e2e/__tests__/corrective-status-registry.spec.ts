@@ -52,24 +52,13 @@ test.describe('Corrective Status Registry', () => {
       await expect(page.getByText(/Showing \d+ mappings/)).toBeVisible({ timeout: 20000 });
     });
 
-    test('should display table headers when data exists', async ({ page }) => {
-      const table = page.locator('table');
-      const loadingSpinner = page.locator('.animate-spin');
+    test('should display table headers', async ({ page }) => {
+      await expect(page.locator('table')).toBeVisible({ timeout: 20000 });
 
-      let attempts = 0;
-      while (attempts < 40) {
-        const isSpinnerVisible = await loadingSpinner.isVisible();
-        if (!isSpinnerVisible) break;
-        await page.waitForTimeout(500);
-        attempts++;
-      }
-
-      if (await table.isVisible()) {
-        await expect(page.locator('th').getByText('RAW STATUS')).toBeVisible();
-        await expect(page.locator('th').getByText('DISPLAY STATUS')).toBeVisible();
-        await expect(page.locator('th').getByText('STATUS')).toBeVisible();
-        await expect(page.locator('th').getByText('ACTIONS')).toBeVisible();
-      }
+      await expect(page.locator('th').getByText('RAW STATUS')).toBeVisible();
+      await expect(page.locator('th').getByText('DISPLAY STATUS')).toBeVisible();
+      await expect(page.locator('th').getByText('STATUS', { exact: true })).toBeVisible();
+      await expect(page.locator('th').getByText('ACTIONS')).toBeVisible();
     });
   });
 

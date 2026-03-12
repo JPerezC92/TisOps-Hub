@@ -68,15 +68,12 @@ test.describe('Request Relationships', () => {
     });
 
     test('should display table columns', async ({ page }) => {
-      // Wait for content to load
-      await page.waitForTimeout(2000);
-
       const table = page.locator('table').first();
-      if (await table.isVisible()) {
-        await expect(page.getByText('Rank', { exact: true })).toBeVisible();
-        await expect(page.getByText('Parent Request ID', { exact: true })).toBeVisible();
-        await expect(page.getByText('Child Count', { exact: true })).toBeVisible();
-      }
+      await expect(table).toBeVisible({ timeout: 10000 });
+
+      await expect(table.locator('th').getByText('Rank', { exact: true })).toBeVisible();
+      await expect(table.locator('th').getByText('Parent Request ID', { exact: true })).toBeVisible();
+      await expect(table.locator('th').getByText('Child Count', { exact: true })).toBeVisible();
     });
   });
 

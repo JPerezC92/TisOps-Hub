@@ -17,7 +17,8 @@
       "dependsOn": ["^build"]
     },
     "test:e2e": {
-      "dependsOn": ["^build", "build"]
+      "dependsOn": ["^build", "build"],
+      "env": ["E2E_KEEP_DB"]
     }
   }
 }

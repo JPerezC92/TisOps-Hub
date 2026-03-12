@@ -627,7 +627,7 @@ function AnalyticsDashboardContent() {
       const response = await fetch('http://localhost:3000/application-registry', { cache: 'no-store' });
       if (response.ok) {
         const result = await response.json();
-        setApplications(result || []);
+        setApplications(result.data || []);
       }
     } catch (error) {
       console.error('Failed to fetch applications:', error);

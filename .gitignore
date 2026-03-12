@@ -19,6 +19,9 @@ coverage
 test-results/
 playwright/.cache/
 playwright-report/
+e2e-test.db
+e2e-test.db-wal
+e2e-test.db-shm
 
 
 # Turbo
