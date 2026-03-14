@@ -4,8 +4,7 @@ import { INestApplication } from '@nestjs/common';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mock, MockProxy } from 'vitest-mock-extended';
 import request from 'supertest';
-import { CorrectiveStatusRegistryController } from '@corrective-status-registry/corrective-status-registry.controller';
-import { CorrectiveStatusRegistryService } from '@corrective-status-registry/corrective-status-registry.service';
+import { CorrectiveStatusRegistryController } from '@corrective-status-registry/infrastructure/corrective-status-registry.controller';
 import { CORRECTIVE_STATUS_REGISTRY_REPOSITORY } from '@corrective-status-registry/domain/repositories/corrective-status-registry.repository.interface';
 import type { ICorrectiveStatusRegistryRepository } from '@corrective-status-registry/domain/repositories/corrective-status-registry.repository.interface';
 import { GetAllCorrectiveStatusesUseCase } from '@corrective-status-registry/application/use-cases/get-all-corrective-statuses.use-case';
@@ -14,6 +13,8 @@ import { CreateCorrectiveStatusUseCase } from '@corrective-status-registry/appli
 import { UpdateCorrectiveStatusUseCase } from '@corrective-status-registry/application/use-cases/update-corrective-status.use-case';
 import { DeleteCorrectiveStatusUseCase } from '@corrective-status-registry/application/use-cases/delete-corrective-status.use-case';
 import { GetDistinctDisplayStatusesUseCase } from '@corrective-status-registry/application/use-cases/get-distinct-display-statuses.use-case';
+import { DomainErrorFilter } from '@shared/infrastructure/filters/domain-error.filter';
+import { ERROR_CODES } from '@shared/domain/errors/error-codes';
 import { CorrectiveStatusFactory } from './helpers/corrective-status.factory';
 
 describe('CorrectiveStatusRegistryController (Integration)', () => {
@@ -26,7 +27,6 @@ describe('CorrectiveStatusRegistryController (Integration)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [CorrectiveStatusRegistryController],
       providers: [
-        CorrectiveStatusRegistryService,
         {
           provide: CORRECTIVE_STATUS_REGISTRY_REPOSITORY,
           useValue: mockRepository,
@@ -77,6 +77,7 @@ describe('CorrectiveStatusRegistryController (Integration)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalFilters(new DomainErrorFilter());
     await app.init();
   });
 
@@ -178,8 +179,11 @@ describe('CorrectiveStatusRegistryController (Integration)', () => {
         .expect(404);
 
       expect(response.body).toMatchObject({
-        statusCode: 404,
-        message: 'Corrective status with ID 999 not found',
+        status: 'fail',
+        data: {
+          message: 'Corrective status with ID 999 not found',
+          code: ERROR_CODES.CORRECTIVE_STATUS_NOT_FOUND,
+        },
       });
       expect(mockRepository.findById).toHaveBeenCalledWith(999);
     });
@@ -242,6 +246,8 @@ describe('CorrectiveStatusRegistryController (Integration)', () => {
         isActive: false,
       });
 
+      const existingStatus = CorrectiveStatusFactory.create({ id: 1 });
+      mockRepository.findById.mockResolvedValue(existingStatus);
       mockRepository.update.mockResolvedValue(updatedStatus);
 
       const response = await request(app.getHttpServer())
@@ -273,6 +279,8 @@ describe('CorrectiveStatusRegistryController (Integration)', () => {
 
   describe('DELETE /corrective-status-registry/:id', () => {
     it('should delete a status mapping', async () => {
+      const existingStatus = CorrectiveStatusFactory.create({ id: 1 });
+      mockRepository.findById.mockResolvedValue(existingStatus);
       mockRepository.delete.mockResolvedValue(undefined);
 
       const response = await request(app.getHttpServer())

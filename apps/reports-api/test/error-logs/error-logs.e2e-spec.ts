@@ -56,8 +56,9 @@ describe('ErrorLogsController (E2E)', () => {
         .get('/error-logs/99999')
         .expect(404);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('Error log with ID 99999 not found');
+      expect(response.body.status).toBe('fail');
+      expect(response.body.data).toHaveProperty('message');
+      expect(response.body.data.message).toContain('Error log with ID 99999 not found');
     });
 
     it('should return 400 when id is not a valid number', async () => {

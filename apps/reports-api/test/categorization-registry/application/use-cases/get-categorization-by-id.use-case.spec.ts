@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { mock, MockProxy } from 'vitest-mock-extended';
 import { GetCategorizationByIdUseCase } from '@categorization-registry/application/use-cases/get-categorization-by-id.use-case';
 import type { ICategorizationRegistryRepository } from '@categorization-registry/domain/repositories/categorization-registry.repository.interface';
+import { CategorizationNotFoundError } from '@categorization-registry/domain/errors/categorization-not-found.error';
+import { DomainError } from '@shared/domain/errors/domain.error';
 import { CategorizationFactory } from '../../helpers/categorization-registry.factory';
 
 describe('GetCategorizationByIdUseCase', () => {
@@ -24,12 +26,14 @@ describe('GetCategorizationByIdUseCase', () => {
     expect(result).toEqual(expectedCategorization);
   });
 
-  it('should return null when categorization not found', async () => {
+  it('should return CategorizationNotFoundError when categorization not found', async () => {
     mockRepository.findById.mockResolvedValue(null);
 
     const result = await useCase.execute(999);
 
+    expect(DomainError.isDomainError(result)).toBe(true);
+    expect(result).toBeInstanceOf(CategorizationNotFoundError);
+    expect((result as CategorizationNotFoundError).message).toBe('Categorization with ID 999 not found');
     expect(mockRepository.findById).toHaveBeenCalledWith(999);
-    expect(result).toBeNull();
   });
 });

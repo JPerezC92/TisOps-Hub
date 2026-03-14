@@ -1,19 +1,18 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Module } from '../../domain/entities/module.entity';
 import {
   IModuleRegistryRepository,
-  MODULE_REGISTRY_REPOSITORY,
   UpdateModuleDto,
-} from '../../domain/repositories/module-registry.repository.interface';
+} from '@module-registry/domain/repositories/module-registry.repository.interface';
+import { Module } from '@module-registry/domain/entities/module.entity';
+import { ModuleNotFoundError } from '@module-registry/domain/errors/module-not-found.error';
 
-@Injectable()
 export class UpdateModuleUseCase {
-  constructor(
-    @Inject(MODULE_REGISTRY_REPOSITORY)
-    private readonly repository: IModuleRegistryRepository,
-  ) {}
+  constructor(private readonly repository: IModuleRegistryRepository) {}
 
-  async execute(id: number, data: UpdateModuleDto): Promise<Module> {
+  async execute(id: number, data: UpdateModuleDto): Promise<Module | ModuleNotFoundError> {
+    const existing = await this.repository.findById(id);
+    if (!existing) {
+      return new ModuleNotFoundError(id);
+    }
     return this.repository.update(id, data);
   }
 }

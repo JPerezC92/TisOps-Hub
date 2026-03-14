@@ -36,7 +36,7 @@ export interface IApplicationRegistryRepository {
   update(id: number, data: UpdateApplicationDto): Promise<Application>;
   delete(id: number): Promise<void>;
   createPattern(data: CreatePatternDto): Promise<ApplicationPattern>;
-  deletePattern(id: number): Promise<void>;
+  deletePattern(id: number): Promise<boolean>;
 }
 
 export const APPLICATION_REGISTRY_REPOSITORY = Symbol(

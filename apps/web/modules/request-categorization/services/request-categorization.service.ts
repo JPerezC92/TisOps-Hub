@@ -1,35 +1,35 @@
 import { apiClient } from '@/shared/api/client';
 import { parseJsendData } from '@repo/reports/common';
 import {
-  requestCategorizationWithInfoArraySchema,
+  reqCatWithInfoArraySchema,
   reqCatCategorySummaryArraySchema,
-  requestIdsByCategorizationResponseSchema,
-  uploadResultSchema,
-  deleteResultSchema,
+  reqCatRequestIdsResponseSchema,
+  reqCatUploadResultSchema,
+  reqCatDeleteResultSchema,
 } from '@repo/reports/frontend';
 import type {
-  RequestCategorizationWithInfo,
-  CategorySummaryResponse,
-  UploadResult,
-  DeleteResult,
-  RequestIdsByCategorization,
+  ReqCatWithInfo,
+  ReqCatCategorySummary,
+  ReqCatUploadResult,
+  ReqCatDeleteResult,
+  ReqCatRequestIdsResponse,
 } from '@repo/reports/frontend';
 
 export type {
-  RequestCategorizationWithInfo,
-  CategorySummaryResponse,
-  UploadResult,
-  DeleteResult,
-  RequestIdsByCategorization,
+  ReqCatWithInfo,
+  ReqCatCategorySummary,
+  ReqCatUploadResult,
+  ReqCatDeleteResult,
+  ReqCatRequestIdsResponse,
 };
 
 export const requestCategorizationService = {
-  getAll: async (): Promise<RequestCategorizationWithInfo[]> => {
+  getAll: async (): Promise<ReqCatWithInfo[]> => {
     const raw = await apiClient.get<unknown>('/request-categorization');
-    return parseJsendData(requestCategorizationWithInfoArraySchema, raw);
+    return parseJsendData(reqCatWithInfoArraySchema, raw);
   },
 
-  getSummary: async (): Promise<CategorySummaryResponse[]> => {
+  getSummary: async (): Promise<ReqCatCategorySummary[]> => {
     const raw = await apiClient.get<unknown>('/request-categorization/summary');
     return parseJsendData(reqCatCategorySummaryArraySchema, raw);
   },
@@ -37,25 +37,25 @@ export const requestCategorizationService = {
   getRequestIdsByCategorization: async (
     linkedRequestId: string,
     categorizacion: string,
-  ): Promise<RequestIdsByCategorization> => {
+  ): Promise<ReqCatRequestIdsResponse> => {
     const raw = await apiClient.get<unknown>(
       `/request-categorization/request-ids-by-categorization?linkedRequestId=${encodeURIComponent(linkedRequestId)}&categorizacion=${encodeURIComponent(categorizacion)}`,
     );
-    return parseJsendData(requestIdsByCategorizationResponseSchema, raw);
+    return parseJsendData(reqCatRequestIdsResponseSchema, raw);
   },
 
-  upload: async (file: File): Promise<UploadResult> => {
+  upload: async (file: File): Promise<ReqCatUploadResult> => {
     const formData = new FormData();
     formData.append('file', file);
     const raw = await apiClient.postForm<unknown>(
       '/request-categorization/upload',
       formData,
     );
-    return parseJsendData(uploadResultSchema, raw);
+    return parseJsendData(reqCatUploadResultSchema, raw);
   },
 
-  deleteAll: async (): Promise<DeleteResult> => {
+  deleteAll: async (): Promise<ReqCatDeleteResult> => {
     const raw = await apiClient.delete<unknown>('/request-categorization');
-    return parseJsendData(deleteResultSchema, raw);
+    return parseJsendData(reqCatDeleteResultSchema, raw);
   },
 };

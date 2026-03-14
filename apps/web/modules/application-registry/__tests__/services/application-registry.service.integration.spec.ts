@@ -172,7 +172,7 @@ describe('applicationRegistryService (Integration)', () => {
         ok: true,
         json: () => Promise.resolve({
           status: 'success',
-          data: { message: 'Application deleted' },
+          data: { deleted: true },
         }),
       });
 
@@ -182,7 +182,7 @@ describe('applicationRegistryService (Integration)', () => {
         expect.stringContaining('/application-registry/1'),
         expect.objectContaining({ method: 'DELETE' })
       );
-      expect(result.message).toBe('Application deleted');
+      expect(result.deleted).toBe(true);
     });
 
     it('should throw on delete error', async () => {
@@ -263,7 +263,7 @@ describe('applicationRegistryService (Integration)', () => {
         ok: true,
         json: () => Promise.resolve({
           status: 'success',
-          data: { message: 'Pattern deleted' },
+          data: { deleted: true },
         }),
       });
 
@@ -273,7 +273,7 @@ describe('applicationRegistryService (Integration)', () => {
         expect.stringContaining('/application-registry/patterns/42'),
         expect.objectContaining({ method: 'DELETE' })
       );
-      expect(result.message).toBe('Pattern deleted');
+      expect(result.deleted).toBe(true);
     });
 
     it('should throw on delete pattern error', async () => {

@@ -78,8 +78,8 @@ apps/reports-api/src/{module}/
 └── infrastructure/
     ├── repositories/      # Drizzle ORM implementations
     ├── services/          # Infrastructure services (e.g., parsers)
-    ├── controller.ts      # NestJS controller, injects use cases directly
-    └── module.ts          # NestJS module with factory providers
+    ├── {module}.controller.ts  # NestJS controller, injects use cases directly
+    └── {module}.module.ts      # NestJS module with factory providers
 ```
 
 Use cases are wired via factory providers injecting repository interfaces:

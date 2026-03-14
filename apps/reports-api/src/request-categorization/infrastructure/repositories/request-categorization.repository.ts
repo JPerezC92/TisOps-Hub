@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
 import { eq, sql, and, isNotNull, ne } from 'drizzle-orm';
 import { Database, requestCategorization, requestTags } from '@repo/database';
 import { IRequestCategorizationRepository } from '@request-categorization/domain/repositories/request-categorization.repository.interface';
 import { RequestCategorizationEntity } from '@request-categorization/domain/entities/request-categorization.entity';
+import { RequestCategorizationAdapter } from '@request-categorization/infrastructure/adapters/request-categorization.adapter';
 
-@Injectable()
 export class RequestCategorizationRepository
   implements IRequestCategorizationRepository
 {
@@ -12,7 +11,7 @@ export class RequestCategorizationRepository
 
   async findAll(): Promise<RequestCategorizationEntity[]> {
     const results = await this.db.select().from(requestCategorization);
-    return results.map((record) => this.toDomain(record));
+    return results.map((record) => RequestCategorizationAdapter.toDomain(record));
   }
 
   async findAllWithAdditionalInfo(): Promise<
@@ -125,7 +124,7 @@ export class RequestCategorizationRepository
       .select()
       .from(requestCategorization)
       .where(eq(requestCategorization.category, category));
-    return results.map((record) => this.toDomain(record));
+    return results.map((record) => RequestCategorizationAdapter.toDomain(record));
   }
 
   async create(
@@ -147,7 +146,7 @@ export class RequestCategorizationRepository
       })
       .returning();
 
-    return this.toDomain(inserted);
+    return RequestCategorizationAdapter.toDomain(inserted);
   }
 
   async createMany(
@@ -171,7 +170,7 @@ export class RequestCategorizationRepository
       .values(values)
       .returning();
 
-    return inserted.map((record) => this.toDomain(record));
+    return inserted.map((record) => RequestCategorizationAdapter.toDomain(record));
   }
 
   async upsertMany(
@@ -276,20 +275,4 @@ export class RequestCategorizationRepository
     return results.map((r) => ({ category: r.category, count: Number(r.count) }));
   }
 
-  private toDomain(
-    dbRecord: typeof requestCategorization.$inferSelect,
-  ): RequestCategorizationEntity {
-    return new RequestCategorizationEntity(
-      dbRecord.requestId,
-      dbRecord.category,
-      dbRecord.technician,
-      dbRecord.createdTime,
-      dbRecord.modulo,
-      dbRecord.subject,
-      dbRecord.problemId,
-      dbRecord.linkedRequestId,
-      dbRecord.requestIdLink ?? undefined,
-      dbRecord.linkedRequestIdLink ?? undefined,
-    );
-  }
 }

@@ -1,15 +1,11 @@
-import { Inject, Injectable } from '@nestjs/common';
 import {
-  APPLICATION_REGISTRY_REPOSITORY,
-  CreateApplicationDto,
   IApplicationRegistryRepository,
-} from '../../domain/repositories/application-registry.repository.interface';
-import { Application } from '../../domain/entities/application.entity';
+  CreateApplicationDto,
+} from '@application-registry/domain/repositories/application-registry.repository.interface';
+import { Application } from '@application-registry/domain/entities/application.entity';
 
-@Injectable()
 export class CreateApplicationUseCase {
   constructor(
-    @Inject(APPLICATION_REGISTRY_REPOSITORY)
     private readonly repository: IApplicationRegistryRepository,
   ) {}
 

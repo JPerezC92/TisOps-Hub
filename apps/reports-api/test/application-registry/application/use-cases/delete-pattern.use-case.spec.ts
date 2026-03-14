@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { mock, MockProxy } from 'vitest-mock-extended';
 import { DeletePatternUseCase } from '@application-registry/application/use-cases/delete-pattern.use-case';
 import type { IApplicationRegistryRepository } from '@application-registry/domain/repositories/application-registry.repository.interface';
+import { ApplicationPatternNotFoundError } from '@application-registry/domain/errors/application-pattern-not-found.error';
+import { DomainError } from '@shared/domain/errors/domain.error';
 
 describe('DeletePatternUseCase', () => {
   let useCase: DeletePatternUseCase;
@@ -13,7 +15,7 @@ describe('DeletePatternUseCase', () => {
   });
 
   it('should delete pattern successfully', async () => {
-    mockRepository.deletePattern.mockResolvedValue(undefined);
+    mockRepository.deletePattern.mockResolvedValue(true);
 
     await useCase.execute(1);
 
@@ -22,10 +24,19 @@ describe('DeletePatternUseCase', () => {
   });
 
   it('should call repository deletePattern with correct id', async () => {
-    mockRepository.deletePattern.mockResolvedValue(undefined);
+    mockRepository.deletePattern.mockResolvedValue(true);
 
     await useCase.execute(99);
 
     expect(mockRepository.deletePattern).toHaveBeenCalledWith(99);
+  });
+
+  it('should return ApplicationPatternNotFoundError when pattern not found', async () => {
+    mockRepository.deletePattern.mockResolvedValue(false);
+
+    const result = await useCase.execute(999);
+
+    expect(DomainError.isDomainError(result)).toBe(true);
+    expect(result).toBeInstanceOf(ApplicationPatternNotFoundError);
   });
 });

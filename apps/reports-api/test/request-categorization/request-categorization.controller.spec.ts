@@ -7,7 +7,7 @@ import { mock, MockProxy } from 'vitest-mock-extended';
 import request from 'supertest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { RequestCategorizationController } from '@request-categorization/infrastructure/controller';
+import { RequestCategorizationController } from '@request-categorization/infrastructure/request-categorization.controller';
 import { ExcelParserService } from '@request-categorization/infrastructure/services/excel-parser.service';
 import { REQUEST_CATEGORIZATION_REPOSITORY } from '@request-categorization/domain/repositories/request-categorization.repository.interface';
 import type { IRequestCategorizationRepository } from '@request-categorization/domain/repositories/request-categorization.repository.interface';
@@ -16,6 +16,7 @@ import { DeleteAllRequestCategorizationsUseCase } from '@request-categorization/
 import { UpsertManyRequestCategorizationsUseCase } from '@request-categorization/application/use-cases/upsert-many-request-categorizations.use-case';
 import { GetCategorySummaryUseCase } from '@request-categorization/application/use-cases/get-category-summary.use-case';
 import { GetRequestIdsByCategorizacionUseCase } from '@request-categorization/application/use-cases/get-request-ids-by-categorizacion.use-case';
+import { DomainErrorFilter } from '@shared/infrastructure/filters/domain-error.filter';
 import { RequestCategorizationFactory } from './helpers/request-categorization.factory';
 
 describe('RequestCategorizationController (Integration)', () => {
@@ -82,6 +83,7 @@ describe('RequestCategorizationController (Integration)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalFilters(new DomainErrorFilter());
     await app.init();
   });
 

@@ -39,11 +39,12 @@ describe('TasksController (E2E)', () => {
         .send(createTaskDto)
         .expect(201);
 
-      expect(response.body).toHaveProperty('id');
-      expect(response.body.title).toBe('E2E Test Task');
-      expect(response.body.description).toBe('Task created by e2e test');
-      expect(response.body.priority).toBe('high');
-      expect(response.body.completed).toBe(false);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('id');
+      expect(response.body.data.title).toBe('E2E Test Task');
+      expect(response.body.data.description).toBe('Task created by e2e test');
+      expect(response.body.data.priority).toBe('high');
+      expect(response.body.data.completed).toBe(false);
     });
 
     it('should create a task with default priority', async () => {
@@ -56,9 +57,10 @@ describe('TasksController (E2E)', () => {
         .send(createTaskDto)
         .expect(201);
 
-      expect(response.body).toHaveProperty('id');
-      expect(response.body.title).toBe('Task with default priority');
-      expect(response.body.priority).toBe('medium');
+      expect(response.body.status).toBe('success');
+      expect(response.body.data).toHaveProperty('id');
+      expect(response.body.data.title).toBe('Task with default priority');
+      expect(response.body.data.priority).toBe('medium');
     });
   });
 
@@ -68,7 +70,8 @@ describe('TasksController (E2E)', () => {
         .get('/tasks')
         .expect(200);
 
-      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.status).toBe('success');
+      expect(Array.isArray(response.body.data)).toBe(true);
     });
   });
 
@@ -80,15 +83,15 @@ describe('TasksController (E2E)', () => {
         .send({ title: 'Task to get by ID' })
         .expect(201);
 
-      const taskId = createResponse.body.id;
+      const taskId = createResponse.body.data.id;
 
       // Then get it by id
       const response = await request(app.getHttpServer())
         .get(`/tasks/${taskId}`)
         .expect(200);
 
-      expect(response.body.id).toBe(taskId);
-      expect(response.body.title).toBe('Task to get by ID');
+      expect(response.body.data.id).toBe(taskId);
+      expect(response.body.data.title).toBe('Task to get by ID');
     });
 
     it('should return 404 when task not found', async () => {
@@ -118,7 +121,7 @@ describe('TasksController (E2E)', () => {
         .send({ title: 'Task to update' })
         .expect(201);
 
-      const taskId = createResponse.body.id;
+      const taskId = createResponse.body.data.id;
 
       // Then update it
       const response = await request(app.getHttpServer())
@@ -126,9 +129,9 @@ describe('TasksController (E2E)', () => {
         .send({ title: 'Updated Task Title', completed: true })
         .expect(200);
 
-      expect(response.body.id).toBe(taskId);
-      expect(response.body.title).toBe('Updated Task Title');
-      expect(response.body.completed).toBe(true);
+      expect(response.body.data.id).toBe(taskId);
+      expect(response.body.data.title).toBe('Updated Task Title');
+      expect(response.body.data.completed).toBe(true);
     });
   });
 
@@ -140,7 +143,7 @@ describe('TasksController (E2E)', () => {
         .send({ title: 'Task to delete' })
         .expect(201);
 
-      const taskId = createResponse.body.id;
+      const taskId = createResponse.body.data.id;
 
       // Then delete it
       await request(app.getHttpServer())
@@ -166,15 +169,15 @@ describe('TasksController (E2E)', () => {
         })
         .expect(201);
 
-      const taskId = createResponse.body.id;
-      expect(createResponse.body.title).toBe('Integration Test Task');
+      const taskId = createResponse.body.data.id;
+      expect(createResponse.body.data.title).toBe('Integration Test Task');
 
       // 2. Get the task
       const getResponse = await request(app.getHttpServer())
         .get(`/tasks/${taskId}`)
         .expect(200);
 
-      expect(getResponse.body.id).toBe(taskId);
+      expect(getResponse.body.data.id).toBe(taskId);
 
       // 3. Update the task
       const updateResponse = await request(app.getHttpServer())
@@ -182,8 +185,8 @@ describe('TasksController (E2E)', () => {
         .send({ completed: true, priority: 'high' })
         .expect(200);
 
-      expect(updateResponse.body.completed).toBe(true);
-      expect(updateResponse.body.priority).toBe('high');
+      expect(updateResponse.body.data.completed).toBe(true);
+      expect(updateResponse.body.data.priority).toBe('high');
 
       // 4. Delete the task
       await request(app.getHttpServer())

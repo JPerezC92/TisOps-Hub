@@ -4,8 +4,7 @@ import { INestApplication } from '@nestjs/common';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mock, MockProxy } from 'vitest-mock-extended';
 import request from 'supertest';
-import { ApplicationRegistryController } from '@application-registry/application-registry.controller';
-import { ApplicationRegistryService } from '@application-registry/application-registry.service';
+import { ApplicationRegistryController } from '@application-registry/infrastructure/application-registry.controller';
 import { APPLICATION_REGISTRY_REPOSITORY } from '@application-registry/domain/repositories/application-registry.repository.interface';
 import type { IApplicationRegistryRepository } from '@application-registry/domain/repositories/application-registry.repository.interface';
 import { GetAllApplicationsUseCase } from '@application-registry/application/use-cases/get-all-applications.use-case';
@@ -17,6 +16,8 @@ import { UpdateApplicationUseCase } from '@application-registry/application/use-
 import { DeleteApplicationUseCase } from '@application-registry/application/use-cases/delete-application.use-case';
 import { CreatePatternUseCase } from '@application-registry/application/use-cases/create-pattern.use-case';
 import { DeletePatternUseCase } from '@application-registry/application/use-cases/delete-pattern.use-case';
+import { DomainErrorFilter } from '@shared/infrastructure/filters/domain-error.filter';
+import { ERROR_CODES } from '@shared/domain/errors/error-codes';
 import {
   ApplicationFactory,
   ApplicationPatternFactory,
@@ -33,78 +34,69 @@ describe('ApplicationRegistryController (Integration)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [ApplicationRegistryController],
       providers: [
-        ApplicationRegistryService,
         {
           provide: APPLICATION_REGISTRY_REPOSITORY,
           useValue: mockRepository,
         },
         {
           provide: GetAllApplicationsUseCase,
-          useFactory: (repository: IApplicationRegistryRepository) => {
-            return new GetAllApplicationsUseCase(repository);
-          },
+          useFactory: (repository: IApplicationRegistryRepository) =>
+            new GetAllApplicationsUseCase(repository),
           inject: [APPLICATION_REGISTRY_REPOSITORY],
         },
         {
           provide: GetApplicationByIdUseCase,
-          useFactory: (repository: IApplicationRegistryRepository) => {
-            return new GetApplicationByIdUseCase(repository);
-          },
+          useFactory: (repository: IApplicationRegistryRepository) =>
+            new GetApplicationByIdUseCase(repository),
           inject: [APPLICATION_REGISTRY_REPOSITORY],
         },
         {
           provide: FindApplicationByNameUseCase,
-          useFactory: (repository: IApplicationRegistryRepository) => {
-            return new FindApplicationByNameUseCase(repository);
-          },
+          useFactory: (repository: IApplicationRegistryRepository) =>
+            new FindApplicationByNameUseCase(repository),
           inject: [APPLICATION_REGISTRY_REPOSITORY],
         },
         {
           provide: GetApplicationsWithPatternsUseCase,
-          useFactory: (repository: IApplicationRegistryRepository) => {
-            return new GetApplicationsWithPatternsUseCase(repository);
-          },
+          useFactory: (repository: IApplicationRegistryRepository) =>
+            new GetApplicationsWithPatternsUseCase(repository),
           inject: [APPLICATION_REGISTRY_REPOSITORY],
         },
         {
           provide: CreateApplicationUseCase,
-          useFactory: (repository: IApplicationRegistryRepository) => {
-            return new CreateApplicationUseCase(repository);
-          },
+          useFactory: (repository: IApplicationRegistryRepository) =>
+            new CreateApplicationUseCase(repository),
           inject: [APPLICATION_REGISTRY_REPOSITORY],
         },
         {
           provide: UpdateApplicationUseCase,
-          useFactory: (repository: IApplicationRegistryRepository) => {
-            return new UpdateApplicationUseCase(repository);
-          },
+          useFactory: (repository: IApplicationRegistryRepository) =>
+            new UpdateApplicationUseCase(repository),
           inject: [APPLICATION_REGISTRY_REPOSITORY],
         },
         {
           provide: DeleteApplicationUseCase,
-          useFactory: (repository: IApplicationRegistryRepository) => {
-            return new DeleteApplicationUseCase(repository);
-          },
+          useFactory: (repository: IApplicationRegistryRepository) =>
+            new DeleteApplicationUseCase(repository),
           inject: [APPLICATION_REGISTRY_REPOSITORY],
         },
         {
           provide: CreatePatternUseCase,
-          useFactory: (repository: IApplicationRegistryRepository) => {
-            return new CreatePatternUseCase(repository);
-          },
+          useFactory: (repository: IApplicationRegistryRepository) =>
+            new CreatePatternUseCase(repository),
           inject: [APPLICATION_REGISTRY_REPOSITORY],
         },
         {
           provide: DeletePatternUseCase,
-          useFactory: (repository: IApplicationRegistryRepository) => {
-            return new DeletePatternUseCase(repository);
-          },
+          useFactory: (repository: IApplicationRegistryRepository) =>
+            new DeletePatternUseCase(repository),
           inject: [APPLICATION_REGISTRY_REPOSITORY],
         },
       ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalFilters(new DomainErrorFilter());
     await app.init();
   });
 
@@ -220,8 +212,11 @@ describe('ApplicationRegistryController (Integration)', () => {
         .expect(404);
 
       expect(response.body).toMatchObject({
-        statusCode: 404,
-        message: 'Application with ID 999 not found',
+        status: 'fail',
+        data: {
+          message: 'Application with ID 999 not found',
+          code: ERROR_CODES.APPLICATION_NOT_FOUND,
+        },
       });
       expect(mockRepository.findById).toHaveBeenCalledWith(999);
     });
@@ -278,12 +273,14 @@ describe('ApplicationRegistryController (Integration)', () => {
         isActive: false,
       };
 
+      const existingApplication = ApplicationFactory.create({ id: 1 });
       const updatedApplication = ApplicationFactory.create({
         id: 1,
         name: 'Updated Application',
         isActive: false,
       });
 
+      mockRepository.findById.mockResolvedValue(existingApplication);
       mockRepository.update.mockResolvedValue(updatedApplication);
 
       const response = await request(app.getHttpServer())
@@ -315,6 +312,8 @@ describe('ApplicationRegistryController (Integration)', () => {
 
   describe('DELETE /application-registry/:id', () => {
     it('should delete an application', async () => {
+      const existingApplication = ApplicationFactory.create({ id: 1 });
+      mockRepository.findById.mockResolvedValue(existingApplication);
       mockRepository.delete.mockResolvedValue(undefined);
 
       const response = await request(app.getHttpServer())
@@ -323,7 +322,7 @@ describe('ApplicationRegistryController (Integration)', () => {
 
       expect(response.body.status).toBe('success');
       expect(response.body.data).toMatchObject({
-        message: 'Application deleted successfully',
+        deleted: true,
       });
       expect(mockRepository.delete).toHaveBeenCalledWith(1);
     });
@@ -380,7 +379,7 @@ describe('ApplicationRegistryController (Integration)', () => {
 
   describe('DELETE /application-registry/patterns/:patternId', () => {
     it('should delete a pattern', async () => {
-      mockRepository.deletePattern.mockResolvedValue(undefined);
+      mockRepository.deletePattern.mockResolvedValue(true);
 
       const response = await request(app.getHttpServer())
         .delete('/application-registry/patterns/1')
@@ -388,7 +387,7 @@ describe('ApplicationRegistryController (Integration)', () => {
 
       expect(response.body.status).toBe('success');
       expect(response.body.data).toMatchObject({
-        message: 'Pattern deleted successfully',
+        deleted: true,
       });
       expect(mockRepository.deletePattern).toHaveBeenCalledWith(1);
     });

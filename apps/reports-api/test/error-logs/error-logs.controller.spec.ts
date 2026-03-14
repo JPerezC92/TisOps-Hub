@@ -4,11 +4,13 @@ import { INestApplication } from '@nestjs/common';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mock, MockProxy } from 'vitest-mock-extended';
 import request from 'supertest';
-import { ErrorLogsController } from '@error-logs/error-logs.controller';
+import { ErrorLogsController } from '@error-logs/infrastructure/error-logs.controller';
 import { ERROR_LOG_REPOSITORY } from '@error-logs/domain/repositories/error-log.repository.interface';
 import type { IErrorLogRepository } from '@error-logs/domain/repositories/error-log.repository.interface';
 import { GetAllErrorLogsUseCase } from '@error-logs/application/use-cases/get-all-error-logs.use-case';
 import { GetErrorLogByIdUseCase } from '@error-logs/application/use-cases/get-error-log-by-id.use-case';
+import { DomainErrorFilter } from '@shared/infrastructure/filters/domain-error.filter';
+import { ERROR_CODES } from '@shared/domain/errors/error-codes';
 import { ErrorLogFactory } from './helpers/error-log.factory';
 
 describe('ErrorLogsController (Integration)', () => {
@@ -46,6 +48,7 @@ describe('ErrorLogsController (Integration)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalFilters(new DomainErrorFilter());
     await app.init();
   });
 
@@ -206,8 +209,11 @@ describe('ErrorLogsController (Integration)', () => {
         .expect(404);
 
       expect(response.body).toMatchObject({
-        statusCode: 404,
-        message: 'Error log with ID 999 not found',
+        status: 'fail',
+        data: {
+          message: 'Error log with ID 999 not found',
+          code: ERROR_CODES.ERROR_LOG_NOT_FOUND,
+        },
       });
       expect(mockErrorLogRepository.findById).toHaveBeenCalledWith(999);
     });

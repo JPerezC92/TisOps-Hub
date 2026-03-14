@@ -2,6 +2,8 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { mock, MockProxy } from 'vitest-mock-extended';
 import { GetErrorLogByIdUseCase } from '@error-logs/application/use-cases/get-error-log-by-id.use-case';
 import { IErrorLogRepository } from '@error-logs/domain/repositories/error-log.repository.interface';
+import { ErrorLogNotFoundError } from '@error-logs/domain/errors/error-log-not-found.error';
+import { DomainError } from '@shared/domain/errors/domain.error';
 import { ErrorLogFactory } from '../../helpers/error-log.factory';
 
 describe('GetErrorLogByIdUseCase', () => {
@@ -24,18 +26,19 @@ describe('GetErrorLogByIdUseCase', () => {
     expect(mockRepository.findById).toHaveBeenCalledWith(errorLogId);
     expect(mockRepository.findById).toHaveBeenCalledOnce();
     expect(result).toEqual(expectedLog);
-    expect(result?.id).toBe(errorLogId);
   });
 
-  it('should return null when error log not found', async () => {
+  it('should return ErrorLogNotFoundError when error log not found', async () => {
     const errorLogId = 999;
 
     mockRepository.findById.mockResolvedValue(null);
 
     const result = await getErrorLogByIdUseCase.execute(errorLogId);
 
+    expect(DomainError.isDomainError(result)).toBe(true);
+    expect(result).toBeInstanceOf(ErrorLogNotFoundError);
+    expect((result as ErrorLogNotFoundError).message).toBe('Error log with ID 999 not found');
     expect(mockRepository.findById).toHaveBeenCalledWith(errorLogId);
-    expect(result).toBeNull();
   });
 
   it('should handle repository errors', async () => {
@@ -66,8 +69,5 @@ describe('GetErrorLogByIdUseCase', () => {
     const result = await getErrorLogByIdUseCase.execute(1);
 
     expect(result).toEqual(errorLog);
-    expect(result?.errorType).toBe('DatabaseError');
-    expect(result?.stackTrace).toBeDefined();
-    expect(result?.metadata).toBeDefined();
   });
 });

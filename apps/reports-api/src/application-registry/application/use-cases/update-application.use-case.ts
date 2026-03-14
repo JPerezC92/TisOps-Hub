@@ -1,19 +1,20 @@
-import { Inject, Injectable } from '@nestjs/common';
 import {
-  APPLICATION_REGISTRY_REPOSITORY,
   IApplicationRegistryRepository,
   UpdateApplicationDto,
-} from '../../domain/repositories/application-registry.repository.interface';
-import { Application } from '../../domain/entities/application.entity';
+} from '@application-registry/domain/repositories/application-registry.repository.interface';
+import { Application } from '@application-registry/domain/entities/application.entity';
+import { ApplicationNotFoundError } from '@application-registry/domain/errors/application-not-found.error';
 
-@Injectable()
 export class UpdateApplicationUseCase {
   constructor(
-    @Inject(APPLICATION_REGISTRY_REPOSITORY)
     private readonly repository: IApplicationRegistryRepository,
   ) {}
 
-  async execute(id: number, data: UpdateApplicationDto): Promise<Application> {
+  async execute(id: number, data: UpdateApplicationDto): Promise<Application | ApplicationNotFoundError> {
+    const existing = await this.repository.findById(id);
+    if (!existing) {
+      return new ApplicationNotFoundError(id);
+    }
     return this.repository.update(id, data);
   }
 }

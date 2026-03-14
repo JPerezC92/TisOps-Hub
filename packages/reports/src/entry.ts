@@ -48,21 +48,23 @@ export type {
   RequestCategorization,
   RequestCategorizationResponse,
   CategorySummary,
-  RequestCategorizationWithInfo,
-  CategorySummaryResponse,
-  UploadResult as RequestCategorizationUploadResult,
-  DeleteResult as RequestCategorizationDeleteResult,
+  ReqCatWithInfo,
+  ReqCatCategorySummary,
+  ReqCatUploadResult,
+  ReqCatDeleteResult,
   RequestIdEntry,
-  RequestIdsByCategorization,
+  ReqCatRequestIdsResponse,
 } from './request-categorization';
 
 export {
-  requestCategorizationWithInfoSchema,
+  reqCatWithInfoSchema,
+  reqCatWithInfoArraySchema,
   reqCatCategorySummarySchema,
-  uploadResultSchema as requestCategorizationUploadResultSchema,
-  deleteResultSchema as requestCategorizationDeleteResultSchema,
+  reqCatCategorySummaryArraySchema,
+  reqCatUploadResultSchema,
+  reqCatDeleteResultSchema,
   requestIdEntrySchema,
-  requestIdsByCategorizationResponseSchema,
+  reqCatRequestIdsResponseSchema,
 } from './request-categorization';
 
 // Parent-Child Requests validation schemas, DTOs and Types
@@ -110,10 +112,29 @@ export {
   appRegistryDeleteResultSchema,
 } from './application-registry';
 
-// Error Logs Types
+// Corrective Status Registry Types and Schemas
+export type {
+  CorrectiveStatusResponse,
+  CorrectiveStatusDeleteResult,
+} from './corrective-status-registry';
+
+export {
+  correctiveStatusSchema,
+  correctiveStatusArraySchema,
+  correctiveStatusDeleteResultSchema,
+} from './corrective-status-registry';
+
+// Error Logs Types and Schemas
 export type {
   ErrorLog,
   ErrorLogResponse,
+  ErrorLogSchemaResponse,
+  ErrorLogListResponse,
+} from './error-logs';
+
+export {
+  errorLogSchema,
+  errorLogListResponseSchema,
 } from './error-logs';
 
 // War Rooms Types (re-export from database)

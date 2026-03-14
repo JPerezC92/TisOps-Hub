@@ -26,23 +26,23 @@ export type {
   RequestCategorization,
   RequestCategorizationResponse,
   CategorySummary,
-  RequestCategorizationWithInfo,
-  CategorySummaryResponse,
-  UploadResult,
-  DeleteResult,
+  ReqCatWithInfo,
+  ReqCatCategorySummary,
+  ReqCatUploadResult,
+  ReqCatDeleteResult,
   RequestIdEntry,
-  RequestIdsByCategorization,
+  ReqCatRequestIdsResponse,
 } from './request-categorization/frontend';
 
 export {
-  requestCategorizationWithInfoSchema,
-  requestCategorizationWithInfoArraySchema,
+  reqCatWithInfoSchema,
+  reqCatWithInfoArraySchema,
   reqCatCategorySummarySchema,
   reqCatCategorySummaryArraySchema,
-  uploadResultSchema,
-  deleteResultSchema,
+  reqCatUploadResultSchema,
+  reqCatDeleteResultSchema,
   requestIdEntrySchema,
-  requestIdsByCategorizationResponseSchema,
+  reqCatRequestIdsResponseSchema,
 } from './request-categorization/frontend';
 
 // Parent-Child Requests

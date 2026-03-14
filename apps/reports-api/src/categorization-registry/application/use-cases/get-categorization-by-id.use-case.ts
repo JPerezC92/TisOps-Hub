@@ -1,18 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Categorization } from '../../domain/entities/categorization.entity';
-import {
-  ICategorizationRegistryRepository,
-  CATEGORIZATION_REGISTRY_REPOSITORY,
-} from '../../domain/repositories/categorization-registry.repository.interface';
+import { ICategorizationRegistryRepository } from '@categorization-registry/domain/repositories/categorization-registry.repository.interface';
+import { Categorization } from '@categorization-registry/domain/entities/categorization.entity';
+import { CategorizationNotFoundError } from '@categorization-registry/domain/errors/categorization-not-found.error';
 
-@Injectable()
 export class GetCategorizationByIdUseCase {
-  constructor(
-    @Inject(CATEGORIZATION_REGISTRY_REPOSITORY)
-    private readonly repository: ICategorizationRegistryRepository,
-  ) {}
+  constructor(private readonly repository: ICategorizationRegistryRepository) {}
 
-  async execute(id: number): Promise<Categorization | null> {
-    return this.repository.findById(id);
+  async execute(id: number): Promise<Categorization | CategorizationNotFoundError> {
+    const categorization = await this.repository.findById(id);
+    if (!categorization) {
+      return new CategorizationNotFoundError(id);
+    }
+    return categorization;
   }
 }

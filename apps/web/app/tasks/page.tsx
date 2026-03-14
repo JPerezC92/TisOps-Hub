@@ -14,8 +14,8 @@ export default function TasksPage() {
   const fetchTasks = async () => {
     try {
       const response = await fetch('http://localhost:3000/tasks');
-      const data = await response.json();
-      setTasks(data);
+      const json = await response.json();
+      setTasks(json.data);
     } catch (error) {
       console.error('Error fetching tasks:', error);
     } finally {

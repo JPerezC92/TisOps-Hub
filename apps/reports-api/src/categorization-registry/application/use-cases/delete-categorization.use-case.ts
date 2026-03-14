@@ -1,17 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common';
-import {
-  ICategorizationRegistryRepository,
-  CATEGORIZATION_REGISTRY_REPOSITORY,
-} from '../../domain/repositories/categorization-registry.repository.interface';
+import { ICategorizationRegistryRepository } from '@categorization-registry/domain/repositories/categorization-registry.repository.interface';
+import { CategorizationNotFoundError } from '@categorization-registry/domain/errors/categorization-not-found.error';
 
-@Injectable()
 export class DeleteCategorizationUseCase {
-  constructor(
-    @Inject(CATEGORIZATION_REGISTRY_REPOSITORY)
-    private readonly repository: ICategorizationRegistryRepository,
-  ) {}
+  constructor(private readonly repository: ICategorizationRegistryRepository) {}
 
-  async execute(id: number): Promise<void> {
-    return this.repository.delete(id);
+  async execute(id: number): Promise<void | CategorizationNotFoundError> {
+    const existing = await this.repository.findById(id);
+    if (!existing) {
+      return new CategorizationNotFoundError(id);
+    }
+    await this.repository.delete(id);
   }
 }

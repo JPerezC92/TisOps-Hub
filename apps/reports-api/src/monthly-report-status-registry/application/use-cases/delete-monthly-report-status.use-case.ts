@@ -1,17 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common';
-import {
-  MONTHLY_REPORT_STATUS_REGISTRY_REPOSITORY,
-  IMonthlyReportStatusRegistryRepository,
-} from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
+import { IMonthlyReportStatusRegistryRepository } from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
+import { MonthlyReportStatusNotFoundError } from '@monthly-report-status-registry/domain/errors/monthly-report-status-not-found.error';
 
-@Injectable()
 export class DeleteMonthlyReportStatusUseCase {
-  constructor(
-    @Inject(MONTHLY_REPORT_STATUS_REGISTRY_REPOSITORY)
-    private readonly repository: IMonthlyReportStatusRegistryRepository,
-  ) {}
+  constructor(private readonly repository: IMonthlyReportStatusRegistryRepository) {}
 
-  async execute(id: number): Promise<void> {
+  async execute(id: number): Promise<void | MonthlyReportStatusNotFoundError> {
+    const existing = await this.repository.findById(id);
+    if (!existing) {
+      return new MonthlyReportStatusNotFoundError(id);
+    }
     await this.repository.delete(id);
   }
 }

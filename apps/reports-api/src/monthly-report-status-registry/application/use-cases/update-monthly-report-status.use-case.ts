@@ -1,19 +1,18 @@
-import { Inject, Injectable } from '@nestjs/common';
 import {
-  MONTHLY_REPORT_STATUS_REGISTRY_REPOSITORY,
   IMonthlyReportStatusRegistryRepository,
   UpdateMonthlyReportStatusDto,
 } from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
 import { MonthlyReportStatus } from '@monthly-report-status-registry/domain/entities/monthly-report-status.entity';
+import { MonthlyReportStatusNotFoundError } from '@monthly-report-status-registry/domain/errors/monthly-report-status-not-found.error';
 
-@Injectable()
 export class UpdateMonthlyReportStatusUseCase {
-  constructor(
-    @Inject(MONTHLY_REPORT_STATUS_REGISTRY_REPOSITORY)
-    private readonly repository: IMonthlyReportStatusRegistryRepository,
-  ) {}
+  constructor(private readonly repository: IMonthlyReportStatusRegistryRepository) {}
 
-  async execute(id: number, data: UpdateMonthlyReportStatusDto): Promise<MonthlyReportStatus> {
+  async execute(id: number, data: UpdateMonthlyReportStatusDto): Promise<MonthlyReportStatus | MonthlyReportStatusNotFoundError> {
+    const existing = await this.repository.findById(id);
+    if (!existing) {
+      return new MonthlyReportStatusNotFoundError(id);
+    }
     return this.repository.update(id, data);
   }
 }

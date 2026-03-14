@@ -7,6 +7,14 @@ export function jsendSuccess<T extends z.ZodTypeAny>(dataSchema: T) {
   });
 }
 
+export const jsendFailSchema = z.object({
+  status: z.literal('fail'),
+  data: z.object({
+    message: z.string(),
+    code: z.string(),
+  }),
+});
+
 /**
  * Parses a raw API response as a JSend success envelope and validates the data.
  * Returns the validated data directly (unwrapped from the envelope).

@@ -1,7 +1,5 @@
-import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import {
   Database,
-  DATABASE_CONNECTION,
   applicationRegistry,
   applicationPatterns,
   InsertApplicationRegistry,
@@ -14,15 +12,15 @@ import type {
   UpdateApplicationDto,
   CreatePatternDto,
   ApplicationWithPatterns,
-} from '../../domain/repositories/application-registry.repository.interface';
-import { Application } from '../../domain/entities/application.entity';
-import { ApplicationPattern } from '../../domain/entities/application-pattern.entity';
+} from '@application-registry/domain/repositories/application-registry.repository.interface';
+import { Application } from '@application-registry/domain/entities/application.entity';
+import { ApplicationPattern } from '@application-registry/domain/entities/application-pattern.entity';
+import { ApplicationAdapter, ApplicationPatternAdapter } from '@application-registry/infrastructure/adapters/application.adapter';
 
-@Injectable()
 export class ApplicationRegistryRepository
   implements IApplicationRegistryRepository
 {
-  constructor(@Inject(DATABASE_CONNECTION) private readonly db: Database) {}
+  constructor(private readonly db: Database) {}
 
   async findAll(): Promise<Application[]> {
     const results = await this.db
@@ -32,18 +30,7 @@ export class ApplicationRegistryRepository
       .orderBy(applicationRegistry.code)
       .all();
 
-    return results.map(
-      (r) =>
-        new Application(
-          r.id,
-          r.code,
-          r.name,
-          r.description,
-          r.isActive,
-          r.createdAt,
-          r.updatedAt,
-        ),
-    );
+    return results.map(ApplicationAdapter.toDomain);
   }
 
   async findById(id: number): Promise<Application | null> {
@@ -57,15 +44,7 @@ export class ApplicationRegistryRepository
       return null;
     }
 
-    return new Application(
-      result.id,
-      result.code,
-      result.name,
-      result.description,
-      result.isActive,
-      result.createdAt,
-      result.updatedAt,
-    );
+    return ApplicationAdapter.toDomain(result);
   }
 
   async findByPattern(applicationName: string): Promise<Application | null> {
@@ -100,15 +79,7 @@ export class ApplicationRegistryRepository
       return null;
     }
 
-    return new Application(
-      result.id,
-      result.code,
-      result.name,
-      result.description,
-      result.isActive,
-      result.createdAt,
-      result.updatedAt,
-    );
+    return ApplicationAdapter.toDomain(result);
   }
 
   async findAllWithPatterns(): Promise<ApplicationWithPatterns[]> {
@@ -129,28 +100,10 @@ export class ApplicationRegistryRepository
         .orderBy(applicationPatterns.priority)
         .all();
 
-      const patternEntities = patterns.map(
-        (p) =>
-          new ApplicationPattern(
-            p.id,
-            p.applicationId,
-            p.pattern,
-            p.priority,
-            p.matchType,
-            p.isActive,
-          ),
-      );
+      const patternEntities = patterns.map(ApplicationPatternAdapter.toDomain);
 
       const appWithPatterns: ApplicationWithPatterns = Object.assign(
-        new Application(
-          app.id,
-          app.code,
-          app.name,
-          app.description,
-          app.isActive,
-          app.createdAt,
-          app.updatedAt,
-        ),
+        ApplicationAdapter.toDomain(app),
         { patterns: patternEntities },
       );
 
@@ -174,26 +127,13 @@ export class ApplicationRegistryRepository
       .returning()
       .get();
 
-    return new Application(
-      result.id,
-      result.code,
-      result.name,
-      result.description,
-      result.isActive,
-      result.createdAt,
-      result.updatedAt,
-    );
+    return ApplicationAdapter.toDomain(result);
   }
 
   async update(
     id: number,
     data: UpdateApplicationDto,
   ): Promise<Application> {
-    const existing = await this.findById(id);
-    if (!existing) {
-      throw new NotFoundException(`Application with ID ${id} not found`);
-    }
-
     const result = await this.db
       .update(applicationRegistry)
       .set({
@@ -204,24 +144,10 @@ export class ApplicationRegistryRepository
       .returning()
       .get();
 
-    return new Application(
-      result.id,
-      result.code,
-      result.name,
-      result.description,
-      result.isActive,
-      result.createdAt,
-      result.updatedAt,
-    );
+    return ApplicationAdapter.toDomain(result);
   }
 
   async delete(id: number): Promise<void> {
-    const existing = await this.findById(id);
-    if (!existing) {
-      throw new NotFoundException(`Application with ID ${id} not found`);
-    }
-
-    // Soft delete by setting isActive to false
     await this.db
       .update(applicationRegistry)
       .set({ isActive: false, updatedAt: new Date() })
@@ -244,24 +170,15 @@ export class ApplicationRegistryRepository
       .returning()
       .get();
 
-    return new ApplicationPattern(
-      result.id,
-      result.applicationId,
-      result.pattern,
-      result.priority,
-      result.matchType,
-      result.isActive,
-    );
+    return ApplicationPatternAdapter.toDomain(result);
   }
 
-  async deletePattern(id: number): Promise<void> {
+  async deletePattern(id: number): Promise<boolean> {
     const result = await this.db
       .delete(applicationPatterns)
       .where(eq(applicationPatterns.id, id))
       .execute();
 
-    if (result.rowsAffected === 0) {
-      throw new NotFoundException(`Pattern with ID ${id} not found`);
-    }
+    return result.rowsAffected > 0;
   }
 }

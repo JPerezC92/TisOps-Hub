@@ -4,18 +4,13 @@ import { cleanupOpenApiDoc } from 'nestjs-zod';
 
 import { AppModule } from './app.module';
 import { DatabaseExceptionFilter } from './error-logs/infrastructure/filters/database-exception.filter';
-import { DomainErrorFilter } from '@shared/infrastructure/filters/domain-error.filter';
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors();
 
-  // Global Exception Filters
-  // Order matters: last registered runs first (LIFO)
-  // DatabaseExceptionFilter catches all, DomainErrorFilter catches DomainError specifically
+  // Global Exception Filters (DomainErrorFilter is registered via APP_FILTER in AppModule)
   const databaseExceptionFilter = app.get(DatabaseExceptionFilter);
-  const domainErrorFilter = new DomainErrorFilter();
-  app.useGlobalFilters(databaseExceptionFilter, domainErrorFilter);
+  app.useGlobalFilters(databaseExceptionFilter);
 
   // Swagger Configuration
   const config = new DocumentBuilder()

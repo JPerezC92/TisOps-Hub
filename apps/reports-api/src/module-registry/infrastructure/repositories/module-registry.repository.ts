@@ -1,22 +1,24 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
-import { db, moduleRegistry } from '@repo/database';
-import { Module } from '../../domain/entities/module.entity';
+import { Database, moduleRegistry } from '@repo/database';
+import { Module } from '@module-registry/domain/entities/module.entity';
 import {
   IModuleRegistryRepository,
   CreateModuleDto,
   UpdateModuleDto,
-} from '../../domain/repositories/module-registry.repository.interface';
+} from '@module-registry/domain/repositories/module-registry.repository.interface';
+import { ModuleAdapter } from '@module-registry/infrastructure/adapters/module.adapter';
 
-@Injectable()
+
 export class ModuleRegistryRepository implements IModuleRegistryRepository {
+  constructor(private readonly db: Database) {}
+
   async findAll(): Promise<Module[]> {
-    const results = await db.select().from(moduleRegistry);
-    return results.map(this.mapToEntity);
+    const results = await this.db.select().from(moduleRegistry);
+    return results.map(ModuleAdapter.toDomain);
   }
 
   async findById(id: number): Promise<Module | null> {
-    const results = await db
+    const results = await this.db
       .select()
       .from(moduleRegistry)
       .where(eq(moduleRegistry.id, id));
@@ -25,11 +27,11 @@ export class ModuleRegistryRepository implements IModuleRegistryRepository {
       return null;
     }
 
-    return this.mapToEntity(results[0]);
+    return ModuleAdapter.toDomain(results[0]);
   }
 
   async findBySourceValue(sourceValue: string): Promise<Module | null> {
-    const results = await db
+    const results = await this.db
       .select()
       .from(moduleRegistry)
       .where(eq(moduleRegistry.sourceValue, sourceValue));
@@ -38,20 +40,20 @@ export class ModuleRegistryRepository implements IModuleRegistryRepository {
       return null;
     }
 
-    return this.mapToEntity(results[0]);
+    return ModuleAdapter.toDomain(results[0]);
   }
 
   async findByApplication(application: string): Promise<Module[]> {
-    const results = await db
+    const results = await this.db
       .select()
       .from(moduleRegistry)
       .where(eq(moduleRegistry.application, application));
 
-    return results.map(this.mapToEntity);
+    return results.map(ModuleAdapter.toDomain);
   }
 
   async create(data: CreateModuleDto): Promise<Module> {
-    const result = await db
+    const result = await this.db
       .insert(moduleRegistry)
       .values({
         sourceValue: data.sourceValue,
@@ -61,16 +63,11 @@ export class ModuleRegistryRepository implements IModuleRegistryRepository {
       })
       .returning();
 
-    return this.mapToEntity(result[0]);
+    return ModuleAdapter.toDomain(result[0]);
   }
 
   async update(id: number, data: UpdateModuleDto): Promise<Module> {
-    const existing = await this.findById(id);
-    if (!existing) {
-      throw new NotFoundException(`Module with ID ${id} not found`);
-    }
-
-    const result = await db
+    const result = await this.db
       .update(moduleRegistry)
       .set({
         ...(data.sourceValue !== undefined && { sourceValue: data.sourceValue }),
@@ -81,30 +78,13 @@ export class ModuleRegistryRepository implements IModuleRegistryRepository {
       .where(eq(moduleRegistry.id, id))
       .returning();
 
-    return this.mapToEntity(result[0]);
+    return ModuleAdapter.toDomain(result[0]);
   }
 
   async delete(id: number): Promise<void> {
-    const existing = await this.findById(id);
-    if (!existing) {
-      throw new NotFoundException(`Module with ID ${id} not found`);
-    }
-
-    await db
+    await this.db
       .update(moduleRegistry)
       .set({ isActive: false })
       .where(eq(moduleRegistry.id, id));
-  }
-
-  private mapToEntity(record: typeof moduleRegistry.$inferSelect): Module {
-    return new Module(
-      record.id,
-      record.sourceValue,
-      record.displayValue,
-      record.application,
-      record.isActive,
-      record.createdAt,
-      record.updatedAt,
-    );
   }
 }
