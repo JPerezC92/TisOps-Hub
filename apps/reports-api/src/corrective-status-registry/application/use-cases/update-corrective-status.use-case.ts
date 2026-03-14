@@ -1,19 +1,18 @@
-import { Inject, Injectable } from '@nestjs/common';
 import {
-  CORRECTIVE_STATUS_REGISTRY_REPOSITORY,
   ICorrectiveStatusRegistryRepository,
   UpdateCorrectiveStatusDto,
 } from '@corrective-status-registry/domain/repositories/corrective-status-registry.repository.interface';
 import { CorrectiveStatus } from '@corrective-status-registry/domain/entities/corrective-status.entity';
+import { CorrectiveStatusNotFoundError } from '@corrective-status-registry/domain/errors/corrective-status-not-found.error';
 
-@Injectable()
 export class UpdateCorrectiveStatusUseCase {
-  constructor(
-    @Inject(CORRECTIVE_STATUS_REGISTRY_REPOSITORY)
-    private readonly repository: ICorrectiveStatusRegistryRepository,
-  ) {}
+  constructor(private readonly repository: ICorrectiveStatusRegistryRepository) {}
 
-  async execute(id: number, data: UpdateCorrectiveStatusDto): Promise<CorrectiveStatus> {
+  async execute(id: number, data: UpdateCorrectiveStatusDto): Promise<CorrectiveStatus | CorrectiveStatusNotFoundError> {
+    const existing = await this.repository.findById(id);
+    if (!existing) {
+      return new CorrectiveStatusNotFoundError(id);
+    }
     return this.repository.update(id, data);
   }
 }

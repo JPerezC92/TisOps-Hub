@@ -52,7 +52,9 @@
       "Bash(pnpm turbo:*)",
       "Bash(turbo run:*)",
       "WebFetch(domain:github.com)",
-      "Bash(turbo test:e2e:*)"
+      "Bash(turbo test:e2e:*)",
+      "Bash(rm:*)",
+      "Bash(ls:*)"
     ],
     "deny": [],
     "ask": []

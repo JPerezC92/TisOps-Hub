@@ -52,7 +52,7 @@ export class ErrorLog {
   toJSON() {
     return {
       id: this.id,
-      timestamp: this.timestamp,
+      timestamp: this.timestamp.toISOString(),
       errorType: this.errorType,
       errorMessage: this.errorMessage,
       stackTrace: this.stackTrace,

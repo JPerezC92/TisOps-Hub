@@ -65,8 +65,8 @@ describe('MonthlyReportStatusRegistryController (E2E)', () => {
         .get('/monthly-report-status-registry/99999')
         .expect(404);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('not found');
+      expect(response.body.status).toBe('fail');
+      expect(response.body.data).toHaveProperty('message');
     });
 
     it('should return 400 for invalid id', async () => {

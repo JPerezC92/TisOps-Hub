@@ -5,7 +5,7 @@ export const requestIdEntrySchema = z.object({
   requestIdLink: z.string().optional(),
 });
 
-export const requestCategorizationWithInfoSchema = z.object({
+export const reqCatWithInfoSchema = z.object({
   requestId: z.string(),
   category: z.string(),
   technician: z.string(),
@@ -25,28 +25,28 @@ export const reqCatCategorySummarySchema = z.object({
   count: z.number(),
 });
 
-export const uploadResultSchema = z.object({
+export const reqCatUploadResultSchema = z.object({
   message: z.string(),
   recordsCreated: z.number(),
   recordsUpdated: z.number(),
   totalRecords: z.number(),
 });
 
-export const deleteResultSchema = z.object({
+export const reqCatDeleteResultSchema = z.object({
   message: z.string(),
 });
 
-export const requestIdsByCategorizationResponseSchema = z.object({
+export const reqCatRequestIdsResponseSchema = z.object({
   requestIds: z.array(requestIdEntrySchema),
 });
 
 // Pre-composed array schemas (avoids cross-package type inference issues with z.array())
-export const requestCategorizationWithInfoArraySchema = z.array(requestCategorizationWithInfoSchema);
+export const reqCatWithInfoArraySchema = z.array(reqCatWithInfoSchema);
 export const reqCatCategorySummaryArraySchema = z.array(reqCatCategorySummarySchema);
 
-export type RequestCategorizationWithInfo = z.infer<typeof requestCategorizationWithInfoSchema>;
-export type CategorySummaryResponse = z.infer<typeof reqCatCategorySummarySchema>;
-export type UploadResult = z.infer<typeof uploadResultSchema>;
-export type DeleteResult = z.infer<typeof deleteResultSchema>;
+export type ReqCatWithInfo = z.infer<typeof reqCatWithInfoSchema>;
+export type ReqCatCategorySummary = z.infer<typeof reqCatCategorySummarySchema>;
+export type ReqCatUploadResult = z.infer<typeof reqCatUploadResultSchema>;
+export type ReqCatDeleteResult = z.infer<typeof reqCatDeleteResultSchema>;
 export type RequestIdEntry = z.infer<typeof requestIdEntrySchema>;
-export type RequestIdsByCategorization = z.infer<typeof requestIdsByCategorizationResponseSchema>;
+export type ReqCatRequestIdsResponse = z.infer<typeof reqCatRequestIdsResponseSchema>;

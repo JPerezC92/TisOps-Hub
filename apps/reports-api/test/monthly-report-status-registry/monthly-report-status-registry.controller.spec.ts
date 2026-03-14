@@ -4,8 +4,7 @@ import { INestApplication } from '@nestjs/common';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { mock, MockProxy } from 'vitest-mock-extended';
 import request from 'supertest';
-import { MonthlyReportStatusRegistryController } from '@monthly-report-status-registry/monthly-report-status-registry.controller';
-import { MonthlyReportStatusRegistryService } from '@monthly-report-status-registry/monthly-report-status-registry.service';
+import { MonthlyReportStatusRegistryController } from '@monthly-report-status-registry/infrastructure/monthly-report-status-registry.controller';
 import { MONTHLY_REPORT_STATUS_REGISTRY_REPOSITORY } from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
 import type { IMonthlyReportStatusRegistryRepository } from '@monthly-report-status-registry/domain/repositories/monthly-report-status-registry.repository.interface';
 import { GetAllMonthlyReportStatusesUseCase } from '@monthly-report-status-registry/application/use-cases/get-all-monthly-report-statuses.use-case';
@@ -14,6 +13,10 @@ import { CreateMonthlyReportStatusUseCase } from '@monthly-report-status-registr
 import { UpdateMonthlyReportStatusUseCase } from '@monthly-report-status-registry/application/use-cases/update-monthly-report-status.use-case';
 import { DeleteMonthlyReportStatusUseCase } from '@monthly-report-status-registry/application/use-cases/delete-monthly-report-status.use-case';
 import { MapRawStatusUseCase } from '@monthly-report-status-registry/application/use-cases/map-raw-status.use-case';
+import { DomainErrorFilter } from '@shared/infrastructure/filters/domain-error.filter';
+import { DomainErrorInterceptor } from '@shared/infrastructure/interceptors/domain-error.interceptor';
+import { JSendInterceptor } from '@shared/infrastructure/interceptors/jsend.interceptor';
+import { ERROR_CODES } from '@shared/domain/errors/error-codes';
 import { MonthlyReportStatusFactory } from './helpers/monthly-report-status.factory';
 
 describe('MonthlyReportStatusRegistryController (Integration)', () => {
@@ -26,7 +29,6 @@ describe('MonthlyReportStatusRegistryController (Integration)', () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       controllers: [MonthlyReportStatusRegistryController],
       providers: [
-        MonthlyReportStatusRegistryService,
         {
           provide: MONTHLY_REPORT_STATUS_REGISTRY_REPOSITORY,
           useValue: mockRepository,
@@ -77,6 +79,8 @@ describe('MonthlyReportStatusRegistryController (Integration)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalInterceptors(new JSendInterceptor(), new DomainErrorInterceptor());
+    app.useGlobalFilters(new DomainErrorFilter());
     await app.init();
   });
 
@@ -181,8 +185,11 @@ describe('MonthlyReportStatusRegistryController (Integration)', () => {
         .expect(404);
 
       expect(response.body).toMatchObject({
-        statusCode: 404,
-        message: 'Monthly report status with ID 999 not found',
+        status: 'fail',
+        data: {
+          message: 'Monthly report status with ID 999 not found',
+          code: ERROR_CODES.MONTHLY_REPORT_STATUS_NOT_FOUND,
+        },
       });
       expect(mockRepository.findById).toHaveBeenCalledWith(999);
     });
@@ -245,6 +252,8 @@ describe('MonthlyReportStatusRegistryController (Integration)', () => {
         isActive: false,
       });
 
+      const existingStatus = MonthlyReportStatusFactory.create({ id: 1 });
+      mockRepository.findById.mockResolvedValue(existingStatus);
       mockRepository.update.mockResolvedValue(updatedStatus);
 
       const response = await request(app.getHttpServer())
@@ -276,6 +285,8 @@ describe('MonthlyReportStatusRegistryController (Integration)', () => {
 
   describe('DELETE /monthly-report-status-registry/:id', () => {
     it('should delete a status mapping', async () => {
+      const existingStatus = MonthlyReportStatusFactory.create({ id: 1 });
+      mockRepository.findById.mockResolvedValue(existingStatus);
       mockRepository.delete.mockResolvedValue(undefined);
 
       const response = await request(app.getHttpServer())

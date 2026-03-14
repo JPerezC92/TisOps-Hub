@@ -109,8 +109,8 @@ describe('ApplicationRegistryController (E2E)', () => {
         .get('/application-registry/99999')
         .expect(404);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('99999');
+      expect(response.body.status).toBe('fail');
+      expect(response.body.data).toHaveProperty('message');
     });
 
     it('should return 400 when id is not a valid number', async () => {
@@ -171,8 +171,8 @@ describe('ApplicationRegistryController (E2E)', () => {
         .expect(200);
 
       expect(response.body.status).toBe('success');
-      expect(response.body.data).toHaveProperty('message');
-      expect(response.body.data.message).toContain('deleted');
+      expect(response.body.data).toHaveProperty('deleted');
+      expect(response.body.data.deleted).toBe(true);
     });
   });
 
@@ -235,8 +235,8 @@ describe('ApplicationRegistryController (E2E)', () => {
         .expect(200);
 
       expect(response.body.status).toBe('success');
-      expect(response.body.data).toHaveProperty('message');
-      expect(response.body.data.message).toContain('deleted');
+      expect(response.body.data).toHaveProperty('deleted');
+      expect(response.body.data.deleted).toBe(true);
     });
   });
 

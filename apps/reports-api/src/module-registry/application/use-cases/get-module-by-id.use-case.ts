@@ -1,18 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Module } from '../../domain/entities/module.entity';
-import {
-  IModuleRegistryRepository,
-  MODULE_REGISTRY_REPOSITORY,
-} from '../../domain/repositories/module-registry.repository.interface';
+import { IModuleRegistryRepository } from '@module-registry/domain/repositories/module-registry.repository.interface';
+import { Module } from '@module-registry/domain/entities/module.entity';
+import { ModuleNotFoundError } from '@module-registry/domain/errors/module-not-found.error';
 
-@Injectable()
 export class GetModuleByIdUseCase {
-  constructor(
-    @Inject(MODULE_REGISTRY_REPOSITORY)
-    private readonly repository: IModuleRegistryRepository,
-  ) {}
+  constructor(private readonly repository: IModuleRegistryRepository) {}
 
-  async execute(id: number): Promise<Module | null> {
-    return this.repository.findById(id);
+  async execute(id: number): Promise<Module | ModuleNotFoundError> {
+    const module = await this.repository.findById(id);
+    if (!module) {
+      return new ModuleNotFoundError(id);
+    }
+    return module;
   }
 }

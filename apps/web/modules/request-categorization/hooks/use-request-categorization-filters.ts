@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
-import type { RequestCategorizationWithInfo } from '../services/request-categorization.service';
+import type { ReqCatWithInfo } from '../services/request-categorization.service';
 
-export function useRequestCategorizationFilters(records: RequestCategorizationWithInfo[]) {
+export function useRequestCategorizationFilters(records: ReqCatWithInfo[]) {
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
 

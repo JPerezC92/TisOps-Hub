@@ -1,13 +1,11 @@
-import { Injectable } from '@nestjs/common';
 import { eq, desc } from 'drizzle-orm';
-import { LibSQLDatabase } from 'drizzle-orm/libsql';
-import { errorLogs } from '@repo/database';
+import { Database, errorLogs } from '@repo/database';
 import { ErrorLog } from '@error-logs/domain/entities/error-log.entity';
 import { IErrorLogRepository } from '@error-logs/domain/repositories/error-log.repository.interface';
+import { ErrorLogAdapter } from '@error-logs/infrastructure/adapters/error-log.adapter';
 
-@Injectable()
 export class ErrorLogRepository implements IErrorLogRepository {
-  constructor(private readonly db: LibSQLDatabase) {}
+  constructor(private readonly db: Database) {}
 
   async create(errorLog: ErrorLog): Promise<ErrorLog> {
     const [result] = await this.db
@@ -26,7 +24,7 @@ export class ErrorLogRepository implements IErrorLogRepository {
       })
       .returning();
 
-    return this.mapToEntity(result);
+    return ErrorLogAdapter.toDomain(result);
   }
 
   async findAll(limit = 100): Promise<ErrorLog[]> {
@@ -36,7 +34,7 @@ export class ErrorLogRepository implements IErrorLogRepository {
       .orderBy(desc(errorLogs.timestamp))
       .limit(limit);
 
-    return results.map((result) => this.mapToEntity(result));
+    return results.map(ErrorLogAdapter.toDomain);
   }
 
   async findById(id: number): Promise<ErrorLog | null> {
@@ -45,20 +43,6 @@ export class ErrorLogRepository implements IErrorLogRepository {
       .from(errorLogs)
       .where(eq(errorLogs.id, id));
 
-    return result ? this.mapToEntity(result) : null;
-  }
-
-  private mapToEntity(data: typeof errorLogs.$inferSelect): ErrorLog {
-    return new ErrorLog({
-      id: data.id,
-      timestamp: data.timestamp,
-      errorType: data.errorType,
-      errorMessage: data.errorMessage,
-      stackTrace: data.stackTrace ?? undefined,
-      endpoint: data.endpoint ?? undefined,
-      method: data.method ?? undefined,
-      userId: data.userId ?? undefined,
-      metadata: data.metadata ? JSON.parse(data.metadata) : undefined,
-    });
+    return result ? ErrorLogAdapter.toDomain(result) : null;
   }
 }

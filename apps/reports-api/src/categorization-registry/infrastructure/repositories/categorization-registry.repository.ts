@@ -1,22 +1,24 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
 import { eq } from 'drizzle-orm';
-import { db, categorizationRegistry } from '@repo/database';
-import { Categorization } from '../../domain/entities/categorization.entity';
+import { Database, categorizationRegistry } from '@repo/database';
+import { Categorization } from '@categorization-registry/domain/entities/categorization.entity';
 import {
   ICategorizationRegistryRepository,
   CreateCategorizationDto,
   UpdateCategorizationDto,
-} from '../../domain/repositories/categorization-registry.repository.interface';
+} from '@categorization-registry/domain/repositories/categorization-registry.repository.interface';
+import { CategorizationAdapter } from '@categorization-registry/infrastructure/adapters/categorization.adapter';
 
-@Injectable()
+
 export class CategorizationRegistryRepository implements ICategorizationRegistryRepository {
+  constructor(private readonly db: Database) {}
+
   async findAll(): Promise<Categorization[]> {
-    const results = await db.select().from(categorizationRegistry);
-    return results.map(this.mapToEntity);
+    const results = await this.db.select().from(categorizationRegistry);
+    return results.map(CategorizationAdapter.toDomain);
   }
 
   async findById(id: number): Promise<Categorization | null> {
-    const results = await db
+    const results = await this.db
       .select()
       .from(categorizationRegistry)
       .where(eq(categorizationRegistry.id, id));
@@ -25,11 +27,11 @@ export class CategorizationRegistryRepository implements ICategorizationRegistry
       return null;
     }
 
-    return this.mapToEntity(results[0]);
+    return CategorizationAdapter.toDomain(results[0]);
   }
 
   async findBySourceValue(sourceValue: string): Promise<Categorization | null> {
-    const results = await db
+    const results = await this.db
       .select()
       .from(categorizationRegistry)
       .where(eq(categorizationRegistry.sourceValue, sourceValue));
@@ -38,11 +40,11 @@ export class CategorizationRegistryRepository implements ICategorizationRegistry
       return null;
     }
 
-    return this.mapToEntity(results[0]);
+    return CategorizationAdapter.toDomain(results[0]);
   }
 
   async create(data: CreateCategorizationDto): Promise<Categorization> {
-    const result = await db
+    const result = await this.db
       .insert(categorizationRegistry)
       .values({
         sourceValue: data.sourceValue,
@@ -51,16 +53,11 @@ export class CategorizationRegistryRepository implements ICategorizationRegistry
       })
       .returning();
 
-    return this.mapToEntity(result[0]);
+    return CategorizationAdapter.toDomain(result[0]);
   }
 
   async update(id: number, data: UpdateCategorizationDto): Promise<Categorization> {
-    const existing = await this.findById(id);
-    if (!existing) {
-      throw new NotFoundException(`Categorization with ID ${id} not found`);
-    }
-
-    const result = await db
+    const result = await this.db
       .update(categorizationRegistry)
       .set({
         ...(data.sourceValue !== undefined && { sourceValue: data.sourceValue }),
@@ -70,29 +67,13 @@ export class CategorizationRegistryRepository implements ICategorizationRegistry
       .where(eq(categorizationRegistry.id, id))
       .returning();
 
-    return this.mapToEntity(result[0]);
+    return CategorizationAdapter.toDomain(result[0]);
   }
 
   async delete(id: number): Promise<void> {
-    const existing = await this.findById(id);
-    if (!existing) {
-      throw new NotFoundException(`Categorization with ID ${id} not found`);
-    }
-
-    await db
+    await this.db
       .update(categorizationRegistry)
       .set({ isActive: false })
       .where(eq(categorizationRegistry.id, id));
-  }
-
-  private mapToEntity(record: typeof categorizationRegistry.$inferSelect): Categorization {
-    return new Categorization(
-      record.id,
-      record.sourceValue,
-      record.displayValue,
-      record.isActive,
-      record.createdAt,
-      record.updatedAt,
-    );
   }
 }

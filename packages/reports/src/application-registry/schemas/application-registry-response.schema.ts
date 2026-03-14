@@ -1,13 +1,18 @@
 import { z } from 'zod';
 
+const isoDateString = z.preprocess(
+  (val) => (val instanceof Date ? val.toISOString() : val),
+  z.string(),
+);
+
 export const appRegistryApplicationSchema = z.object({
   id: z.number(),
   code: z.string(),
   name: z.string(),
   description: z.string().nullable(),
   isActive: z.boolean(),
-  createdAt: z.string(),
-  updatedAt: z.string(),
+  createdAt: isoDateString,
+  updatedAt: isoDateString,
 });
 
 export const appRegistryPatternSchema = z.object({
@@ -28,7 +33,7 @@ export const appRegistryApplicationArraySchema = z.array(appRegistryApplicationS
 export const appRegistryWithPatternsArraySchema = z.array(appRegistryWithPatternsSchema);
 
 export const appRegistryDeleteResultSchema = z.object({
-  message: z.string(),
+  deleted: z.boolean(),
 });
 
 // Inferred types
