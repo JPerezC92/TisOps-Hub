@@ -40,7 +40,7 @@ interface MulterFile {
 class JSendWithInfoArrayDto extends createZodDto(jsendSuccess(reqCatWithInfoArraySchema)) {}
 class JSendCategorySummaryArrayDto extends createZodDto(jsendSuccess(reqCatCategorySummaryArraySchema)) {}
 class JSendUploadResultDto extends createZodDto(jsendSuccess(reqCatUploadResultSchema)) {}
-class JSendDeleteResultDto extends createZodDto(jsendSuccess(reqCatDeleteResultSchema)) {}
+class JSendReqCatDeleteResultDto extends createZodDto(jsendSuccess(reqCatDeleteResultSchema)) {}
 class JSendRequestIdsDto extends createZodDto(jsendSuccess(reqCatRequestIdsResponseSchema)) {}
 
 @ApiTags('request-categorization')
@@ -162,7 +162,7 @@ export class RequestCategorizationController {
 
   @Delete()
   @ApiOperation({ summary: 'Delete all request categorization records' })
-  @ZodResponse({ status: 200, description: 'All records deleted', type: JSendDeleteResultDto })
+  @ZodResponse({ status: 200, description: 'All records deleted', type: JSendReqCatDeleteResultDto })
   async deleteAll() {
     await this.deleteAllUseCase.execute();
     return { status: 'success' as const, data: { message: 'All records deleted successfully' } };

@@ -48,7 +48,7 @@ class JSendApplicationDto extends createZodDto(jsendSuccess(appRegistryApplicati
 class JSendApplicationNullableDto extends createZodDto(jsendSuccess(appRegistryApplicationSchema.nullable())) {}
 class JSendWithPatternsArrayDto extends createZodDto(jsendSuccess(appRegistryWithPatternsArraySchema)) {}
 class JSendPatternDto extends createZodDto(jsendSuccess(appRegistryPatternSchema)) {}
-class JSendDeleteResultDto extends createZodDto(jsendSuccess(appRegistryDeleteResultSchema)) {}
+class JSendAppRegistryDeleteResultDto extends createZodDto(jsendSuccess(appRegistryDeleteResultSchema)) {}
 
 // JSend fail DTO
 class JSendFailDto extends createZodDto(jsendFailSchema) {}
@@ -129,7 +129,7 @@ export class ApplicationRegistryController {
   @Delete(':id')
   @ApiOperation({ summary: 'Delete application (soft delete)' })
   @ApiParam({ name: 'id', description: 'Application ID' })
-  @ZodResponse({ status: 200, description: 'Application deleted successfully', type: JSendDeleteResultDto })
+  @ZodResponse({ status: 200, description: 'Application deleted successfully', type: JSendAppRegistryDeleteResultDto })
   @ApiResponse({ status: 404, description: 'Application not found', type: JSendFailDto })
   async delete(@Param('id', ParseIntPipe) id: number) {
     const result = await this.deleteApplicationUseCase.execute(id);
@@ -155,7 +155,7 @@ export class ApplicationRegistryController {
   @Delete('patterns/:patternId')
   @ApiOperation({ summary: 'Delete pattern' })
   @ApiParam({ name: 'patternId', description: 'Pattern ID' })
-  @ZodResponse({ status: 200, description: 'Pattern deleted successfully', type: JSendDeleteResultDto })
+  @ZodResponse({ status: 200, description: 'Pattern deleted successfully', type: JSendAppRegistryDeleteResultDto })
   @ApiResponse({ status: 404, description: 'Pattern not found', type: JSendFailDto })
   async deletePattern(@Param('patternId', ParseIntPipe) patternId: number) {
     const result = await this.deletePatternUseCase.execute(patternId);
