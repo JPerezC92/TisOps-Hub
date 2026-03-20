@@ -1,43 +1,31 @@
 import { apiClient } from '@/shared/api/client';
-import type { JSendSuccess } from '@repo/reports/common';
-import type { Problem } from '@repo/reports/frontend';
-
-export type { Problem };
-
-export interface UploadResult {
-  message: string;
-  imported: number;
-  total: number;
-}
-
-export interface DeleteResult {
-  message: string;
-  deleted: number;
-}
+import { parseJsendData } from '@repo/reports/common';
+import {
+  probGetAllResponseSchema,
+  probUploadResultSchema,
+  probDeleteResultSchema,
+} from '@repo/reports/frontend';
+import type {
+  ProbGetAllResponse,
+  ProbUploadResult,
+  ProbDeleteResult,
+} from '@repo/reports/frontend';
 
 export const problemsService = {
-  getAll: async (): Promise<{ data: Problem[]; total: number }> => {
-    const response = await apiClient.get<
-      JSendSuccess<{ data: Problem[]; total: number }>
-    >('/problems');
-    return response.data;
+  getAll: async (): Promise<ProbGetAllResponse> => {
+    const raw = await apiClient.get<unknown>('/problems');
+    return parseJsendData(probGetAllResponseSchema, raw);
   },
 
-  upload: async (file: File): Promise<UploadResult> => {
+  upload: async (file: File): Promise<ProbUploadResult> => {
     const formData = new FormData();
     formData.append('file', file);
-
-    const response = await apiClient.postForm<JSendSuccess<UploadResult>>(
-      '/problems/upload',
-      formData
-    );
-    return response.data;
+    const raw = await apiClient.postForm<unknown>('/problems/upload', formData);
+    return parseJsendData(probUploadResultSchema, raw);
   },
 
-  deleteAll: async (): Promise<DeleteResult> => {
-    const response = await apiClient.delete<JSendSuccess<DeleteResult>>(
-      '/problems'
-    );
-    return response.data;
+  deleteAll: async (): Promise<ProbDeleteResult> => {
+    const raw = await apiClient.delete<unknown>('/problems');
+    return parseJsendData(probDeleteResultSchema, raw);
   },
 };

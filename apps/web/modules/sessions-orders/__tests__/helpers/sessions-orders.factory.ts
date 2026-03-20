@@ -1,4 +1,4 @@
-import type { SessionsOrder, SessionsOrdersRelease } from '../../services/sessions-orders.service';
+import type { SessionsOrder, SessionsOrdersRelease } from '@repo/reports/frontend';
 
 let idCounter = 1;
 

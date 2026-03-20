@@ -1,7 +1,7 @@
 'use client';
 
 import { Badge } from '@/components/ui/badge';
-import type { ParentChildRequest } from '../services/request-relationships.service';
+import type { ParentChildRequest } from '@repo/reports/frontend';
 
 interface RecentRelationshipsTableProps {
   relationships: ParentChildRequest[];

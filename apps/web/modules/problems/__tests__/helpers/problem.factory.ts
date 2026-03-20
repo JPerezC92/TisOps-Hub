@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import type { Problem } from '@repo/reports/frontend';
-import type { UploadResult, DeleteResult } from '../../services/problems.service';
+import type { ProbUploadResult, ProbDeleteResult } from '@repo/reports/frontend';
 
 const SERVICE_CATEGORIES = [
   'Incident Management',
@@ -34,7 +34,7 @@ export class ProblemFactory {
     return Array.from({ length: count }, () => this.createProblem(overrides));
   }
 
-  static createUploadResult(overrides?: Partial<UploadResult>): UploadResult {
+  static createUploadResult(overrides?: Partial<ProbUploadResult>): ProbUploadResult {
     const total = overrides?.total ?? faker.number.int({ min: 50, max: 300 });
     const imported = overrides?.imported ?? faker.number.int({ min: Math.floor(total * 0.8), max: total });
 
@@ -45,7 +45,7 @@ export class ProblemFactory {
     };
   }
 
-  static createDeleteResult(overrides?: Partial<DeleteResult>): DeleteResult {
+  static createDeleteResult(overrides?: Partial<ProbDeleteResult>): ProbDeleteResult {
     return {
       message: overrides?.message ?? 'All problems deleted successfully',
       deleted: overrides?.deleted ?? faker.number.int({ min: 10, max: 500 }),

@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import type { Module } from '../services/module-registry.service';
+import type { ModRegModule as Module } from '@repo/reports/frontend';
 
 type SortBy = 'sourceValue' | 'displayValue' | 'application' | 'created';
 type StatusFilter = 'all' | 'active' | 'inactive';

@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 import type { WeeklyCorrective } from '@repo/reports/frontend';
-import type { UploadResult, DeleteResult } from '../../services/weekly-corrective.service';
+import type { WkCorrUploadResult, WkCorrDeleteResult } from '@repo/reports/frontend';
 
 const APPLICATIONS = ['CD', 'FFVV', 'SB', 'UNETE'];
 const PRIORITIES = ['Alta', 'Media', 'Baja'];
@@ -28,7 +28,7 @@ export class WeeklyCorrectiveFactory {
     return Array.from({ length: count }, () => this.createRecord(overrides));
   }
 
-  static createUploadResult(overrides?: Partial<UploadResult>): UploadResult {
+  static createUploadResult(overrides?: Partial<WkCorrUploadResult>): WkCorrUploadResult {
     const total = overrides?.total ?? faker.number.int({ min: 50, max: 300 });
     const imported = overrides?.imported ?? faker.number.int({ min: Math.floor(total * 0.8), max: total });
 
@@ -39,7 +39,7 @@ export class WeeklyCorrectiveFactory {
     };
   }
 
-  static createDeleteResult(overrides?: Partial<DeleteResult>): DeleteResult {
+  static createDeleteResult(overrides?: Partial<WkCorrDeleteResult>): WkCorrDeleteResult {
     return {
       message: overrides?.message ?? 'All weekly corrective records deleted successfully',
       deleted: overrides?.deleted ?? faker.number.int({ min: 10, max: 500 }),

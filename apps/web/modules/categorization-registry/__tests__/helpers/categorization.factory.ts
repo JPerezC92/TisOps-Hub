@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import type { Categorization } from '../../services/categorization-registry.service';
+import type { CatRegCategorization as Categorization } from '@repo/reports/frontend';
 
 export class CategorizationFactory {
   static create(overrides?: Partial<Categorization>): Categorization {

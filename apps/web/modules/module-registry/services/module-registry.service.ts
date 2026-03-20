@@ -1,15 +1,11 @@
 import { apiClient } from '@/shared/api/client';
-import type { JSendSuccess } from '@repo/reports/common';
-
-export interface Module {
-  id: number;
-  sourceValue: string;
-  displayValue: string;
-  application: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import { parseJsendData } from '@repo/reports/common';
+import {
+  modRegModuleSchema,
+  modRegModuleArraySchema,
+  modRegDeleteResultSchema,
+} from '@repo/reports/frontend';
+import type { ModRegModule } from '@repo/reports/frontend';
 
 export interface CreateModuleDto {
   sourceValue: string;
@@ -35,39 +31,31 @@ export const APPLICATION_COLORS: Record<string, { bg: string; text: string; bord
 };
 
 export const moduleRegistryService = {
-  getAll: async (): Promise<Module[]> => {
-    const response = await apiClient.get<JSendSuccess<Module[]>>(
-      '/module-registry'
-    );
-    return response.data;
+  getAll: async (): Promise<ModRegModule[]> => {
+    const raw = await apiClient.get<unknown>('/module-registry');
+    return parseJsendData(modRegModuleArraySchema, raw);
   },
 
-  getById: async (id: number): Promise<Module> => {
-    const response = await apiClient.get<JSendSuccess<Module>>(
-      `/module-registry/${id}`
-    );
-    return response.data;
+  getById: async (id: number): Promise<ModRegModule> => {
+    const raw = await apiClient.get<unknown>(`/module-registry/${id}`);
+    return parseJsendData(modRegModuleSchema, raw);
   },
 
-  create: async (data: CreateModuleDto): Promise<Module> => {
-    const response = await apiClient.post<JSendSuccess<Module>>(
+  create: async (data: CreateModuleDto): Promise<ModRegModule> => {
+    const raw = await apiClient.post<unknown>(
       '/module-registry',
       { ...data, isActive: data.isActive ?? true }
     );
-    return response.data;
+    return parseJsendData(modRegModuleSchema, raw);
   },
 
-  update: async (id: number, data: UpdateModuleDto): Promise<Module> => {
-    const response = await apiClient.put<JSendSuccess<Module>>(
-      `/module-registry/${id}`,
-      data
-    );
-    return response.data;
+  update: async (id: number, data: UpdateModuleDto): Promise<ModRegModule> => {
+    const raw = await apiClient.put<unknown>(`/module-registry/${id}`, data);
+    return parseJsendData(modRegModuleSchema, raw);
   },
 
   delete: async (id: number): Promise<void> => {
-    await apiClient.delete<JSendSuccess<{ deleted: boolean }>>(
-      `/module-registry/${id}`
-    );
+    const raw = await apiClient.delete<unknown>(`/module-registry/${id}`);
+    parseJsendData(modRegDeleteResultSchema, raw);
   },
 };

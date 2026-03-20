@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import type { Categorization } from '../services/categorization-registry.service';
+import type { CatRegCategorization as Categorization } from '@repo/reports/frontend';
 
 type SortBy = 'sourceValue' | 'displayValue' | 'created';
 type StatusFilter = 'all' | 'active' | 'inactive';

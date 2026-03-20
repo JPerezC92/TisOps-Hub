@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import type { MonthlyReport } from '../services/monthly-report.service';
+import type { MonthlyReport } from '@repo/reports/frontend';
 
 export function useMonthlyReportFilters(records: MonthlyReport[]) {
   const [searchTerm, setSearchTerm] = useState('');

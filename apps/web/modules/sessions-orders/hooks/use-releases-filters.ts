@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import type { SessionsOrdersRelease } from '../services/sessions-orders.service';
+import type { SessionsOrdersRelease } from '@repo/reports/frontend';
 
 export function useReleasesFilters(records: SessionsOrdersRelease[]) {
   const [searchTerm, setSearchTerm] = useState('');

@@ -1,14 +1,10 @@
 import { apiClient } from '@/shared/api/client';
-import type { JSendSuccess } from '@repo/reports/common';
-
-export interface Categorization {
-  id: number;
-  sourceValue: string;
-  displayValue: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import { parseJsendData } from '@repo/reports/common';
+import {
+  catRegCategorizationSchema,
+  catRegCategorizationArraySchema,
+} from '@repo/reports/frontend';
+import type { CatRegCategorization } from '@repo/reports/frontend';
 
 export interface CreateCategorizationDto {
   sourceValue: string;
@@ -23,42 +19,30 @@ export interface UpdateCategorizationDto {
 }
 
 export const categorizationRegistryService = {
-  getAll: async (): Promise<Categorization[]> => {
-    const response = await apiClient.get<JSendSuccess<Categorization[]>>(
-      '/categorization-registry'
-    );
-    return response.data;
+  getAll: async (): Promise<CatRegCategorization[]> => {
+    const raw = await apiClient.get<unknown>('/categorization-registry');
+    return parseJsendData(catRegCategorizationArraySchema, raw);
   },
 
-  getById: async (id: number): Promise<Categorization> => {
-    const response = await apiClient.get<JSendSuccess<Categorization>>(
-      `/categorization-registry/${id}`
-    );
-    return response.data;
+  getById: async (id: number): Promise<CatRegCategorization> => {
+    const raw = await apiClient.get<unknown>(`/categorization-registry/${id}`);
+    return parseJsendData(catRegCategorizationSchema, raw);
   },
 
-  create: async (data: CreateCategorizationDto): Promise<Categorization> => {
-    const response = await apiClient.post<JSendSuccess<Categorization>>(
+  create: async (data: CreateCategorizationDto): Promise<CatRegCategorization> => {
+    const raw = await apiClient.post<unknown>(
       '/categorization-registry',
       { ...data, isActive: data.isActive ?? true }
     );
-    return response.data;
+    return parseJsendData(catRegCategorizationSchema, raw);
   },
 
-  update: async (
-    id: number,
-    data: UpdateCategorizationDto
-  ): Promise<Categorization> => {
-    const response = await apiClient.put<JSendSuccess<Categorization>>(
-      `/categorization-registry/${id}`,
-      data
-    );
-    return response.data;
+  update: async (id: number, data: UpdateCategorizationDto): Promise<CatRegCategorization> => {
+    const raw = await apiClient.put<unknown>(`/categorization-registry/${id}`, data);
+    return parseJsendData(catRegCategorizationSchema, raw);
   },
 
   delete: async (id: number): Promise<void> => {
-    await apiClient.delete<JSendSuccess<void>>(
-      `/categorization-registry/${id}`
-    );
+    await apiClient.delete<unknown>(`/categorization-registry/${id}`);
   },
 };

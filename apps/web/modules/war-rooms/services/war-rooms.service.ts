@@ -1,43 +1,31 @@
 import { apiClient } from '@/shared/api/client';
-import type { JSendSuccess } from '@repo/reports/common';
-import type { WarRoom } from '@repo/reports/frontend';
-
-export type { WarRoom };
-
-export interface UploadResult {
-  message: string;
-  imported: number;
-  total: number;
-}
-
-export interface DeleteResult {
-  message: string;
-  deleted: number;
-}
+import { parseJsendData } from '@repo/reports/common';
+import {
+  warRoomGetAllResponseSchema,
+  warRoomUploadResultSchema,
+  warRoomDeleteResultSchema,
+} from '@repo/reports/frontend';
+import type {
+  WarRoomGetAllResponse,
+  WarRoomUploadResult,
+  WarRoomDeleteResult,
+} from '@repo/reports/frontend';
 
 export const warRoomsService = {
-  getAll: async (): Promise<{ data: WarRoom[]; total: number }> => {
-    const response = await apiClient.get<
-      JSendSuccess<{ data: WarRoom[]; total: number }>
-    >('/war-rooms');
-    return response.data;
+  getAll: async (): Promise<WarRoomGetAllResponse> => {
+    const raw = await apiClient.get<unknown>('/war-rooms');
+    return parseJsendData(warRoomGetAllResponseSchema, raw);
   },
 
-  upload: async (file: File): Promise<UploadResult> => {
+  upload: async (file: File): Promise<WarRoomUploadResult> => {
     const formData = new FormData();
     formData.append('file', file);
-
-    const response = await apiClient.postForm<JSendSuccess<UploadResult>>(
-      '/war-rooms/upload',
-      formData
-    );
-    return response.data;
+    const raw = await apiClient.postForm<unknown>('/war-rooms/upload', formData);
+    return parseJsendData(warRoomUploadResultSchema, raw);
   },
 
-  deleteAll: async (): Promise<DeleteResult> => {
-    const response = await apiClient.delete<JSendSuccess<DeleteResult>>(
-      '/war-rooms'
-    );
-    return response.data;
+  deleteAll: async (): Promise<WarRoomDeleteResult> => {
+    const raw = await apiClient.delete<unknown>('/war-rooms');
+    return parseJsendData(warRoomDeleteResultSchema, raw);
   },
 };

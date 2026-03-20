@@ -30,7 +30,7 @@ import { useMonthlyReportStatusFilters } from '../hooks/use-monthly-report-statu
 import { useCreateMonthlyReportStatus } from '../hooks/use-create-monthly-report-status';
 import { useUpdateMonthlyReportStatus } from '../hooks/use-update-monthly-report-status';
 import { useDeleteMonthlyReportStatus } from '../hooks/use-delete-monthly-report-status';
-import type { MonthlyReportStatus } from '../services/monthly-report-status-registry.service';
+import type { MoRepStatus as MonthlyReportStatus } from '@repo/reports/frontend';
 
 interface FormData {
   rawStatus: string;

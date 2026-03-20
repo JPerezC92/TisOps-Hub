@@ -2,6 +2,7 @@ export {
   correctiveStatusSchema,
   correctiveStatusArraySchema,
   correctiveStatusDeleteResultSchema,
+  correctiveStatusDisplayStatusesSchema,
 } from './schemas/corrective-status-response.schema';
 
 export type {
