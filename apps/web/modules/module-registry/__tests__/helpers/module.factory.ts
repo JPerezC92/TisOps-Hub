@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import type { Module } from '../../services/module-registry.service';
+import type { ModRegModule as Module } from '@repo/reports/frontend';
 import { APPLICATIONS } from '../../services/module-registry.service';
 
 export class ModuleFactory {

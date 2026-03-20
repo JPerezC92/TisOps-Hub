@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import type { WarRoom } from '../../services/war-rooms.service';
+import type { WarRoom } from '@repo/reports/frontend';
 
 const PRIORITIES = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'];
 const STATUSES = ['Closed', 'Open', 'In Progress'];

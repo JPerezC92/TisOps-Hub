@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import type { WarRoom } from '../services/war-rooms.service';
+import type { WarRoom } from '@repo/reports/frontend';
 
 export function useWarRoomsFilters(records: WarRoom[]) {
   const [searchTerm, setSearchTerm] = useState('');

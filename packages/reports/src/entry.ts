@@ -148,6 +148,42 @@ export {
   correctiveStatusDeleteResultSchema,
 } from './corrective-status-registry';
 
+// Monthly Report Status Registry Types and Schemas
+export type {
+  MoRepStatus,
+  MoRepStatusDeleteResult,
+} from './monthly-report-status-registry';
+
+export {
+  moRepStatusSchema,
+  moRepStatusArraySchema,
+  moRepStatusDeleteResultSchema,
+} from './monthly-report-status-registry';
+
+// Categorization Registry Types and Schemas
+export type {
+  CatRegCategorization,
+  CatRegDeleteResult,
+} from './categorization-registry';
+
+export {
+  catRegCategorizationSchema,
+  catRegCategorizationArraySchema,
+  catRegDeleteResultSchema,
+} from './categorization-registry';
+
+// Module Registry Types and Schemas
+export type {
+  ModRegModule,
+  ModRegDeleteResult,
+} from './module-registry';
+
+export {
+  modRegModuleSchema,
+  modRegModuleArraySchema,
+  modRegDeleteResultSchema,
+} from './module-registry';
+
 // Error Logs Types and Schemas
 export type {
   ErrorLog,

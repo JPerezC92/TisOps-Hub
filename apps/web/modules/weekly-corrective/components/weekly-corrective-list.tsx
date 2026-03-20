@@ -99,12 +99,12 @@ export function WeeklyCorrectiveList() {
   // Stats
   const totalRecords = records.length;
 
-  const priorityCounts = records.reduce((acc, w) => {
+  const priorityCounts: Record<string, number> = records.reduce((acc: Record<string, number>, w) => {
     acc[w.priority] = (acc[w.priority] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);
 
-  const statusCounts = records.reduce((acc, w) => {
+  const statusCounts: Record<string, number> = records.reduce((acc: Record<string, number>, w) => {
     acc[w.requestStatus] = (acc[w.requestStatus] || 0) + 1;
     return acc;
   }, {} as Record<string, number>);

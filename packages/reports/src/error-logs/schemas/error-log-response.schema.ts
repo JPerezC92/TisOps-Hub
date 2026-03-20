@@ -6,7 +6,7 @@ const isoDateString = z.preprocess(
 );
 
 export const errorLogSchema = z.object({
-  id: z.number().optional(),
+  id: z.number(),
   timestamp: isoDateString,
   errorType: z.string(),
   errorMessage: z.string(),

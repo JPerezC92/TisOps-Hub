@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import type { Problem } from '../services/problems.service';
+import type { Problem } from '@repo/reports/frontend';
 
 export function useProblemFilters(problems: Problem[]) {
   const [searchTerm, setSearchTerm] = useState('');

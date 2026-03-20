@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import type { MonthlyReportStatus } from '../../services/monthly-report-status-registry.service';
+import type { MoRepStatus as MonthlyReportStatus } from '@repo/reports/frontend';
 
 const DISPLAY_STATUS_OPTIONS = ['Closed', 'On going L2', 'On going L3', 'In L3 Backlog'] as const;
 

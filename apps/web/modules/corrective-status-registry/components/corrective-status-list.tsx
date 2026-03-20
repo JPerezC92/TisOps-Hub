@@ -31,7 +31,7 @@ import { useCorrectiveStatusFilters } from '../hooks/use-corrective-status-filte
 import { useCreateCorrectiveStatus } from '../hooks/use-create-corrective-status';
 import { useUpdateCorrectiveStatus } from '../hooks/use-update-corrective-status';
 import { useDeleteCorrectiveStatus } from '../hooks/use-delete-corrective-status';
-import type { CorrectiveStatus } from '../services/corrective-status-registry.service';
+import type { CorrectiveStatusResponse as CorrectiveStatus } from '@repo/reports/frontend';
 
 interface FormData {
   rawStatus: string;

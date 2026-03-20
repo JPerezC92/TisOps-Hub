@@ -50,7 +50,21 @@ export type {
   ParentChildRequest,
   ParentChildRequestStats,
   ParentChildRequestResponse,
-} from './parent-child-requests';
+} from './parent-child-requests/entities/parent-child-request.entity';
+
+export type {
+  PcReqGetAllResponse,
+  PcReqStatsResponse,
+  PcReqUploadResult,
+  PcReqDeleteResult,
+} from './parent-child-requests/schemas/parent-child-requests-response.schema';
+
+export {
+  pcReqGetAllResponseSchema,
+  pcReqStatsResponseSchema,
+  pcReqUploadResultSchema,
+  pcReqDeleteResultSchema,
+} from './parent-child-requests/schemas/parent-child-requests-response.schema';
 
 // Request Tags (frontend-safe barrel, no DTOs)
 export type {
@@ -95,7 +109,127 @@ export {
 export type {
   ErrorLog,
   ErrorLogResponse,
+  ErrorLogListResponse,
 } from './error-logs';
+
+export {
+  errorLogSchema,
+  errorLogListResponseSchema,
+} from './error-logs';
+
+// Problems
+export type {
+  ProbGetAllResponse,
+  ProbUploadResult,
+  ProbDeleteResult,
+} from './problems';
+
+export {
+  probGetAllResponseSchema,
+  probUploadResultSchema,
+  probDeleteResultSchema,
+} from './problems';
+
+// Weekly Corrective
+export type {
+  WkCorrGetAllResponse,
+  WkCorrUploadResult,
+  WkCorrDeleteResult,
+} from './weekly-corrective';
+
+export {
+  wkCorrGetAllResponseSchema,
+  wkCorrUploadResultSchema,
+  wkCorrDeleteResultSchema,
+} from './weekly-corrective';
+
+// Monthly Report Status Registry
+export type {
+  MoRepStatus,
+  MoRepStatusDeleteResult,
+} from './monthly-report-status-registry';
+
+export {
+  moRepStatusSchema,
+  moRepStatusArraySchema,
+  moRepStatusDeleteResultSchema,
+} from './monthly-report-status-registry';
+
+// Corrective Status Registry
+export type {
+  CorrectiveStatusResponse,
+  CorrectiveStatusDeleteResult,
+} from './corrective-status-registry';
+
+export {
+  correctiveStatusSchema,
+  correctiveStatusArraySchema,
+  correctiveStatusDeleteResultSchema,
+  correctiveStatusDisplayStatusesSchema,
+} from './corrective-status-registry';
+
+// Categorization Registry
+export type {
+  CatRegCategorization,
+  CatRegDeleteResult,
+} from './categorization-registry';
+
+export {
+  catRegCategorizationSchema,
+  catRegCategorizationArraySchema,
+  catRegDeleteResultSchema,
+} from './categorization-registry';
+
+// Module Registry
+export type {
+  ModRegModule,
+  ModRegDeleteResult,
+} from './module-registry';
+
+export {
+  modRegModuleSchema,
+  modRegModuleArraySchema,
+  modRegDeleteResultSchema,
+} from './module-registry';
+
+// Monthly Report
+export type {
+  MoRepGetAllResponse,
+  MoRepUploadResult,
+  MoRepDeleteResult,
+} from './monthly-report';
+
+export {
+  moRepGetAllResponseSchema,
+  moRepUploadResultSchema,
+  moRepDeleteResultSchema,
+} from './monthly-report';
+
+// Sessions Orders
+export type {
+  SessOrdGetAllResponse,
+  SessOrdUploadResult,
+  SessOrdDeleteResult,
+} from './sessions-orders';
+
+export {
+  sessOrdGetAllResponseSchema,
+  sessOrdUploadResultSchema,
+  sessOrdDeleteResultSchema,
+} from './sessions-orders';
+
+// War Rooms
+export type {
+  WarRoomGetAllResponse,
+  WarRoomUploadResult,
+  WarRoomDeleteResult,
+} from './war-rooms';
+
+export {
+  warRoomGetAllResponseSchema,
+  warRoomUploadResultSchema,
+  warRoomDeleteResultSchema,
+} from './war-rooms';
 
 // Re-export database types (these are just type definitions, safe for frontend)
 export type {

@@ -1,13 +1,11 @@
 import { apiClient } from '@/shared/api/client';
-import type { ErrorLogResponse } from '@repo/reports/frontend';
-import type { JSendSuccess } from '@repo/reports/common';
+import { parseJsendData } from '@repo/reports/common';
+import { errorLogListResponseSchema } from '@repo/reports/frontend';
+import type { ErrorLogListResponse } from '@repo/reports/frontend';
 
-// Service object
 export const errorLogsService = {
-  getAll: async (limit: number = 50): Promise<ErrorLogResponse> => {
-    const response = await apiClient.get<JSendSuccess<ErrorLogResponse>>(
-      `/error-logs?limit=${limit}`
-    );
-    return response.data;
+  getAll: async (limit: number = 50): Promise<ErrorLogListResponse> => {
+    const raw = await apiClient.get<unknown>(`/error-logs?limit=${limit}`);
+    return parseJsendData(errorLogListResponseSchema, raw);
   },
 };

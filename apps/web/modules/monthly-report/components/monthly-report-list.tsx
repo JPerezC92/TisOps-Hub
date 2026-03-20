@@ -97,8 +97,8 @@ export function MonthlyReportList() {
   // Statistics
   const totalRecords = records.length;
   const altaPriority = records.filter((r) => r.priority === Priority.High).length;
-  const categorizationCounts = records.reduce(
-    (acc, r) => {
+  const categorizationCounts: Record<string, number> = records.reduce(
+    (acc: Record<string, number>, r) => {
       acc[r.categorizacion] = (acc[r.categorizacion] || 0) + 1;
       return acc;
     },

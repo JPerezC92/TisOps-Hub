@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import type { WeeklyCorrective } from '../services/weekly-corrective.service';
+import type { WeeklyCorrective } from '@repo/reports/frontend';
 
 export function useWeeklyCorrectiveFilters(records: WeeklyCorrective[]) {
   const [searchTerm, setSearchTerm] = useState('');

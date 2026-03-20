@@ -20,6 +20,8 @@ export const correctiveStatusDeleteResultSchema = z.object({
   deleted: z.boolean(),
 });
 
+export const correctiveStatusDisplayStatusesSchema = z.array(z.string());
+
 // Inferred types
 export type CorrectiveStatusResponse = z.infer<typeof correctiveStatusSchema>;
 export type CorrectiveStatusDeleteResult = z.infer<

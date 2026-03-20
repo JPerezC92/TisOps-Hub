@@ -33,7 +33,7 @@ import {
   APPLICATIONS,
   APPLICATION_COLORS,
 } from '../services/module-registry.service';
-import type { Module } from '../services/module-registry.service';
+import type { ModRegModule as Module } from '@repo/reports/frontend';
 
 interface FormData {
   sourceValue: string;

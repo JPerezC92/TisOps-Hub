@@ -29,7 +29,7 @@ import { useCategorizationsFilters } from '../hooks/use-categorizations-filters'
 import { useCreateCategorization } from '../hooks/use-create-categorization';
 import { useUpdateCategorization } from '../hooks/use-update-categorization';
 import { useDeleteCategorization } from '../hooks/use-delete-categorization';
-import type { Categorization } from '../services/categorization-registry.service';
+import type { CatRegCategorization as Categorization } from '@repo/reports/frontend';
 
 interface FormData {
   sourceValue: string;

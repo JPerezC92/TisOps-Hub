@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import type { CorrectiveStatus } from '../services/corrective-status-registry.service';
+import type { CorrectiveStatusResponse as CorrectiveStatus } from '@repo/reports/frontend';
 
 type SortBy = 'rawStatus' | 'displayStatus' | 'created';
 type StatusFilter = 'all' | 'active' | 'inactive';

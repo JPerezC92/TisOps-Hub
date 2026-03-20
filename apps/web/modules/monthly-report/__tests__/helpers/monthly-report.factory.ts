@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import type { MonthlyReport } from '../../services/monthly-report.service';
+import type { MonthlyReport } from '@repo/reports/frontend';
 
 const CATEGORIZATIONS = ['Error por Cambio', 'Error de Plataforma', 'Requerimiento', 'Mejora', 'Bug'];
 const PRIORITIES = ['Low', 'Medium', 'High', 'Critical'];

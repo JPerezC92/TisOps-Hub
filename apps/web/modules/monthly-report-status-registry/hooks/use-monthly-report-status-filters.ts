@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import type { MonthlyReportStatus } from '../services/monthly-report-status-registry.service';
+import type { MoRepStatus as MonthlyReportStatus } from '@repo/reports/frontend';
 
 type SortBy = 'rawStatus' | 'displayStatus' | 'created';
 type StatusFilter = 'all' | 'active' | 'inactive';

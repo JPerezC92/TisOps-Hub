@@ -1,53 +1,31 @@
 import { apiClient } from '@/shared/api/client';
-import type { JSendSuccess } from '@repo/reports/common';
-import type { SessionsOrder, SessionsOrdersRelease } from '@repo/reports/frontend';
-
-export type { SessionsOrder, SessionsOrdersRelease };
-
-export interface GetAllResult {
-  data: SessionsOrder[];
-  releases: SessionsOrdersRelease[];
-  total: number;
-  totalReleases: number;
-}
-
-export interface UploadResult {
-  message: string;
-  importedMain: number;
-  importedReleases: number;
-  totalMain: number;
-  totalReleases: number;
-}
-
-export interface DeleteResult {
-  message: string;
-  deletedMain: number;
-  deletedReleases: number;
-}
+import { parseJsendData } from '@repo/reports/common';
+import {
+  sessOrdGetAllResponseSchema,
+  sessOrdUploadResultSchema,
+  sessOrdDeleteResultSchema,
+} from '@repo/reports/frontend';
+import type {
+  SessOrdGetAllResponse,
+  SessOrdUploadResult,
+  SessOrdDeleteResult,
+} from '@repo/reports/frontend';
 
 export const sessionsOrdersService = {
-  getAll: async (): Promise<GetAllResult> => {
-    const response = await apiClient.get<JSendSuccess<GetAllResult>>(
-      '/sessions-orders'
-    );
-    return response.data;
+  getAll: async (): Promise<SessOrdGetAllResponse> => {
+    const raw = await apiClient.get<unknown>('/sessions-orders');
+    return parseJsendData(sessOrdGetAllResponseSchema, raw);
   },
 
-  upload: async (file: File): Promise<UploadResult> => {
+  upload: async (file: File): Promise<SessOrdUploadResult> => {
     const formData = new FormData();
     formData.append('file', file);
-
-    const response = await apiClient.postForm<JSendSuccess<UploadResult>>(
-      '/sessions-orders/upload',
-      formData
-    );
-    return response.data;
+    const raw = await apiClient.postForm<unknown>('/sessions-orders/upload', formData);
+    return parseJsendData(sessOrdUploadResultSchema, raw);
   },
 
-  deleteAll: async (): Promise<DeleteResult> => {
-    const response = await apiClient.delete<JSendSuccess<DeleteResult>>(
-      '/sessions-orders'
-    );
-    return response.data;
+  deleteAll: async (): Promise<SessOrdDeleteResult> => {
+    const raw = await apiClient.delete<unknown>('/sessions-orders');
+    return parseJsendData(sessOrdDeleteResultSchema, raw);
   },
 };

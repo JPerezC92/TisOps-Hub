@@ -1,5 +1,5 @@
 import { faker } from '@faker-js/faker';
-import type { CorrectiveStatus } from '../../services/corrective-status-registry.service';
+import type { CorrectiveStatusResponse as CorrectiveStatus } from '@repo/reports/frontend';
 
 const DISPLAY_STATUS_OPTIONS = ['In Backlog', 'Dev in Progress', 'In Testing', 'PRD Deployment'];
 

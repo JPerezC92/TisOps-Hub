@@ -1,10 +1,10 @@
 import { faker } from '@faker-js/faker';
 import type {
   ParentChildRequest,
-  RelationshipsStats,
-  UploadResult,
-  DeleteResult,
-} from '../../services/request-relationships.service';
+  PcReqStatsResponse,
+  PcReqUploadResult,
+  PcReqDeleteResult,
+} from '@repo/reports/frontend';
 
 export class RequestRelationshipsFactory {
   static createRequest(overrides?: Partial<ParentChildRequest>): ParentChildRequest {
@@ -29,7 +29,7 @@ export class RequestRelationshipsFactory {
     return Array.from({ length: count }, () => this.createRequest(overrides));
   }
 
-  static createStats(overrides?: Partial<RelationshipsStats>): RelationshipsStats {
+  static createStats(overrides?: Partial<PcReqStatsResponse>): PcReqStatsResponse {
     const totalRecords = overrides?.totalRecords ?? faker.number.int({ min: 10, max: 1000 });
     const uniqueParents = overrides?.uniqueParents ?? faker.number.int({ min: 5, max: totalRecords });
 
@@ -48,7 +48,7 @@ export class RequestRelationshipsFactory {
     };
   }
 
-  static createUploadResult(overrides?: Partial<UploadResult>): UploadResult {
+  static createUploadResult(overrides?: Partial<PcReqUploadResult>): PcReqUploadResult {
     const total = overrides?.total ?? faker.number.int({ min: 100, max: 500 });
     const imported =
       overrides?.imported ?? faker.number.int({ min: Math.floor(total * 0.8), max: total });
@@ -62,7 +62,7 @@ export class RequestRelationshipsFactory {
     };
   }
 
-  static createDeleteResult(overrides?: Partial<DeleteResult>): DeleteResult {
+  static createDeleteResult(overrides?: Partial<PcReqDeleteResult>): PcReqDeleteResult {
     return {
       deleted: overrides?.deleted ?? true,
       message:
