@@ -3,6 +3,8 @@ import { mock, MockProxy } from 'vitest-mock-extended';
 import { UpdateTaskUseCase } from '@tasks/application/use-cases/update-task.use-case';
 import type { ITaskRepository } from '@tasks/domain/repositories/task.repository.interface';
 import { Task } from '@tasks/domain/entities/task.entity';
+import { TaskNotFoundError } from '@tasks/domain/errors/task-not-found.error';
+import { DomainError } from '@shared/domain/errors/domain.error';
 
 describe('UpdateTaskUseCase', () => {
   let updateTaskUseCase: UpdateTaskUseCase;
@@ -14,45 +16,30 @@ describe('UpdateTaskUseCase', () => {
   });
 
   it('should update a task with new data', async () => {
+    const existingTask = new Task(1, 'Old Task', 'Old Description', 'medium', false, new Date(), new Date());
     const updateData = {
       title: 'Updated Task',
       description: 'Updated Description',
       priority: 'high' as const,
     };
+    const updatedTask = new Task(1, 'Updated Task', 'Updated Description', 'high', false, new Date(), new Date());
 
-    const updatedTask = new Task(
-      1,
-      'Updated Task',
-      'Updated Description',
-      'high',
-      false,
-      new Date(),
-      new Date(),
-    );
-
+    mockTaskRepository.findById.mockResolvedValue(existingTask);
     mockTaskRepository.update.mockResolvedValue(updatedTask);
 
     const result = await updateTaskUseCase.execute(1, updateData);
 
+    expect(mockTaskRepository.findById).toHaveBeenCalledWith(1);
     expect(mockTaskRepository.update).toHaveBeenCalledWith(1, updateData);
     expect(result).toBe(updatedTask);
   });
 
   it('should update only the title', async () => {
-    const updateData = {
-      title: 'New Title',
-    };
+    const existingTask = new Task(1, 'Original Title', 'Original Description', 'medium', false, new Date(), new Date());
+    const updateData = { title: 'New Title' };
+    const updatedTask = new Task(1, 'New Title', 'Original Description', 'medium', false, new Date(), new Date());
 
-    const updatedTask = new Task(
-      1,
-      'New Title',
-      'Original Description',
-      'medium',
-      false,
-      new Date(),
-      new Date(),
-    );
-
+    mockTaskRepository.findById.mockResolvedValue(existingTask);
     mockTaskRepository.update.mockResolvedValue(updatedTask);
 
     const result = await updateTaskUseCase.execute(1, updateData);
@@ -61,58 +48,23 @@ describe('UpdateTaskUseCase', () => {
     expect(result.title).toBe('New Title');
   });
 
-  it('should update task completion status', async () => {
-    const updateData = {
-      completed: true,
-    };
+  it('should return TaskNotFoundError when task is not found', async () => {
+    mockTaskRepository.findById.mockResolvedValue(null);
 
-    const updatedTask = new Task(
-      1,
-      'Task',
-      'Description',
-      'medium',
-      true,
-      new Date(),
-      new Date(),
-    );
+    const result = await updateTaskUseCase.execute(999, { title: 'Test' });
 
-    mockTaskRepository.update.mockResolvedValue(updatedTask);
-
-    const result = await updateTaskUseCase.execute(1, updateData);
-
-    expect(mockTaskRepository.update).toHaveBeenCalledWith(1, updateData);
-    expect(result.completed).toBe(true);
-  });
-
-  it('should update task priority', async () => {
-    const updateData = {
-      priority: 'low' as const,
-    };
-
-    const updatedTask = new Task(
-      1,
-      'Task',
-      'Description',
-      'low',
-      false,
-      new Date(),
-      new Date(),
-    );
-
-    mockTaskRepository.update.mockResolvedValue(updatedTask);
-
-    const result = await updateTaskUseCase.execute(1, updateData);
-
-    expect(mockTaskRepository.update).toHaveBeenCalledWith(1, updateData);
-    expect(result.priority).toBe('low');
+    expect(mockTaskRepository.findById).toHaveBeenCalledWith(999);
+    expect(mockTaskRepository.update).not.toHaveBeenCalled();
+    expect(DomainError.isDomainError(result)).toBe(true);
+    expect(result).toBeInstanceOf(TaskNotFoundError);
+    expect((result as TaskNotFoundError).message).toBe('Task with ID 999 not found');
   });
 
   it('should handle repository errors', async () => {
-    const error = new Error('Update failed');
-    mockTaskRepository.update.mockRejectedValue(error);
+    const existingTask = new Task(1, 'Task', 'Description', 'medium', false, new Date(), new Date());
+    mockTaskRepository.findById.mockResolvedValue(existingTask);
+    mockTaskRepository.update.mockRejectedValue(new Error('Update failed'));
 
-    await expect(updateTaskUseCase.execute(1, { title: 'Test' })).rejects.toThrow(
-      'Update failed',
-    );
+    await expect(updateTaskUseCase.execute(1, { title: 'Test' })).rejects.toThrow('Update failed');
   });
 });

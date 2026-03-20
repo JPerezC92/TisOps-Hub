@@ -3,6 +3,8 @@ import { mock, MockProxy } from 'vitest-mock-extended';
 import { GetTaskByIdUseCase } from '@tasks/application/use-cases/get-task-by-id.use-case';
 import type { ITaskRepository } from '@tasks/domain/repositories/task.repository.interface';
 import { Task } from '@tasks/domain/entities/task.entity';
+import { TaskNotFoundError } from '@tasks/domain/errors/task-not-found.error';
+import { DomainError } from '@shared/domain/errors/domain.error';
 
 describe('GetTaskByIdUseCase', () => {
   let getTaskByIdUseCase: GetTaskByIdUseCase;
@@ -32,13 +34,15 @@ describe('GetTaskByIdUseCase', () => {
     expect(result).toBe(expectedTask);
   });
 
-  it('should return null when task is not found', async () => {
+  it('should return TaskNotFoundError when task is not found', async () => {
     mockTaskRepository.findById.mockResolvedValue(null);
 
     const result = await getTaskByIdUseCase.execute(999);
 
     expect(mockTaskRepository.findById).toHaveBeenCalledWith(999);
-    expect(result).toBeNull();
+    expect(DomainError.isDomainError(result)).toBe(true);
+    expect(result).toBeInstanceOf(TaskNotFoundError);
+    expect((result as TaskNotFoundError).message).toBe('Task with ID 999 not found');
   });
 
   it('should handle repository errors', async () => {

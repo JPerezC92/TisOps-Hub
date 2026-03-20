@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { ITaskRepository } from '@tasks/domain/repositories/task.repository.interface';
 import { Task } from '@tasks/domain/entities/task.entity';
+import { TaskAdapter } from '@tasks/infrastructure/adapters/task.adapter';
 import { Database, tasks } from '@repo/database';
 
 export class TaskRepository implements ITaskRepository {
@@ -8,12 +9,12 @@ export class TaskRepository implements ITaskRepository {
 
   async findAll(): Promise<Task[]> {
     const result = await this.db.select().from(tasks);
-    return result.map(this.toDomain);
+    return result.map(TaskAdapter.toDomain);
   }
 
   async findById(id: number): Promise<Task | null> {
     const result = await this.db.select().from(tasks).where(eq(tasks.id, id));
-    return result.length > 0 ? this.toDomain(result[0]) : null;
+    return result.length > 0 ? TaskAdapter.toDomain(result[0]) : null;
   }
 
   async create(taskData: Partial<Task>): Promise<Task> {
@@ -26,7 +27,7 @@ export class TaskRepository implements ITaskRepository {
         completed: taskData.completed || false,
       })
       .returning();
-    return this.toDomain(result[0]);
+    return TaskAdapter.toDomain(result[0]);
   }
 
   async update(id: number, taskData: Partial<Task>): Promise<Task> {
@@ -38,22 +39,10 @@ export class TaskRepository implements ITaskRepository {
       })
       .where(eq(tasks.id, id))
       .returning();
-    return this.toDomain(result[0]);
+    return TaskAdapter.toDomain(result[0]);
   }
 
   async delete(id: number): Promise<void> {
     await this.db.delete(tasks).where(eq(tasks.id, id));
-  }
-
-  private toDomain(data: any): Task {
-    return new Task(
-      data.id,
-      data.title,
-      data.description,
-      data.priority,
-      data.completed,
-      data.createdAt,
-      data.updatedAt,
-    );
   }
 }

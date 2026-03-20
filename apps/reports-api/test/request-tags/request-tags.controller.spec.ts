@@ -4,13 +4,12 @@ import { INestApplication } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
 import { APP_PIPE } from '@nestjs/core';
 import { ZodValidationPipe } from 'nestjs-zod';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mock, MockProxy } from 'vitest-mock-extended';
 import request from 'supertest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { RequestTagsController } from '@request-tags/request-tags.controller';
-import { RequestTagsService } from '@request-tags/request-tags.service';
+import { RequestTagsController } from '@request-tags/infrastructure/request-tags.controller';
 import { REQUEST_TAG_REPOSITORY } from '@request-tags/domain/repositories/request-tag.repository.interface';
 import type { IRequestTagRepository } from '@request-tags/domain/repositories/request-tag.repository.interface';
 import { GetAllRequestTagsUseCase } from '@request-tags/application/use-cases/get-all-request-tags.use-case';
@@ -27,69 +26,58 @@ describe('RequestTagsController (Integration)', () => {
   let mockRepository: MockProxy<IRequestTagRepository>;
 
   beforeEach(async () => {
-    // Create mock repository using vitest-mock-extended
     mockRepository = mock<IRequestTagRepository>();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         MulterModule.register({
           limits: {
-            fileSize: 10 * 1024 * 1024, // 10MB max file size
+            fileSize: 10 * 1024 * 1024,
           },
         }),
       ],
       controllers: [RequestTagsController],
       providers: [
-        RequestTagsService,
-        // Mock repository
         {
           provide: REQUEST_TAG_REPOSITORY,
           useValue: mockRepository,
         },
-        // Use Cases
         {
           provide: GetAllRequestTagsUseCase,
-          useFactory: (repository: IRequestTagRepository) => {
-            return new GetAllRequestTagsUseCase(repository);
-          },
+          useFactory: (repository: IRequestTagRepository) =>
+            new GetAllRequestTagsUseCase(repository),
           inject: [REQUEST_TAG_REPOSITORY],
         },
         {
           provide: DeleteAllRequestTagsUseCase,
-          useFactory: (repository: IRequestTagRepository) => {
-            return new DeleteAllRequestTagsUseCase(repository);
-          },
+          useFactory: (repository: IRequestTagRepository) =>
+            new DeleteAllRequestTagsUseCase(repository),
           inject: [REQUEST_TAG_REPOSITORY],
         },
         {
           provide: ImportRequestTagsUseCase,
-          useFactory: (repository: IRequestTagRepository) => {
-            return new ImportRequestTagsUseCase(repository);
-          },
+          useFactory: (repository: IRequestTagRepository) =>
+            new ImportRequestTagsUseCase(repository),
           inject: [REQUEST_TAG_REPOSITORY],
         },
         {
           provide: CreateRequestTagUseCase,
-          useFactory: (repository: IRequestTagRepository) => {
-            return new CreateRequestTagUseCase(repository);
-          },
+          useFactory: (repository: IRequestTagRepository) =>
+            new CreateRequestTagUseCase(repository),
           inject: [REQUEST_TAG_REPOSITORY],
         },
         {
           provide: GetRequestIdsByAdditionalInfoUseCase,
-          useFactory: (repository: IRequestTagRepository) => {
-            return new GetRequestIdsByAdditionalInfoUseCase(repository);
-          },
+          useFactory: (repository: IRequestTagRepository) =>
+            new GetRequestIdsByAdditionalInfoUseCase(repository),
           inject: [REQUEST_TAG_REPOSITORY],
         },
         {
           provide: GetMissingIdsByLinkedRequestUseCase,
-          useFactory: (repository: IRequestTagRepository) => {
-            return new GetMissingIdsByLinkedRequestUseCase(repository);
-          },
+          useFactory: (repository: IRequestTagRepository) =>
+            new GetMissingIdsByLinkedRequestUseCase(repository),
           inject: [REQUEST_TAG_REPOSITORY],
         },
-        // Global validation pipe
         {
           provide: APP_PIPE,
           useClass: ZodValidationPipe,
@@ -98,12 +86,12 @@ describe('RequestTagsController (Integration)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    // Register DomainErrorFilter for 409 responses
     app.useGlobalFilters(new DomainErrorFilter());
     await app.init();
   });
 
   afterEach(async () => {
+    vi.clearAllMocks();
     await app.close();
   });
 
@@ -160,7 +148,6 @@ describe('RequestTagsController (Integration)', () => {
     it('should create a new request tag and return 201 with JSend success', async () => {
       const createdTag = RequestTagFactory.create(validTagData);
 
-      // Repository: tag doesn't exist, then create it
       mockRepository.findByRequestId.mockResolvedValue(null);
       mockRepository.create.mockResolvedValue(createdTag);
 
@@ -182,7 +169,6 @@ describe('RequestTagsController (Integration)', () => {
     it('should return 409 with JSend fail when tag already exists', async () => {
       const existingTag = RequestTagFactory.create(validTagData);
 
-      // Repository: tag already exists
       mockRepository.findByRequestId.mockResolvedValue(existingTag);
 
       const response = await request(app.getHttpServer())
@@ -204,7 +190,6 @@ describe('RequestTagsController (Integration)', () => {
     it('should return 400 when required fields are missing', async () => {
       const invalidData = {
         requestId: 'REQ-INVALID',
-        // Missing required fields
       };
 
       const response = await request(app.getHttpServer())
@@ -221,9 +206,8 @@ describe('RequestTagsController (Integration)', () => {
       const filePath = join(__dirname, '../../files/REP01 XD TAG 2025.xlsx');
       const fileBuffer = readFileSync(filePath);
 
-      // Mock repository methods to prevent actual database write
       mockRepository.deleteAll.mockResolvedValue(undefined);
-      mockRepository.createMany.mockResolvedValue(100); // Mock that 100 records were imported
+      mockRepository.createMany.mockResolvedValue(100);
 
       const response = await request(app.getHttpServer())
         .post('/request-tags/upload')

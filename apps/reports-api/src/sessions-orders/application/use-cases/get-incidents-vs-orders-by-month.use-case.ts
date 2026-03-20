@@ -1,10 +1,8 @@
-import { Injectable } from '@nestjs/common';
 import type {
   ISessionsOrdersRepository,
   IncidentsVsOrdersByMonthResult,
-} from '../../domain/repositories/sessions-orders.repository.interface';
+} from '@sessions-orders/domain/repositories/sessions-orders.repository.interface';
 
-@Injectable()
 export class GetIncidentsVsOrdersByMonthUseCase {
   constructor(private readonly repository: ISessionsOrdersRepository) {}
 

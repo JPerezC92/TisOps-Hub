@@ -30,12 +30,17 @@ export {
   updateTaskSchema,
   CreateTaskDto,
   UpdateTaskDto,
+  taskSchema,
+  taskArraySchema,
+  taskDeleteResultSchema,
 } from './tasks';
 
 export type {
   Task,
   TaskResponse,
   TaskListResponse,
+  TaskSchemaResponse,
+  TaskDeleteResult,
 } from './tasks';
 
 // Request Categorization validation schemas, DTOs and Types
@@ -71,12 +76,20 @@ export {
 export {
   CreateParentChildRequestDto,
   UpdateParentChildRequestDto,
+  pcReqGetAllResponseSchema,
+  pcReqStatsResponseSchema,
+  pcReqUploadResultSchema,
+  pcReqDeleteResultSchema,
 } from './parent-child-requests';
 
 export type {
   ParentChildRequest,
   ParentChildRequestStats,
   ParentChildRequestResponse,
+  PcReqGetAllResponse,
+  PcReqStatsResponse,
+  PcReqUploadResult,
+  PcReqDeleteResult,
 } from './parent-child-requests';
 
 // Request Tags validation schemas, DTOs and Types
@@ -85,11 +98,22 @@ export {
   updateRequestTagSchema,
   CreateRequestTagDto,
   UpdateRequestTagDto,
+  requestTagSchema,
+  requestTagListResponseSchema,
+  requestTagUploadResultSchema,
+  requestTagDeleteResultSchema,
+  requestTagByAdditionalInfoResponseSchema,
+  requestTagMissingIdsResponseSchema,
 } from './request-tags';
 
 export type {
   RequestTag,
   RequestTagResponse,
+  RequestTagListResponse,
+  RequestTagUploadResult,
+  RequestTagDeleteResult,
+  RequestTagByAdditionalInfoResponse,
+  RequestTagMissingIdsResponse,
 } from './request-tags';
 
 // Application Registry Types and Schemas
@@ -137,10 +161,24 @@ export {
   errorLogListResponseSchema,
 } from './error-logs';
 
-// War Rooms Types (re-export from database)
+// War Rooms Types and Schemas
 export type { WarRoom, InsertWarRoom } from '@repo/database';
 
-// Sessions Orders Types (re-export from database)
+export {
+  warRoomGetAllResponseSchema,
+  warRoomUploadResultSchema,
+  warRoomDeleteResultSchema,
+  warRoomAnalyticsResponseSchema,
+} from './war-rooms';
+
+export type {
+  WarRoomGetAllResponse,
+  WarRoomUploadResult,
+  WarRoomDeleteResult,
+  WarRoomAnalyticsResponse,
+} from './war-rooms';
+
+// Sessions Orders Types and Schemas
 export type {
   SessionsOrder,
   InsertSessionsOrder,
@@ -148,11 +186,67 @@ export type {
   InsertSessionsOrdersRelease
 } from '@repo/database';
 
-// Monthly Report Types (re-export from database)
+export {
+  sessOrdSessionsOrderSchema,
+  sessOrdReleaseSchema,
+  sessOrdGetAllResponseSchema,
+  sessOrdUploadResultSchema,
+  sessOrdDeleteResultSchema,
+  sessOrdLast30DaysResponseSchema,
+  sessOrdIncidentsVsOrdersResponseSchema,
+} from './sessions-orders';
+
+export type {
+  SessOrdGetAllResponse,
+  SessOrdUploadResult,
+  SessOrdDeleteResult,
+  SessOrdLast30DaysResponse,
+  SessOrdIncidentsVsOrdersResponse,
+} from './sessions-orders';
+
+// Monthly Report Types and Schemas
 export type { MonthlyReport, InsertMonthlyReport } from '@repo/database';
+
+export {
+  moRepGetAllResponseSchema,
+  moRepUploadResultSchema,
+  moRepDeleteResultSchema,
+} from './monthly-report';
+
+export type {
+  MoRepGetAllResponse,
+  MoRepUploadResult,
+  MoRepDeleteResult,
+} from './monthly-report';
+
+// Weekly Corrective Types and Schemas
+export {
+  wkCorrGetAllResponseSchema,
+  wkCorrUploadResultSchema,
+  wkCorrDeleteResultSchema,
+  wkCorrL3TicketsByStatusResponseSchema,
+} from './weekly-corrective';
+
+export type {
+  WkCorrGetAllResponse,
+  WkCorrUploadResult,
+  WkCorrDeleteResult,
+} from './weekly-corrective';
 
 // Weekly Corrective Types (re-export from database)
 export type { WeeklyCorrective, InsertWeeklyCorrective } from '@repo/database';
 
-// Problems Types (re-export from database)
+// Problems Types and Schemas
 export type { Problem, InsertProblem } from '@repo/database';
+
+export {
+  probGetAllResponseSchema,
+  probUploadResultSchema,
+  probDeleteResultSchema,
+} from './problems';
+
+export type {
+  ProbGetAllResponse,
+  ProbUploadResult,
+  ProbDeleteResult,
+} from './problems';

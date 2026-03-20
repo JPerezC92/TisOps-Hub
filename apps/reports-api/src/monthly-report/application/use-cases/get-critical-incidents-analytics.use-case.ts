@@ -1,6 +1,5 @@
-import { Injectable } from '@nestjs/common';
 import type { MonthlyReport } from '@repo/database';
-import type { IMonthlyReportRepository } from '../../domain/repositories/monthly-report.repository.interface';
+import type { IMonthlyReportRepository } from '@monthly-report/domain/repositories/monthly-report.repository.interface';
 
 // Flattened response type for frontend consumption
 export interface CriticalIncidentResponse extends MonthlyReport {
@@ -9,7 +8,6 @@ export interface CriticalIncidentResponse extends MonthlyReport {
   mappedCategorizationDisplayValue: string | null;
 }
 
-@Injectable()
 export class GetCriticalIncidentsAnalyticsUseCase {
   constructor(private readonly repository: IMonthlyReportRepository) {}
 

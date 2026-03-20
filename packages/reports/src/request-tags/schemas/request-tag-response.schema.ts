@@ -3,11 +3,13 @@ import { requestIdEntrySchema } from '../../request-categorization/schemas/reque
 
 export const requestTagSchema = z.object({
   requestId: z.string(),
+  requestIdLink: z.string().nullish(),
   createdTime: z.string(),
   informacionAdicional: z.string(),
   modulo: z.string(),
   problemId: z.string(),
   linkedRequestId: z.string(),
+  linkedRequestIdLink: z.string().nullish(),
   jira: z.string(),
   categorizacion: z.string(),
   technician: z.string(),

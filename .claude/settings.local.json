@@ -54,7 +54,8 @@
       "WebFetch(domain:github.com)",
       "Bash(turbo test:e2e:*)",
       "Bash(rm:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Skill(clean-architecture)"
     ],
     "deny": [],
     "ask": []

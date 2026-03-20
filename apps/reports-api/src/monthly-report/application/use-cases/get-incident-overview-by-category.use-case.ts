@@ -1,10 +1,8 @@
-import { Injectable } from '@nestjs/common';
 import type {
   IMonthlyReportRepository,
   IncidentOverviewByCategoryResult,
-} from '../../domain/repositories/monthly-report.repository.interface';
+} from '@monthly-report/domain/repositories/monthly-report.repository.interface';
 
-@Injectable()
 export class GetIncidentOverviewByCategoryUseCase {
   constructor(private readonly repository: IMonthlyReportRepository) {}
 

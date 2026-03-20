@@ -1,10 +1,8 @@
-import { Injectable } from '@nestjs/common';
 import type {
   IMonthlyReportRepository,
   PriorityByAppResult,
-} from '../../domain/repositories/monthly-report.repository.interface';
+} from '@monthly-report/domain/repositories/monthly-report.repository.interface';
 
-@Injectable()
 export class GetPriorityByAppUseCase {
   constructor(private readonly repository: IMonthlyReportRepository) {}
 

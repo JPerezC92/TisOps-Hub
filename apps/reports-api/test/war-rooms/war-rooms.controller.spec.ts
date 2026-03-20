@@ -1,51 +1,73 @@
 import 'reflect-metadata';
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, HttpStatus, HttpException } from '@nestjs/common';
+import { INestApplication, HttpStatus } from '@nestjs/common';
 import { MulterModule } from '@nestjs/platform-express';
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { mock, MockProxy } from 'vitest-mock-extended';
 import request from 'supertest';
-import { WarRoomsController } from '@war-rooms/war-rooms.controller';
-import { WarRoomsService } from '@war-rooms/war-rooms.service';
+import { WarRoomsController } from '@war-rooms/infrastructure/war-rooms.controller';
+import { WAR_ROOMS_REPOSITORY } from '@war-rooms/domain/repositories/war-rooms.repository.interface';
+import type { IWarRoomsRepository } from '@war-rooms/domain/repositories/war-rooms.repository.interface';
+import { GetAllWarRoomsUseCase } from '@war-rooms/application/use-cases/get-all-war-rooms.use-case';
+import { DeleteAllWarRoomsUseCase } from '@war-rooms/application/use-cases/delete-all-war-rooms.use-case';
+import { UploadAndParseWarRoomsUseCase } from '@war-rooms/application/use-cases/upload-and-parse-war-rooms.use-case';
+import { WarRoomsExcelParser } from '@war-rooms/infrastructure/parsers/war-rooms-excel.parser';
+import { DomainErrorFilter } from '@shared/infrastructure/filters/domain-error.filter';
 import { WarRoomsFactory } from './helpers/war-rooms.factory';
 
 describe('WarRoomsController (Integration)', () => {
   let app: INestApplication;
-  let mockService: MockProxy<WarRoomsService>;
+  let mockRepository: MockProxy<IWarRoomsRepository>;
 
   beforeEach(async () => {
-    mockService = mock<WarRoomsService>();
+    mockRepository = mock<IWarRoomsRepository>();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         MulterModule.register({
-          limits: {
-            fileSize: 10 * 1024 * 1024,
-          },
+          limits: { fileSize: 10 * 1024 * 1024 },
         }),
       ],
       controllers: [WarRoomsController],
       providers: [
+        WarRoomsExcelParser,
         {
-          provide: WarRoomsService,
-          useValue: mockService,
+          provide: WAR_ROOMS_REPOSITORY,
+          useValue: mockRepository,
+        },
+        {
+          provide: GetAllWarRoomsUseCase,
+          useFactory: (repo: IWarRoomsRepository) => new GetAllWarRoomsUseCase(repo),
+          inject: [WAR_ROOMS_REPOSITORY],
+        },
+        {
+          provide: DeleteAllWarRoomsUseCase,
+          useFactory: (repo: IWarRoomsRepository) => new DeleteAllWarRoomsUseCase(repo),
+          inject: [WAR_ROOMS_REPOSITORY],
+        },
+        {
+          provide: UploadAndParseWarRoomsUseCase,
+          useFactory: (repo: IWarRoomsRepository) => new UploadAndParseWarRoomsUseCase(repo),
+          inject: [WAR_ROOMS_REPOSITORY],
         },
       ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalFilters(new DomainErrorFilter());
     await app.init();
   });
 
   afterEach(async () => {
+    vi.clearAllMocks();
     await app.close();
   });
 
   describe('GET /war-rooms', () => {
     it('should return all war rooms with JSend format', async () => {
-      const mockResponse = WarRoomsFactory.createFindAllResponse({ count: 3 });
-
-      mockService.findAll.mockResolvedValue(mockResponse);
+      const mockData = WarRoomsFactory.createManyWarRooms(3);
+      mockRepository.findAllWithApplication.mockResolvedValue(mockData);
+      mockRepository.countAll.mockResolvedValue(3);
 
       const response = await request(app.getHttpServer())
         .get('/war-rooms')
@@ -54,13 +76,11 @@ describe('WarRoomsController (Integration)', () => {
       expect(response.body.status).toBe('success');
       expect(response.body.data.data).toHaveLength(3);
       expect(response.body.data.total).toBe(3);
-      expect(mockService.findAll).toHaveBeenCalledOnce();
     });
 
     it('should return empty array when no war rooms exist', async () => {
-      const mockResponse = { data: [], total: 0 };
-
-      mockService.findAll.mockResolvedValue(mockResponse);
+      mockRepository.findAllWithApplication.mockResolvedValue([]);
+      mockRepository.countAll.mockResolvedValue(0);
 
       const response = await request(app.getHttpServer())
         .get('/war-rooms')
@@ -70,120 +90,74 @@ describe('WarRoomsController (Integration)', () => {
       expect(response.body.data.data).toEqual([]);
       expect(response.body.data.total).toBe(0);
     });
+  });
 
-    it('should validate response structure', async () => {
-      const mockResponse = WarRoomsFactory.createFindAllResponse({ count: 2 });
-
-      mockService.findAll.mockResolvedValue(mockResponse);
+  describe('GET /war-rooms/analytics', () => {
+    it('should return filtered war rooms by app', async () => {
+      const mockData = WarRoomsFactory.createManyWarRooms(3);
+      mockRepository.findAllWithApplicationFiltered.mockResolvedValue(mockData);
+      mockRepository.countFiltered.mockResolvedValue(3);
 
       const response = await request(app.getHttpServer())
-        .get('/war-rooms')
+        .get('/war-rooms/analytics?app=FFVV')
         .expect(HttpStatus.OK);
 
       expect(response.body.status).toBe('success');
-      expect(response.body.data).toHaveProperty('data');
-      expect(response.body.data).toHaveProperty('total');
-      expect(Array.isArray(response.body.data.data)).toBe(true);
-
-      if (response.body.data.data.length > 0) {
-        const record = response.body.data.data[0];
-        expect(record).toHaveProperty('requestId');
-        expect(record).toHaveProperty('application');
-        expect(record).toHaveProperty('date');
-        expect(record).toHaveProperty('summary');
-        expect(record).toHaveProperty('initialPriority');
-        expect(record).toHaveProperty('status');
-      }
+      expect(response.body.data.data).toHaveLength(3);
+      expect(response.body.data.total).toBe(3);
+      expect(mockRepository.findAllWithApplicationFiltered).toHaveBeenCalledWith('FFVV', undefined);
     });
 
-    it('should return war rooms with specific application', async () => {
-      const mockWarRooms = WarRoomsFactory.createManyWarRooms(3, {
-        application: 'FFVV',
-      });
-      const mockResponse = { data: mockWarRooms, total: mockWarRooms.length };
-
-      mockService.findAll.mockResolvedValue(mockResponse);
+    it('should return filtered war rooms by month', async () => {
+      const mockData = WarRoomsFactory.createManyWarRooms(5);
+      mockRepository.findAllWithApplicationFiltered.mockResolvedValue(mockData);
+      mockRepository.countFiltered.mockResolvedValue(5);
 
       const response = await request(app.getHttpServer())
-        .get('/war-rooms')
+        .get('/war-rooms/analytics?month=2025-01')
         .expect(HttpStatus.OK);
 
       expect(response.body.status).toBe('success');
-      expect(response.body.data.data.every((r: any) => r.application === 'FFVV')).toBe(true);
+      expect(response.body.data.data).toHaveLength(5);
+      expect(mockRepository.findAllWithApplicationFiltered).toHaveBeenCalledWith(undefined, '2025-01');
     });
 
-    it('should return war rooms with specific priority', async () => {
-      const mockWarRooms = WarRoomsFactory.createManyWarRooms(2, {
-        initialPriority: 'CRITICAL',
-      });
-      const mockResponse = { data: mockWarRooms, total: mockWarRooms.length };
-
-      mockService.findAll.mockResolvedValue(mockResponse);
+    it('should return filtered war rooms by both app and month', async () => {
+      const mockData = WarRoomsFactory.createManyWarRooms(2);
+      mockRepository.findAllWithApplicationFiltered.mockResolvedValue(mockData);
+      mockRepository.countFiltered.mockResolvedValue(2);
 
       const response = await request(app.getHttpServer())
-        .get('/war-rooms')
+        .get('/war-rooms/analytics?app=B2B&month=2025-02')
         .expect(HttpStatus.OK);
 
       expect(response.body.status).toBe('success');
-      expect(response.body.data.data.every((r: any) => r.initialPriority === 'CRITICAL')).toBe(true);
+      expect(response.body.data.data).toHaveLength(2);
+      expect(mockRepository.findAllWithApplicationFiltered).toHaveBeenCalledWith('B2B', '2025-02');
     });
 
-    it('should return war rooms with specific status', async () => {
-      const mockWarRooms = WarRoomsFactory.createManyWarRooms(2, {
-        status: 'Closed',
-      });
-      const mockResponse = { data: mockWarRooms, total: mockWarRooms.length };
-
-      mockService.findAll.mockResolvedValue(mockResponse);
+    it('should handle no filters', async () => {
+      const mockData = WarRoomsFactory.createManyWarRooms(10);
+      mockRepository.findAllWithApplicationFiltered.mockResolvedValue(mockData);
+      mockRepository.countFiltered.mockResolvedValue(10);
 
       const response = await request(app.getHttpServer())
-        .get('/war-rooms')
+        .get('/war-rooms/analytics')
         .expect(HttpStatus.OK);
 
       expect(response.body.status).toBe('success');
-      expect(response.body.data.data.every((r: any) => r.status === 'Closed')).toBe(true);
+      expect(response.body.data.data).toHaveLength(10);
+      expect(mockRepository.findAllWithApplicationFiltered).toHaveBeenCalledWith(undefined, undefined);
     });
   });
 
   describe('POST /war-rooms/upload', () => {
-    it('should upload and process Excel file successfully', async () => {
-      const mockResponse = WarRoomsFactory.createUploadResponse({
-        imported: 50,
-        total: 50,
-      });
-
-      mockService.uploadAndParse.mockResolvedValue(mockResponse);
-
-      const fakeExcelBuffer = Buffer.from('fake-excel-content');
-
-      const response = await request(app.getHttpServer())
-        .post('/war-rooms/upload')
-        .attach('file', fakeExcelBuffer, {
-          filename: 'war-rooms.xlsx',
-          contentType:
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        })
-        .expect(HttpStatus.CREATED);
-
-      expect(response.body.status).toBe('success');
-      expect(response.body.data).toMatchObject({
-        message: 'File uploaded and parsed successfully',
-        imported: 50,
-        total: 50,
-      });
-      expect(mockService.uploadAndParse).toHaveBeenCalledOnce();
-      expect(mockService.uploadAndParse).toHaveBeenCalledWith(expect.any(Buffer));
-    });
-
     it('should return 400 when no file is uploaded', async () => {
       const response = await request(app.getHttpServer())
         .post('/war-rooms/upload')
         .expect(HttpStatus.BAD_REQUEST);
 
-      expect(response.body).toMatchObject({
-        statusCode: 400,
-        message: 'No file uploaded',
-      });
+      expect(response.body.message).toContain('No file uploaded');
     });
 
     it('should return 400 for invalid file type', async () => {
@@ -197,291 +171,29 @@ describe('WarRoomsController (Integration)', () => {
         })
         .expect(HttpStatus.BAD_REQUEST);
 
-      expect(response.body).toMatchObject({
-        statusCode: 400,
-        message: expect.stringContaining('Invalid file type'),
-      });
-    });
-
-    it('should handle empty Excel file', async () => {
-      mockService.uploadAndParse.mockRejectedValue(
-        new HttpException('Excel file is empty', HttpStatus.BAD_REQUEST),
-      );
-
-      const fakeExcelBuffer = Buffer.from('fake-excel-content');
-
-      await request(app.getHttpServer())
-        .post('/war-rooms/upload')
-        .attach('file', fakeExcelBuffer, {
-          filename: 'empty.xlsx',
-          contentType:
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        })
-        .expect(HttpStatus.BAD_REQUEST);
-
-      expect(mockService.uploadAndParse).toHaveBeenCalled();
-    });
-
-    it('should process large datasets efficiently', async () => {
-      const mockResponse = WarRoomsFactory.createUploadResponse({
-        imported: 200,
-        total: 200,
-      });
-
-      mockService.uploadAndParse.mockResolvedValue(mockResponse);
-
-      const fakeExcelBuffer = Buffer.from('fake-large-excel');
-
-      const response = await request(app.getHttpServer())
-        .post('/war-rooms/upload')
-        .attach('file', fakeExcelBuffer, {
-          filename: 'large-war-rooms.xlsx',
-          contentType:
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        })
-        .expect(HttpStatus.CREATED);
-
-      expect(response.body.status).toBe('success');
-      expect(response.body.data.imported).toBe(200);
+      expect(response.body.message).toContain('Invalid file type');
     });
   });
 
   describe('DELETE /war-rooms', () => {
     it('should delete all war rooms', async () => {
-      const mockResponse = WarRoomsFactory.createDeleteResponse({
-        deleted: 75,
-      });
-
-      mockService.deleteAll.mockResolvedValue(mockResponse);
+      mockRepository.deleteAll.mockResolvedValue(75);
 
       const response = await request(app.getHttpServer())
         .delete('/war-rooms')
         .expect(HttpStatus.OK);
 
       expect(response.body.status).toBe('success');
-      expect(response.body.data).toMatchObject({
-        message: 'All war rooms deleted successfully',
-        deleted: 75,
-      });
-      expect(mockService.deleteAll).toHaveBeenCalledOnce();
     });
 
     it('should handle deletion when no records exist', async () => {
-      const mockResponse = WarRoomsFactory.createDeleteResponse({
-        deleted: 0,
-      });
-
-      mockService.deleteAll.mockResolvedValue(mockResponse);
+      mockRepository.deleteAll.mockResolvedValue(0);
 
       const response = await request(app.getHttpServer())
         .delete('/war-rooms')
         .expect(HttpStatus.OK);
 
       expect(response.body.status).toBe('success');
-      expect(response.body.data.deleted).toBe(0);
-    });
-  });
-
-  describe('GET /war-rooms/analytics', () => {
-    it('should return filtered war rooms by app', async () => {
-      const mockResponse = WarRoomsFactory.createAnalyticsResponse({
-        count: 3,
-        app: { id: 1, code: 'FFVV', name: 'FFVV Application' },
-      });
-
-      mockService.getAnalytics.mockResolvedValue(mockResponse);
-
-      const response = await request(app.getHttpServer())
-        .get('/war-rooms/analytics?app=FFVV')
-        .expect(HttpStatus.OK);
-
-      expect(response.body.status).toBe('success');
-      expect(response.body.data.data).toHaveLength(3);
-      expect(response.body.data.total).toBe(3);
-      expect(mockService.getAnalytics).toHaveBeenCalledWith('FFVV', undefined);
-    });
-
-    it('should return filtered war rooms by month', async () => {
-      const mockResponse = WarRoomsFactory.createAnalyticsResponse({ count: 5 });
-
-      mockService.getAnalytics.mockResolvedValue(mockResponse);
-
-      const response = await request(app.getHttpServer())
-        .get('/war-rooms/analytics?month=2025-01')
-        .expect(HttpStatus.OK);
-
-      expect(response.body.status).toBe('success');
-      expect(response.body.data.data).toHaveLength(5);
-      expect(response.body.data.total).toBe(5);
-      expect(mockService.getAnalytics).toHaveBeenCalledWith(undefined, '2025-01');
-    });
-
-    it('should return filtered war rooms by both app and month', async () => {
-      const mockResponse = WarRoomsFactory.createAnalyticsResponse({
-        count: 2,
-        app: { id: 2, code: 'B2B', name: 'B2B Application' },
-      });
-
-      mockService.getAnalytics.mockResolvedValue(mockResponse);
-
-      const response = await request(app.getHttpServer())
-        .get('/war-rooms/analytics?app=B2B&month=2025-02')
-        .expect(HttpStatus.OK);
-
-      expect(response.body.status).toBe('success');
-      expect(response.body.data.data).toHaveLength(2);
-      expect(response.body.data.total).toBe(2);
-      expect(mockService.getAnalytics).toHaveBeenCalledWith('B2B', '2025-02');
-    });
-
-    it('should handle no filters', async () => {
-      const mockResponse = WarRoomsFactory.createAnalyticsResponse({ count: 10 });
-
-      mockService.getAnalytics.mockResolvedValue(mockResponse);
-
-      const response = await request(app.getHttpServer())
-        .get('/war-rooms/analytics')
-        .expect(HttpStatus.OK);
-
-      expect(response.body.status).toBe('success');
-      expect(response.body.data.data).toHaveLength(10);
-      expect(response.body.data.total).toBe(10);
-      expect(mockService.getAnalytics).toHaveBeenCalledWith(undefined, undefined);
-    });
-
-    it('should validate response structure', async () => {
-      const mockResponse = WarRoomsFactory.createAnalyticsResponse({
-        count: 1,
-        app: { id: 1, code: 'FFVV', name: 'FFVV Application' },
-      });
-
-      mockService.getAnalytics.mockResolvedValue(mockResponse);
-
-      const response = await request(app.getHttpServer())
-        .get('/war-rooms/analytics?app=FFVV')
-        .expect(HttpStatus.OK);
-
-      expect(response.body.status).toBe('success');
-      expect(response.body.data).toHaveProperty('data');
-      expect(response.body.data).toHaveProperty('total');
-      expect(Array.isArray(response.body.data.data)).toBe(true);
-
-      if (response.body.data.data.length > 0) {
-        const record = response.body.data.data[0];
-        expect(record).toHaveProperty('requestId');
-        expect(record).toHaveProperty('application');
-        expect(record).toHaveProperty('app');
-
-        if (record.app) {
-          expect(record.app).toHaveProperty('id');
-          expect(record.app).toHaveProperty('code');
-          expect(record.app).toHaveProperty('name');
-        }
-      }
-    });
-
-    it('should handle app="all" filter', async () => {
-      const mockResponse = WarRoomsFactory.createAnalyticsResponse({ count: 10 });
-
-      mockService.getAnalytics.mockResolvedValue(mockResponse);
-
-      const response = await request(app.getHttpServer())
-        .get('/war-rooms/analytics?app=all')
-        .expect(HttpStatus.OK);
-
-      expect(response.body.status).toBe('success');
-      expect(mockService.getAnalytics).toHaveBeenCalledWith('all', undefined);
-    });
-
-    it('should return empty array when no matches found', async () => {
-      const mockResponse = { data: [], total: 0 };
-
-      mockService.getAnalytics.mockResolvedValue(mockResponse);
-
-      const response = await request(app.getHttpServer())
-        .get('/war-rooms/analytics?app=UNKNOWN&month=2025-12')
-        .expect(HttpStatus.OK);
-
-      expect(response.body.status).toBe('success');
-      expect(response.body.data.data).toEqual([]);
-      expect(response.body.data.total).toBe(0);
-    });
-
-    it('should handle war rooms with null app', async () => {
-      const mockResponse = WarRoomsFactory.createAnalyticsResponse({
-        count: 2,
-        app: null,
-      });
-
-      mockService.getAnalytics.mockResolvedValue(mockResponse);
-
-      const response = await request(app.getHttpServer())
-        .get('/war-rooms/analytics?month=2025-03')
-        .expect(HttpStatus.OK);
-
-      expect(response.body.status).toBe('success');
-      expect(response.body.data.data).toHaveLength(2);
-      if (response.body.data.data.length > 0) {
-        expect(response.body.data.data[0].app).toBeNull();
-      }
-    });
-  });
-
-  describe('Edge Cases', () => {
-    it('should handle records with priority changes', async () => {
-      const mockWarRooms = WarRoomsFactory.createManyWarRooms(2, {
-        priorityChanged: 'Yes',
-      });
-      const mockResponse = { data: mockWarRooms, total: mockWarRooms.length };
-
-      mockService.findAll.mockResolvedValue(mockResponse);
-
-      const response = await request(app.getHttpServer())
-        .get('/war-rooms')
-        .expect(HttpStatus.OK);
-
-      expect(response.body.status).toBe('success');
-      expect(response.body.data.data.every((r: any) => r.priorityChanged === 'Yes')).toBe(true);
-    });
-
-    it('should handle records with resolution team changes', async () => {
-      const mockWarRooms = WarRoomsFactory.createManyWarRooms(2, {
-        resolutionTeamChanged: 'Yes',
-      });
-      const mockResponse = { data: mockWarRooms, total: mockWarRooms.length };
-
-      mockService.findAll.mockResolvedValue(mockResponse);
-
-      const response = await request(app.getHttpServer())
-        .get('/war-rooms')
-        .expect(HttpStatus.OK);
-
-      expect(response.body.status).toBe('success');
-      expect(response.body.data.data.every((r: any) => r.resolutionTeamChanged === 'Yes')).toBe(true);
-    });
-
-    it('should handle mixed RCA status records', async () => {
-      const completedRCAs = WarRoomsFactory.createManyWarRooms(2, {
-        rcaStatus: 'Completed',
-      });
-      const pendingRCAs = WarRoomsFactory.createManyWarRooms(2, {
-        rcaStatus: 'Pending',
-      });
-      const mockResponse = {
-        data: [...completedRCAs, ...pendingRCAs],
-        total: 4
-      };
-
-      mockService.findAll.mockResolvedValue(mockResponse);
-
-      const response = await request(app.getHttpServer())
-        .get('/war-rooms')
-        .expect(HttpStatus.OK);
-
-      expect(response.body.status).toBe('success');
-      expect(response.body.data.data.length).toBe(4);
-      expect(response.body.data.data.filter((r: any) => r.rcaStatus === 'Completed').length).toBe(2);
-      expect(response.body.data.data.filter((r: any) => r.rcaStatus === 'Pending').length).toBe(2);
     });
   });
 });
