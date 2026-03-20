@@ -99,8 +99,8 @@ describe('TasksController (E2E)', () => {
         .get('/tasks/99999')
         .expect(404);
 
-      expect(response.body).toHaveProperty('message');
-      expect(response.body.message).toContain('99999');
+      expect(response.body.status).toBe('fail');
+      expect(response.body.data.message).toContain('99999');
     });
 
     it('should return 400 when id is not a valid number', async () => {

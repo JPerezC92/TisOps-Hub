@@ -1,15 +1,13 @@
-import { Injectable } from '@nestjs/common';
 import type {
   IMonthlyReportRepository,
   ModuleEvolutionResult,
-} from '../../domain/repositories/monthly-report.repository.interface';
+} from '@monthly-report/domain/repositories/monthly-report.repository.interface';
 
 export interface ModuleEvolutionResponse {
   data: ModuleEvolutionResult[];
   total: number;
 }
 
-@Injectable()
 export class GetModuleEvolutionUseCase {
   constructor(private readonly repository: IMonthlyReportRepository) {}
 

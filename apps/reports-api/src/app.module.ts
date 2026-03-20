@@ -5,16 +5,16 @@ import { DomainErrorInterceptor } from '@shared/infrastructure/interceptors/doma
 import { JSendInterceptor } from '@shared/infrastructure/interceptors/jsend.interceptor';
 import { DomainErrorFilter } from '@shared/infrastructure/filters/domain-error.filter';
 
-import { TasksModule } from './tasks/tasks.module';
-import { ParentChildRequestsModule } from './parent-child-requests/parent-child-requests.module';
+import { TasksModule } from './tasks/infrastructure/tasks.module';
+import { ParentChildRequestsModule } from './parent-child-requests/infrastructure/parent-child-requests.module';
 import { RequestCategorizationModule } from './request-categorization/infrastructure/request-categorization.module';
-import { RequestTagsModule } from './request-tags/request-tags.module';
+import { RequestTagsModule } from './request-tags/infrastructure/request-tags.module';
 import { ErrorLogsModule } from './error-logs/infrastructure/error-logs.module';
-import { WarRoomsModule } from './war-rooms/war-rooms.module';
-import { SessionsOrdersModule } from './sessions-orders/sessions-orders.module';
-import { MonthlyReportModule } from './monthly-report/monthly-report.module';
-import { WeeklyCorrectiveModule } from './weekly-corrective/weekly-corrective.module';
-import { ProblemsModule } from './problems/problems.module';
+import { WarRoomsModule } from './war-rooms/infrastructure/war-rooms.module';
+import { SessionsOrdersModule } from './sessions-orders/infrastructure/sessions-orders.module';
+import { MonthlyReportModule } from './monthly-report/infrastructure/monthly-report.module';
+import { WeeklyCorrectiveModule } from './weekly-corrective/infrastructure/weekly-corrective.module';
+import { ProblemsModule } from './problems/infrastructure/problems.module';
 import { ApplicationRegistryModule } from './application-registry/infrastructure/application-registry.module';
 import { MonthlyReportStatusRegistryModule } from './monthly-report-status-registry/infrastructure/monthly-report-status-registry.module';
 import { CategorizationRegistryModule } from './categorization-registry/infrastructure/categorization-registry.module';

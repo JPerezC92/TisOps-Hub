@@ -7,9 +7,7 @@ import { mock, MockProxy } from 'vitest-mock-extended';
 import request from 'supertest';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ParentChildRequestsController } from '@parent-child-requests/parent-child-requests.controller';
-import { ParentChildRequestsService } from '@parent-child-requests/parent-child-requests.service';
-import { ExcelParserService } from '@parent-child-requests/infrastructure/services/excel-parser.service';
+import { ParentChildRequestsController } from '@parent-child-requests/infrastructure/parent-child-requests.controller';
 import { PARENT_CHILD_REQUEST_REPOSITORY } from '@parent-child-requests/domain/repositories/parent-child-request.repository.interface';
 import type { IParentChildRequestRepository } from '@parent-child-requests/domain/repositories/parent-child-request.repository.interface';
 import { GetAllParentChildRequestsUseCase } from '@parent-child-requests/application/use-cases/get-all-parent-child-requests.use-case';
@@ -17,6 +15,8 @@ import { GetChildrenByParentUseCase } from '@parent-child-requests/application/u
 import { GetStatsUseCase } from '@parent-child-requests/application/use-cases/get-stats.use-case';
 import { CreateManyParentChildRequestsUseCase } from '@parent-child-requests/application/use-cases/create-many.use-case';
 import { DeleteAllParentChildRequestsUseCase } from '@parent-child-requests/application/use-cases/delete-all.use-case';
+import { ExcelParserService } from '@parent-child-requests/infrastructure/services/excel-parser.service';
+import { DomainErrorFilter } from '@shared/infrastructure/filters/domain-error.filter';
 import { ParentChildRequestFactory } from './helpers/parent-child-request.factory';
 
 describe('ParentChildRequestsController (Integration)', () => {
@@ -25,71 +25,64 @@ describe('ParentChildRequestsController (Integration)', () => {
   let excelParserService: ExcelParserService;
 
   beforeEach(async () => {
-    // Create mock repository using vitest-mock-extended
     mockRepository = mock<IParentChildRequestRepository>();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [
         MulterModule.register({
           limits: {
-            fileSize: 10 * 1024 * 1024, // 10MB max file size
+            fileSize: 10 * 1024 * 1024,
           },
         }),
       ],
       controllers: [ParentChildRequestsController],
       providers: [
-        ParentChildRequestsService,
         ExcelParserService,
-        // Mock repository
         {
           provide: PARENT_CHILD_REQUEST_REPOSITORY,
           useValue: mockRepository,
         },
-        // Use Cases
         {
           provide: GetAllParentChildRequestsUseCase,
-          useFactory: (repository: IParentChildRequestRepository) => {
-            return new GetAllParentChildRequestsUseCase(repository);
-          },
+          useFactory: (repository: IParentChildRequestRepository) =>
+            new GetAllParentChildRequestsUseCase(repository),
           inject: [PARENT_CHILD_REQUEST_REPOSITORY],
         },
         {
           provide: GetChildrenByParentUseCase,
-          useFactory: (repository: IParentChildRequestRepository) => {
-            return new GetChildrenByParentUseCase(repository);
-          },
+          useFactory: (repository: IParentChildRequestRepository) =>
+            new GetChildrenByParentUseCase(repository),
           inject: [PARENT_CHILD_REQUEST_REPOSITORY],
         },
         {
           provide: GetStatsUseCase,
-          useFactory: (repository: IParentChildRequestRepository) => {
-            return new GetStatsUseCase(repository);
-          },
+          useFactory: (repository: IParentChildRequestRepository) =>
+            new GetStatsUseCase(repository),
           inject: [PARENT_CHILD_REQUEST_REPOSITORY],
         },
         {
           provide: CreateManyParentChildRequestsUseCase,
-          useFactory: (repository: IParentChildRequestRepository) => {
-            return new CreateManyParentChildRequestsUseCase(repository);
-          },
+          useFactory: (repository: IParentChildRequestRepository) =>
+            new CreateManyParentChildRequestsUseCase(repository),
           inject: [PARENT_CHILD_REQUEST_REPOSITORY],
         },
         {
           provide: DeleteAllParentChildRequestsUseCase,
-          useFactory: (repository: IParentChildRequestRepository) => {
-            return new DeleteAllParentChildRequestsUseCase(repository);
-          },
+          useFactory: (repository: IParentChildRequestRepository) =>
+            new DeleteAllParentChildRequestsUseCase(repository),
           inject: [PARENT_CHILD_REQUEST_REPOSITORY],
         },
       ],
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.useGlobalFilters(new DomainErrorFilter());
     excelParserService = moduleFixture.get<ExcelParserService>(ExcelParserService);
     await app.init();
   });
 
   afterEach(async () => {
+    vi.clearAllMocks();
     await app.close();
   });
 
@@ -199,9 +192,7 @@ describe('ParentChildRequestsController (Integration)', () => {
         linkedRequestId: parentId,
       });
 
-      mockRepository.findByParentId.mockResolvedValue(
-        mockChildren,
-      );
+      mockRepository.findByParentId.mockResolvedValue(mockChildren);
 
       const response = await request(app.getHttpServer())
         .get(`/parent-child-requests/parent/${parentId}`)
@@ -233,7 +224,6 @@ describe('ParentChildRequestsController (Integration)', () => {
       const filePath = join(__dirname, '../../files/REP02 padre hijo.xlsx');
       const fileBuffer = readFileSync(filePath);
 
-      // Mock repository methods to prevent actual database write
       mockRepository.dropAndRecreateTable.mockResolvedValue(undefined);
       mockRepository.bulkCreate.mockResolvedValue(undefined);
 
@@ -286,7 +276,6 @@ describe('ParentChildRequestsController (Integration)', () => {
     });
 
     it('should handle parsing errors gracefully', async () => {
-      // Mock parser to throw an error
       vi.spyOn(excelParserService, 'parseExcelFile').mockImplementation(() => {
         throw new Error('Failed to parse Excel file');
       });
