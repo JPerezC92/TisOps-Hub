@@ -28,6 +28,7 @@ import { GetAllWeeklyCorrectivesUseCase } from '@weekly-corrective/application/u
 import { DeleteAllWeeklyCorrectivesUseCase } from '@weekly-corrective/application/use-cases/delete-all-weekly-correctives.use-case';
 import { UploadAndParseWeeklyCorrectiveUseCase } from '@weekly-corrective/application/use-cases/upload-and-parse-weekly-corrective.use-case';
 import { GetL3TicketsByStatusUseCase } from '@weekly-corrective/application/use-cases/get-l3-tickets-by-status.use-case';
+import { SyncSubjectTranslationsUseCase } from '@monthly-report/application/use-cases/sync-subject-translations.use-case';
 import { WeeklyCorrectiveExcelParser } from '@weekly-corrective/infrastructure/parsers/weekly-corrective-excel.parser';
 
 // JSend success DTOs
@@ -43,6 +44,7 @@ export class WeeklyCorrectiveController {
     private readonly deleteAllUseCase: DeleteAllWeeklyCorrectivesUseCase,
     private readonly uploadAndParseUseCase: UploadAndParseWeeklyCorrectiveUseCase,
     private readonly getL3TicketsByStatusUseCase: GetL3TicketsByStatusUseCase,
+    private readonly syncSubjectTranslationsUseCase: SyncSubjectTranslationsUseCase,
     private readonly excelParser: WeeklyCorrectiveExcelParser,
   ) {}
 
@@ -89,6 +91,17 @@ export class WeeklyCorrectiveController {
     try {
       const records = this.excelParser.parse(file.buffer);
       const data = await this.uploadAndParseUseCase.execute(records);
+
+      // Sync subject translations for SB/FFVV apps (non-blocking)
+      const translatableRecords = records.map((r) => ({
+        requestId: r.requestId,
+        aplicativos: r.aplicativos,
+        subject: r.subject,
+      }));
+      this.syncSubjectTranslationsUseCase.execute(translatableRecords).catch((err) => {
+        console.error('Subject translation sync failed:', err);
+      });
+
       return { status: 'success' as const, data };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';

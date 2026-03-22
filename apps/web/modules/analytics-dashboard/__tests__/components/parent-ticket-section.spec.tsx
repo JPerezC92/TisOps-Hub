@@ -160,6 +160,18 @@ describe('ParentTicketSection', () => {
     });
   });
 
+  it('should display ETA value from API', async () => {
+    mockFetchData.mockResolvedValue({
+      data: [createRow({ eta: '31-Mar' })],
+      monthName: 'Mar',
+      totalIncidents: 1,
+    });
+
+    renderWithQueryClient(<ParentTicketSection {...defaultProps} />);
+
+    expect(await screen.findByText('31-Mar')).toBeInTheDocument();
+  });
+
   it('should show filter info', async () => {
     mockFetchData.mockResolvedValue({ data: [createRow()], monthName: 'Mar', totalIncidents: 1 });
 

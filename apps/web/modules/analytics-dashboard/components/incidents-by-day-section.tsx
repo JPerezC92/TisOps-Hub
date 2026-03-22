@@ -1,17 +1,19 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { analyticsDashboardService } from '@/modules/analytics-dashboard/services/analytics-dashboard.service';
 import type { Application, IncidentsByDayResponse } from '@/modules/analytics-dashboard/types';
 
 interface IncidentsByDaySectionProps {
   selectedApp: string;
+  endDay: number;
   applications: Application[];
 }
 
 export function IncidentsByDaySection({
   selectedApp,
+  endDay,
   applications,
 }: IncidentsByDaySectionProps) {
   const [data, setData] = useState<IncidentsByDayResponse | null>(null);
@@ -26,6 +28,15 @@ export function IncidentsByDaySection({
     };
     fetch();
   }, [selectedApp]);
+
+  const allDays = useMemo(() => {
+    if (!data) return [];
+    const countByDay = new Map(data.data.map((row) => [row.day, row.count]));
+    return Array.from({ length: endDay }, (_, i) => ({
+      day: i + 1,
+      count: countByDay.get(i + 1) ?? 0,
+    }));
+  }, [data, endDay]);
 
   const appLabel =
     selectedApp === 'all'
@@ -51,7 +62,7 @@ export function IncidentsByDaySection({
         <div className="p-6 flex items-center justify-center">
           <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-jpc-vibrant-emerald-500"></div>
         </div>
-      ) : data && data.data.length > 0 ? (
+      ) : data && allDays.length > 0 ? (
         <div className="p-4">
           <Table>
             <TableHeader>
@@ -61,8 +72,8 @@ export function IncidentsByDaySection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.data.map((row) => (
-                <TableRow key={row.day} className="border-b border-jpc-vibrant-emerald-500/10 hover:bg-jpc-vibrant-emerald-500/5 transition-colors">
+              {allDays.map((row) => (
+                <TableRow key={row.day} className={`border-b border-jpc-vibrant-emerald-500/10 hover:bg-jpc-vibrant-emerald-500/5 transition-colors ${row.count === 0 ? 'opacity-40' : ''}`}>
                   <TableCell className="text-sm text-foreground/80">Day {row.day}</TableCell>
                   <TableCell className="text-sm text-foreground/80 text-right">{row.count}</TableCell>
                 </TableRow>

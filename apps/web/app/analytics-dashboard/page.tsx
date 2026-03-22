@@ -105,6 +105,7 @@ function AnalyticsDashboardContent() {
         {/* Incidents by Day Section */}
         <IncidentsByDaySection
           selectedApp={selectedApp}
+          endDay={isMonthlyMode ? parseInt(lastDayOfMonth.split('-')[2], 10) : parseInt(endDate.split('-')[2], 10)}
           applications={applications}
         />
 

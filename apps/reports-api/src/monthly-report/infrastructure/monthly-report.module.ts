@@ -22,6 +22,10 @@ import { GetBugsByParentUseCase } from '@monthly-report/application/use-cases/ge
 import { GetIncidentsByDayUseCase } from '@monthly-report/application/use-cases/get-incidents-by-day.use-case';
 import { GetIncidentsByReleaseByDayUseCase } from '@monthly-report/application/use-cases/get-incidents-by-release-by-day.use-case';
 import { GetChangeReleaseByModuleUseCase } from '@monthly-report/application/use-cases/get-change-release-by-module.use-case';
+import { SyncSubjectTranslationsUseCase } from '@monthly-report/application/use-cases/sync-subject-translations.use-case';
+import { TRANSLATION_SERVICE } from '@monthly-report/domain/services/translation.service.interface';
+import type { ITranslationService } from '@monthly-report/domain/services/translation.service.interface';
+import { GoogleTranslationService } from '@monthly-report/infrastructure/services/google-translation.service';
 import { DatabaseModule } from '@database/infrastructure/database.module';
 
 @Module({
@@ -122,6 +126,16 @@ import { DatabaseModule } from '@database/infrastructure/database.module';
       provide: GetChangeReleaseByModuleUseCase,
       useFactory: (repo: IMonthlyReportRepository) => new GetChangeReleaseByModuleUseCase(repo),
       inject: [MONTHLY_REPORT_REPOSITORY],
+    },
+    {
+      provide: TRANSLATION_SERVICE,
+      useClass: GoogleTranslationService,
+    },
+    {
+      provide: SyncSubjectTranslationsUseCase,
+      useFactory: (repo: IMonthlyReportRepository, translator: ITranslationService) =>
+        new SyncSubjectTranslationsUseCase(repo, translator),
+      inject: [MONTHLY_REPORT_REPOSITORY, TRANSLATION_SERVICE],
     },
   ],
 })

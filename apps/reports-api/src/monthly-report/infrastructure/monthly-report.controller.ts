@@ -42,6 +42,7 @@ import { GetBugsByParentUseCase } from '@monthly-report/application/use-cases/ge
 import { GetIncidentsByDayUseCase } from '@monthly-report/application/use-cases/get-incidents-by-day.use-case';
 import { GetIncidentsByReleaseByDayUseCase } from '@monthly-report/application/use-cases/get-incidents-by-release-by-day.use-case';
 import { GetChangeReleaseByModuleUseCase } from '@monthly-report/application/use-cases/get-change-release-by-module.use-case';
+import { SyncSubjectTranslationsUseCase } from '@monthly-report/application/use-cases/sync-subject-translations.use-case';
 import { MonthlyReportExcelParser } from '@monthly-report/infrastructure/parsers/monthly-report-excel.parser';
 
 // JSend success DTOs
@@ -71,6 +72,7 @@ export class MonthlyReportController {
     private readonly getIncidentsByDayUseCase: GetIncidentsByDayUseCase,
     private readonly getIncidentsByReleaseByDayUseCase: GetIncidentsByReleaseByDayUseCase,
     private readonly getChangeReleaseByModuleUseCase: GetChangeReleaseByModuleUseCase,
+    private readonly syncSubjectTranslationsUseCase: SyncSubjectTranslationsUseCase,
     private readonly excelParser: MonthlyReportExcelParser,
   ) {}
 
@@ -282,6 +284,17 @@ export class MonthlyReportController {
     try {
       const records = this.excelParser.parse(file.buffer);
       const data = await this.uploadAndParseUseCase.execute(records);
+
+      // Sync subject translations for SB/FFVV apps (non-blocking)
+      const translatableRecords = records.map((r) => ({
+        requestId: String(r.requestId),
+        aplicativos: r.aplicativos,
+        subject: r.subject,
+      }));
+      this.syncSubjectTranslationsUseCase.execute(translatableRecords).catch((err) => {
+        console.error('Subject translation sync failed:', err);
+      });
+
       return { status: 'success' as const, data };
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error';

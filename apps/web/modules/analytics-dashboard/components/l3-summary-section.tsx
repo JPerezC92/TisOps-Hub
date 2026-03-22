@@ -86,28 +86,28 @@ export function L3SummarySection({
                         {row.critical > 0 ? (
                           <span className="text-red-400 font-semibold">{row.critical}</span>
                         ) : (
-                          <span className="text-foreground/50">-</span>
+                          <span className="text-foreground/50"></span>
                         )}
                       </TableCell>
                       <TableCell className="text-sm text-center">
                         {row.high > 0 ? (
                           <span className="text-orange-400 font-semibold">{row.high}</span>
                         ) : (
-                          <span className="text-foreground/50">-</span>
+                          <span className="text-foreground/50"></span>
                         )}
                       </TableCell>
                       <TableCell className="text-sm text-center">
                         {row.medium > 0 ? (
                           <span className="text-yellow-400 font-semibold">{row.medium}</span>
                         ) : (
-                          <span className="text-foreground/50">-</span>
+                          <span className="text-foreground/50"></span>
                         )}
                       </TableCell>
                       <TableCell className="text-sm text-center">
                         {row.low > 0 ? (
                           <span className="text-green-400 font-semibold">{row.low}</span>
                         ) : (
-                          <span className="text-foreground/50">-</span>
+                          <span className="text-foreground/50"></span>
                         )}
                       </TableCell>
                       <TableCell className="text-sm text-center font-semibold text-jpc-vibrant-cyan-400">{row.total}</TableCell>
@@ -120,28 +120,28 @@ export function L3SummarySection({
                       {data.totals.critical > 0 ? (
                         <span className="text-red-400">{data.totals.critical}</span>
                       ) : (
-                        <span className="text-foreground/50">-</span>
+                        <span className="text-foreground/50"></span>
                       )}
                     </TableCell>
                     <TableCell className="text-sm text-center font-bold">
                       {data.totals.high > 0 ? (
                         <span className="text-orange-400">{data.totals.high}</span>
                       ) : (
-                        <span className="text-foreground/50">-</span>
+                        <span className="text-foreground/50"></span>
                       )}
                     </TableCell>
                     <TableCell className="text-sm text-center font-bold">
                       {data.totals.medium > 0 ? (
                         <span className="text-yellow-400">{data.totals.medium}</span>
                       ) : (
-                        <span className="text-foreground/50">-</span>
+                        <span className="text-foreground/50"></span>
                       )}
                     </TableCell>
                     <TableCell className="text-sm text-center font-bold">
                       {data.totals.low > 0 ? (
                         <span className="text-green-400">{data.totals.low}</span>
                       ) : (
-                        <span className="text-foreground/50">-</span>
+                        <span className="text-foreground/50"></span>
                       )}
                     </TableCell>
                     <TableCell className="text-sm text-center font-bold text-jpc-vibrant-cyan-400">{data.totals.total}</TableCell>

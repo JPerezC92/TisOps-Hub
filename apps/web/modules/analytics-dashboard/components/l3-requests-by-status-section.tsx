@@ -104,7 +104,7 @@ export function L3RequestsByStatusSection({
                       </TableCell>
                       <TableCell className="text-sm text-foreground/80">{req.createdTime}</TableCell>
                       <TableCell className="text-sm text-foreground/80">{req.modulo}</TableCell>
-                      <TableCell className="text-sm text-foreground/80 max-w-xs truncate">{req.subject}</TableCell>
+                      <TableCell className="text-sm text-foreground/80 max-w-xs truncate" title={req.subject}>{req.subjectEnglish || req.subject}</TableCell>
                       <TableCell className="text-sm">
                         <span className={`font-medium ${
                           req.priorityEnglish === 'Critical' ? 'text-red-400' :

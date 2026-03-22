@@ -12,6 +12,11 @@ import { GetAllWeeklyCorrectivesUseCase } from '@weekly-corrective/application/u
 import { DeleteAllWeeklyCorrectivesUseCase } from '@weekly-corrective/application/use-cases/delete-all-weekly-correctives.use-case';
 import { UploadAndParseWeeklyCorrectiveUseCase } from '@weekly-corrective/application/use-cases/upload-and-parse-weekly-corrective.use-case';
 import { GetL3TicketsByStatusUseCase } from '@weekly-corrective/application/use-cases/get-l3-tickets-by-status.use-case';
+import { SyncSubjectTranslationsUseCase } from '@monthly-report/application/use-cases/sync-subject-translations.use-case';
+import { MONTHLY_REPORT_REPOSITORY } from '@monthly-report/domain/repositories/monthly-report.repository.interface';
+import type { IMonthlyReportRepository } from '@monthly-report/domain/repositories/monthly-report.repository.interface';
+import { TRANSLATION_SERVICE } from '@monthly-report/domain/services/translation.service.interface';
+import type { ITranslationService } from '@monthly-report/domain/services/translation.service.interface';
 import { WeeklyCorrectiveExcelParser } from '@weekly-corrective/infrastructure/parsers/weekly-corrective-excel.parser';
 import { DomainErrorFilter } from '@shared/infrastructure/filters/domain-error.filter';
 import { WeeklyCorrectiveFactory } from './helpers/weekly-corrective.factory';
@@ -55,6 +60,20 @@ describe('WeeklyCorrectiveController (Integration)', () => {
           provide: GetL3TicketsByStatusUseCase,
           useFactory: (repo: IWeeklyCorrectiveRepository) => new GetL3TicketsByStatusUseCase(repo),
           inject: [WEEKLY_CORRECTIVE_REPOSITORY],
+        },
+        {
+          provide: MONTHLY_REPORT_REPOSITORY,
+          useValue: mock<IMonthlyReportRepository>(),
+        },
+        {
+          provide: TRANSLATION_SERVICE,
+          useValue: { translateBatch: async (texts: string[]) => texts } as ITranslationService,
+        },
+        {
+          provide: SyncSubjectTranslationsUseCase,
+          useFactory: (repo: IMonthlyReportRepository, translator: ITranslationService) =>
+            new SyncSubjectTranslationsUseCase(repo, translator),
+          inject: [MONTHLY_REPORT_REPOSITORY, TRANSLATION_SERVICE],
         },
       ],
     }).compile();

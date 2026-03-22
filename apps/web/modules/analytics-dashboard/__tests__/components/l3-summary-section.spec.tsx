@@ -80,14 +80,13 @@ describe('L3SummarySection', () => {
     expect(totals.length).toBeGreaterThanOrEqual(2);
   });
 
-  it('should show dash for zero values', async () => {
+  it('should render empty cells for zero values (no dashes for clean copy-paste)', async () => {
     mockedService.getL3Summary.mockResolvedValue(createMockData());
     renderWithQueryClient(<L3SummarySection {...defaultProps} />);
 
     await screen.findByText('Dev in Progress');
-    // "Dev in Progress" row has low=0, "In Testing" has critical=0, medium=0
-    const dashes = screen.getAllByText('-');
-    expect(dashes.length).toBeGreaterThanOrEqual(3);
+    // Zero values should not render any visible text (no dashes)
+    expect(screen.queryByText('-')).not.toBeInTheDocument();
   });
 
   it('should show totals in header', async () => {

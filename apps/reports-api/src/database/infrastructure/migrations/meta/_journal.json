@@ -8,6 +8,20 @@
       "when": 1767980321771,
       "tag": "0000_cool_roughhouse",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1774145695445,
+      "tag": "0001_woozy_killraven",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1774147225075,
+      "tag": "0002_glamorous_brother_voodoo",
+      "breakpoints": true
     }
   ]
 }

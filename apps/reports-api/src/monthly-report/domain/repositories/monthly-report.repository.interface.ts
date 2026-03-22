@@ -1,4 +1,4 @@
-import { MonthlyReport, InsertMonthlyReport } from '@repo/database';
+import { MonthlyReport, InsertMonthlyReport, InsertSubjectTranslation, SubjectTranslation } from '@repo/database';
 
 export const MONTHLY_REPORT_REPOSITORY = Symbol('MONTHLY_REPORT_REPOSITORY');
 
@@ -191,6 +191,7 @@ export interface L3RequestDetail {
   createdTime: string;
   modulo: string;
   subject: string;
+  subjectEnglish?: string;
   priority: string;
   priorityEnglish: string;
   linkedTicketsCount: number;
@@ -335,4 +336,10 @@ export interface IMonthlyReportRepository {
     app?: string,
     month?: string,
   ): Promise<ChangeReleaseByModuleResult>;
+  findSubjectTranslations(
+    requestIds: string[],
+  ): Promise<SubjectTranslation[]>;
+  upsertSubjectTranslations(
+    translations: InsertSubjectTranslation[],
+  ): Promise<void>;
 }
