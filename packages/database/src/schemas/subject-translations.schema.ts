@@ -1,7 +1,7 @@
-import { sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 
 export const subjectTranslations = sqliteTable('subject_translations', {
-  requestId: text('request_id').primaryKey(),
+  requestId: integer('request_id').primaryKey(),
   subject: text('subject').notNull(),
   subjectEnglish: text('subject_english').notNull(),
 });

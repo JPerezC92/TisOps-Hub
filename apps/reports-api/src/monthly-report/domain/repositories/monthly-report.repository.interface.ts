@@ -337,7 +337,7 @@ export interface IMonthlyReportRepository {
     month?: string,
   ): Promise<ChangeReleaseByModuleResult>;
   findSubjectTranslations(
-    requestIds: string[],
+    requestIds: number[],
   ): Promise<SubjectTranslation[]>;
   upsertSubjectTranslations(
     translations: InsertSubjectTranslation[],

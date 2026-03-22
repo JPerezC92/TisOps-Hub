@@ -8,7 +8,7 @@ const APP_PATTERNS: Record<string, string[]> = {
 };
 
 interface TranslatableRecord {
-  requestId: string;
+  requestId: number;
   aplicativos: string;
   subject: string;
 }
@@ -45,7 +45,7 @@ export class SyncSubjectTranslationsUseCase {
     );
 
     // Find records that need translation (new or subject changed)
-    const needsTranslation: { requestId: string; subject: string }[] = [];
+    const needsTranslation: { requestId: number; subject: string }[] = [];
 
     for (const record of translatableRecords) {
       const existing = existingMap.get(record.requestId);

@@ -1,9 +1,9 @@
-import { sqliteTable, text, index } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
 
 export const weeklyCorrectives = sqliteTable(
   'weekly_correctives',
   {
-    requestId: text('request_id').primaryKey(), // Request ID as primary key
+    requestId: integer('request_id').primaryKey(), // Request ID as primary key
     requestIdLink: text('request_id_link'), // Hyperlink URL from Request ID cell
     technician: text('technician').notNull(), // Assigned technician
     aplicativos: text('aplicativos').notNull(), // Application name

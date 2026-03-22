@@ -1347,7 +1347,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
 
     // Normalize weekly_correctives
     const normalizedWeekly: NormalizedRecord[] = weeklyResults.map((r) => ({
-      requestId: r.weeklyCorrective.requestId,
+      requestId: String(r.weeklyCorrective.requestId),
       requestStatus: r.weeklyCorrective.requestStatus || 'Unknown',
       createdTime: DateTime.fromFormat(r.weeklyCorrective.createdTime, 'dd/MM/yyyy HH:mm'),
       registeredAppCode: r.registeredAppCode,
@@ -1467,7 +1467,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       .all();
 
     // Deduplicate weekly_correctives by requestId
-    const seenWeeklyIds = new Set<string>();
+    const seenWeeklyIds = new Set<number>();
     const uniqueWeeklyResults = weeklyResults.filter((r) => {
       if (seenWeeklyIds.has(r.weeklyCorrective.requestId)) return false;
       seenWeeklyIds.add(r.weeklyCorrective.requestId);
@@ -1510,7 +1510,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     }
 
     const normalizedWeekly: NormalizedRecord[] = uniqueWeeklyResults.map((r) => ({
-      requestId: r.weeklyCorrective.requestId,
+      requestId: String(r.weeklyCorrective.requestId),
       rawStatus: r.weeklyCorrective.requestStatus || 'Unknown',
       priority: r.weeklyCorrective.priority || '',
       appCode: r.registeredAppCode,
@@ -1703,7 +1703,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       .all();
 
     // Deduplicate weekly by requestId
-    const seenWeeklyIds = new Set<string>();
+    const seenWeeklyIds = new Set<number>();
     const uniqueWeeklyResults = weeklyResults.filter((r) => {
       if (seenWeeklyIds.has(r.weeklyCorrective.requestId)) return false;
       seenWeeklyIds.add(r.weeklyCorrective.requestId);
@@ -1861,7 +1861,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     const normalizedWeekly: NormalizedRecord[] = uniqueWeeklyResults.map((r) => {
       const rawPriority = r.weeklyCorrective.priority || '';
       return {
-        requestId: r.weeklyCorrective.requestId,
+        requestId: String(r.weeklyCorrective.requestId),
         requestIdLink: r.weeklyCorrective.requestIdLink || undefined,
         rawStatus: r.weeklyCorrective.requestStatus || 'Unknown',
         createdTime: r.weeklyCorrective.createdTime || '',
@@ -1928,9 +1928,10 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     // ===== FETCH SUBJECT TRANSLATIONS =====
     const translationRequestIds = filteredResults
       .filter((r) => r.registeredAppCode === 'SB' || r.registeredAppCode === 'FFVV')
-      .map((r) => r.requestId);
+      .map((r) => Number(r.requestId))
+      .filter((id) => !isNaN(id));
     const translations = await this.findSubjectTranslations(translationRequestIds);
-    const translationMap = new Map(translations.map((t) => [t.requestId, t.subjectEnglish]));
+    const translationMap = new Map(translations.map((t) => [String(t.requestId), t.subjectEnglish]));
 
     // ===== GROUP BY STATUS =====
     interface TempRequestDetail extends L3RequestDetail {
@@ -2083,7 +2084,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       .all();
 
     const correctivesMap = new Map(
-      correctivesRecords.map((r) => [r.requestId, r]),
+      correctivesRecords.map((r) => [String(r.requestId), r]),
     );
 
     // Get all problems records for lookup (requestId is integer, convert to string for comparison)
@@ -2336,7 +2337,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       .all();
 
     const correctivesMapBugs = new Map(
-      correctivesRecordsBugs.map((r) => [r.requestId, r]),
+      correctivesRecordsBugs.map((r) => [String(r.requestId), r]),
     );
 
     // Get all problems records for lookup (requestId is integer, convert to string for comparison)
@@ -2781,7 +2782,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
   }
 
   async findSubjectTranslations(
-    requestIds: string[],
+    requestIds: number[],
   ): Promise<SubjectTranslation[]> {
     if (requestIds.length === 0) return [];
     return this.db

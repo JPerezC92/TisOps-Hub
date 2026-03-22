@@ -287,7 +287,7 @@ export class MonthlyReportController {
 
       // Sync subject translations for SB/FFVV apps (non-blocking)
       const translatableRecords = records.map((r) => ({
-        requestId: String(r.requestId),
+        requestId: r.requestId,
         aplicativos: r.aplicativos,
         subject: r.subject,
       }));
