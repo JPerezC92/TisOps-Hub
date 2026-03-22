@@ -172,6 +172,31 @@ describe('ParentTicketSection', () => {
     expect(await screen.findByText('31-Mar')).toBeInTheDocument();
   });
 
+  it('should show empty cells for unassigned rows (no linkedRequestId)', async () => {
+    mockFetchData.mockResolvedValue({
+      data: [
+        createRow({ linkedRequestId: 'REQ-100', createdDate: '10-Jan-2025', eta: '31-Mar' }),
+        createRow({ linkedRequestId: '', additionalInfo: 'To be evaluated', createdDate: '', eta: '', requestStatus: '', totalLinkedTickets: 0 }),
+      ],
+      monthName: 'Jan',
+      totalIncidents: 5,
+    });
+
+    const { container } = renderWithQueryClient(<ParentTicketSection {...defaultProps} />);
+
+    await screen.findByText('REQ-100');
+    expect(screen.getByText('To be evaluated')).toBeInTheDocument();
+
+    // The unassigned row should NOT show dashes for empty fields
+    const rows = container.querySelectorAll('tbody tr');
+    // Row 1 = normal, Row 2 = unassigned, Row 3 = TOTAL
+    const unassignedRow = rows[1];
+    const cells = unassignedRow.querySelectorAll('td');
+    // createdDate (cell 0), linkedRequestId (cell 1) should be empty
+    expect(cells[0].textContent).toBe('');
+    expect(cells[1].textContent).toBe('');
+  });
+
   it('should show filter info', async () => {
     mockFetchData.mockResolvedValue({ data: [createRow()], monthName: 'Mar', totalIncidents: 1 });
 
