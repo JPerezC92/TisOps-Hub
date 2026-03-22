@@ -9,7 +9,7 @@ const STATUSES = ['En Pruebas', 'En Desarrollo', 'Cerrado', 'Pendiente', 'Asigna
 export class WeeklyCorrectiveFactory {
   static createRecord(overrides?: Partial<WeeklyCorrective>): WeeklyCorrective {
     return {
-      requestId: overrides?.requestId ?? `REQ-${faker.number.int({ min: 10000, max: 99999 })}`,
+      requestId: overrides?.requestId ?? faker.number.int({ min: 10000, max: 99999 }),
       requestIdLink: overrides?.requestIdLink ?? `https://example.com/${faker.number.int({ min: 10000, max: 99999 })}`,
       technician: overrides?.technician ?? faker.person.fullName(),
       aplicativos: overrides?.aplicativos ?? faker.helpers.arrayElement(APPLICATIONS),

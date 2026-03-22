@@ -19,7 +19,7 @@ export function useWeeklyCorrectiveFilters(records: WeeklyCorrective[]) {
   const filteredRecords = useMemo(() => {
     return records.filter((record) => {
       const matchesSearch =
-        record.requestId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        String(record.requestId).toLowerCase().includes(searchTerm.toLowerCase()) ||
         record.technician.toLowerCase().includes(searchTerm.toLowerCase()) ||
         record.aplicativos.toLowerCase().includes(searchTerm.toLowerCase()) ||
         record.subject.toLowerCase().includes(searchTerm.toLowerCase());

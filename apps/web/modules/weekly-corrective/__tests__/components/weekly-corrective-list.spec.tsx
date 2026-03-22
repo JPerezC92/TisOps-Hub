@@ -37,18 +37,18 @@ describe('WeeklyCorrectiveList', () => {
 
   it('should list weekly correctives when data loads', async () => {
     const mockRecords = [
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-10001', technician: 'Juan Perez', aplicativos: 'CD' }),
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-10002', technician: 'Maria Garcia', aplicativos: 'FFVV' }),
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-10003', technician: 'Carlos Lopez', aplicativos: 'SB' }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 10001, technician: 'Juan Perez', aplicativos: 'CD' }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 10002, technician: 'Maria Garcia', aplicativos: 'FFVV' }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 10003, technician: 'Carlos Lopez', aplicativos: 'SB' }),
     ];
 
     mockedService.getAll.mockResolvedValue({ data: mockRecords, total: 3 });
 
     renderWithQueryClient(<WeeklyCorrectiveList />);
 
-    expect(await screen.findByText('REQ-10001')).toBeInTheDocument();
-    expect(screen.getByText('REQ-10002')).toBeInTheDocument();
-    expect(screen.getByText('REQ-10003')).toBeInTheDocument();
+    expect(await screen.findByText('10001')).toBeInTheDocument();
+    expect(screen.getByText('10002')).toBeInTheDocument();
+    expect(screen.getByText('10003')).toBeInTheDocument();
     expect(screen.getByText('Juan Perez')).toBeInTheDocument();
     expect(screen.getByText('Maria Garcia')).toBeInTheDocument();
   });
@@ -63,9 +63,9 @@ describe('WeeklyCorrectiveList', () => {
 
   it('should filter by search term', async () => {
     const mockRecords = [
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-10001', technician: 'Juan Perez', aplicativos: 'CD' }),
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-10002', technician: 'Maria Garcia', aplicativos: 'FFVV' }),
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-10003', technician: 'Carlos Lopez', aplicativos: 'SB' }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 10001, technician: 'Juan Perez', aplicativos: 'CD' }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 10002, technician: 'Maria Garcia', aplicativos: 'FFVV' }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 10003, technician: 'Carlos Lopez', aplicativos: 'SB' }),
     ];
 
     mockedService.getAll.mockResolvedValue({ data: mockRecords, total: 3 });
@@ -73,30 +73,30 @@ describe('WeeklyCorrectiveList', () => {
     const user = userEvent.setup();
     renderWithQueryClient(<WeeklyCorrectiveList />);
 
-    await screen.findByText('REQ-10001');
+    await screen.findByText('10001');
 
     const searchInput = screen.getByPlaceholderText('Request ID, Technician, Application...');
     await user.type(searchInput, 'Juan');
 
     await waitFor(() => {
-      expect(screen.getByText('REQ-10001')).toBeInTheDocument();
-      expect(screen.queryByText('REQ-10002')).not.toBeInTheDocument();
-      expect(screen.queryByText('REQ-10003')).not.toBeInTheDocument();
+      expect(screen.getByText('10001')).toBeInTheDocument();
+      expect(screen.queryByText('10002')).not.toBeInTheDocument();
+      expect(screen.queryByText('10003')).not.toBeInTheDocument();
     });
   });
 
   it('should show delete confirmation dialog when clear data is clicked', async () => {
     const mockRecords = [
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-20001' }),
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-20002' }),
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-20003' }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 20001 }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 20002 }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 20003 }),
     ];
     mockedService.getAll.mockResolvedValue({ data: mockRecords, total: 3 });
 
     const user = userEvent.setup();
     renderWithQueryClient(<WeeklyCorrectiveList />);
 
-    await screen.findByText('REQ-20001');
+    await screen.findByText('20001');
 
     const clearButton = screen.getByRole('button', { name: /clear all data/i });
     await user.click(clearButton);
@@ -106,16 +106,16 @@ describe('WeeklyCorrectiveList', () => {
 
   it('should close delete dialog when Cancel is clicked', async () => {
     const mockRecords = [
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-30001' }),
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-30002' }),
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-30003' }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 30001 }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 30002 }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 30003 }),
     ];
     mockedService.getAll.mockResolvedValue({ data: mockRecords, total: 3 });
 
     const user = userEvent.setup();
     renderWithQueryClient(<WeeklyCorrectiveList />);
 
-    await screen.findByText('REQ-30001');
+    await screen.findByText('30001');
 
     const clearButton = screen.getByRole('button', { name: /clear all data/i });
     await user.click(clearButton);
@@ -130,9 +130,9 @@ describe('WeeklyCorrectiveList', () => {
 
   it('should call deleteAll when delete is confirmed', async () => {
     const mockRecords = [
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-40001' }),
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-40002' }),
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-40003' }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 40001 }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 40002 }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 40003 }),
     ];
     mockedService.getAll.mockResolvedValue({ data: mockRecords, total: 3 });
     mockedService.deleteAll.mockResolvedValue({ message: 'All deleted', deleted: 3 });
@@ -140,7 +140,7 @@ describe('WeeklyCorrectiveList', () => {
     const user = userEvent.setup();
     renderWithQueryClient(<WeeklyCorrectiveList />);
 
-    await screen.findByText('REQ-40001');
+    await screen.findByText('40001');
 
     const clearButton = screen.getByRole('button', { name: /clear all data/i });
     await user.click(clearButton);
@@ -155,16 +155,16 @@ describe('WeeklyCorrectiveList', () => {
 
   it('should display stats grid', async () => {
     const mockRecords = [
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-50001', priority: 'Alta', requestStatus: 'En Pruebas' }),
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-50002', priority: 'Media', requestStatus: 'Cerrado' }),
-      WeeklyCorrectiveFactory.createRecord({ requestId: 'REQ-50003', priority: 'Alta', requestStatus: 'En Pruebas' }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 50001, priority: 'Alta', requestStatus: 'En Pruebas' }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 50002, priority: 'Media', requestStatus: 'Cerrado' }),
+      WeeklyCorrectiveFactory.createRecord({ requestId: 50003, priority: 'Alta', requestStatus: 'En Pruebas' }),
     ];
 
     mockedService.getAll.mockResolvedValue({ data: mockRecords, total: 3 });
 
     renderWithQueryClient(<WeeklyCorrectiveList />);
 
-    await screen.findByText('REQ-50001');
+    await screen.findByText('50001');
 
     expect(screen.getByText('Total Records')).toBeInTheDocument();
     expect(screen.getByText('Top Priority')).toBeInTheDocument();
