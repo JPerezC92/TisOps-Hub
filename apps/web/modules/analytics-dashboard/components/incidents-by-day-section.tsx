@@ -6,7 +6,7 @@ import { analyticsDashboardService } from '@/modules/analytics-dashboard/service
 import type { Application, IncidentsByDayResponse } from '@/modules/analytics-dashboard/types';
 
 interface IncidentsByDaySectionProps {
-  selectedApp: string;
+  selectedApp: string | undefined;
   endDay: number;
   applications: Application[];
 }
@@ -22,7 +22,7 @@ export function IncidentsByDaySection({
   useEffect(() => {
     const fetch = async () => {
       setLoading(true);
-      const result = await analyticsDashboardService.getIncidentsByDay(selectedApp);
+      const result = await analyticsDashboardService.getIncidentsByDay(selectedApp ?? 'all');
       setData(result);
       setLoading(false);
     };
