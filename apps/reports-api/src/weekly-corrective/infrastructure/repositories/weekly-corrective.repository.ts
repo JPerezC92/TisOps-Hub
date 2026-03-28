@@ -62,7 +62,7 @@ export class WeeklyCorrectiveRepository implements IWeeklyCorrectiveRepository {
       .all();
 
     // Deduplicate weekly_correctives by requestId
-    const seenWeeklyIds = new Set<string>();
+    const seenWeeklyIds = new Set<number>();
     const uniqueWeeklyResults = weeklyResults.filter((r) => {
       if (seenWeeklyIds.has(r.weeklyCorrective.requestId)) return false;
       seenWeeklyIds.add(r.weeklyCorrective.requestId);
@@ -116,7 +116,7 @@ export class WeeklyCorrectiveRepository implements IWeeklyCorrectiveRepository {
         createdTime = null;
       }
       return {
-        requestId: r.weeklyCorrective.requestId,
+        requestId: String(r.weeklyCorrective.requestId),
         rawStatus: r.weeklyCorrective.requestStatus || 'Unknown',
         priority: r.weeklyCorrective.priority || 'Unknown',
         application: r.registeredAppName || 'Unknown',

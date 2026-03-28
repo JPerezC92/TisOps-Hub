@@ -137,45 +137,48 @@ export function ParentTicketSection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.data.map((row, index) => (
-                <TableRow
-                  key={row.linkedRequestId || `unassigned-${index}`}
-                  className={`border-b ${colors.rowBorder} ${colors.rowHover} transition-colors`}
-                >
-                  <TableCell className="text-sm text-foreground/80">
-                    {row.createdDate || '-'}
-                  </TableCell>
-                  <TableCell className={`font-medium ${colors.linkColor.split(' ')[0]}`}>
-                    {row.linkedRequestIdLink ? (
-                      <a
-                        href={row.linkedRequestIdLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`${colors.linkColor} hover:underline transition-colors`}
-                      >
-                        {row.linkedRequestId}
-                      </a>
-                    ) : (
-                      <span>{row.linkedRequestId || '-'}</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-sm text-foreground/80 max-w-xs truncate" title={row.additionalInfo}>
-                    {row.additionalInfo || '-'}
-                  </TableCell>
-                  <TableCell className="text-sm text-foreground/90 text-right">
-                    {row.totalLinkedTickets || '-'}
-                  </TableCell>
-                  <TableCell className="text-sm text-foreground/90 text-right font-semibold">
-                    {row.linkedTicketsInMonth}
-                  </TableCell>
-                  <TableCell className="text-sm text-foreground/80">
-                    {row.requestStatus || '-'}
-                  </TableCell>
-                  <TableCell className="text-sm text-foreground/80">
-                    {row.eta || '-'}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {data.data.map((row, index) => {
+                const isUnassigned = !row.linkedRequestId;
+                return (
+                  <TableRow
+                    key={row.linkedRequestId || `unassigned-${index}`}
+                    className={`border-b ${colors.rowBorder} ${colors.rowHover} transition-colors`}
+                  >
+                    <TableCell className="text-sm text-foreground/80">
+                      {isUnassigned ? '' : (row.createdDate || '-')}
+                    </TableCell>
+                    <TableCell className={`font-medium ${colors.linkColor.split(' ')[0]}`}>
+                      {isUnassigned ? '' : row.linkedRequestIdLink ? (
+                        <a
+                          href={row.linkedRequestIdLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`${colors.linkColor} hover:underline transition-colors`}
+                        >
+                          {row.linkedRequestId}
+                        </a>
+                      ) : (
+                        <span>{row.linkedRequestId || '-'}</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-sm text-foreground/80 max-w-xs truncate" title={row.additionalInfo}>
+                      {row.additionalInfo || '-'}
+                    </TableCell>
+                    <TableCell className="text-sm text-foreground/90 text-right">
+                      {isUnassigned ? '' : (row.totalLinkedTickets || '-')}
+                    </TableCell>
+                    <TableCell className="text-sm text-foreground/90 text-right font-semibold">
+                      {row.linkedTicketsInMonth}
+                    </TableCell>
+                    <TableCell className="text-sm text-foreground/80">
+                      {isUnassigned ? '' : (row.requestStatus || '-')}
+                    </TableCell>
+                    <TableCell className="text-sm text-foreground/80">
+                      {isUnassigned ? '' : (row.eta || '-')}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
               {/* TOTAL Row */}
               <TableRow className={`${colors.totalBorder} ${colors.totalBg} font-bold`}>
                 <TableCell className="text-sm text-foreground font-bold">TOTAL</TableCell>

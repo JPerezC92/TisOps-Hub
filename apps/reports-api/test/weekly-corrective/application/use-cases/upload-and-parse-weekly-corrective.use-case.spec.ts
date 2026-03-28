@@ -42,7 +42,7 @@ describe('UploadAndParseWeeklyCorrectiveUseCase', () => {
 
   it('should throw error for missing required fields', async () => {
     const invalidRecords = [
-      WeeklyCorrectiveFactory.createWeeklyCorrective({ requestId: '', aplicativos: '' }),
+      WeeklyCorrectiveFactory.createWeeklyCorrective({ requestId: 0, aplicativos: '' }),
     ];
 
     await expect(uploadAndParseUseCase.execute(invalidRecords)).rejects.toThrow('missing required fields');

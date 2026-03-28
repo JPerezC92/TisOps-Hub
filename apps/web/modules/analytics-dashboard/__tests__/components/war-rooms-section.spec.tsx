@@ -197,4 +197,19 @@ describe('WarRoomsSection', () => {
       expect(mockedService.getWarRooms).toHaveBeenCalledWith('FFVV', '2025-06');
     });
   });
+
+  it('should bold Problem, Cause, Resolution keywords in notes', async () => {
+    mockedService.getWarRooms.mockResolvedValue([
+      createWarRoom({ notes: 'Problem: server down. Cause: OOM. Resolution: restart.' }),
+    ]);
+
+    const { container } = renderWithQueryClient(<WarRoomsSection {...defaultProps} />);
+
+    await screen.findByText(/server down/);
+    const strongs = container.querySelectorAll('strong');
+    const boldTexts = Array.from(strongs).map((el) => el.textContent);
+    expect(boldTexts).toContain('Problem');
+    expect(boldTexts).toContain('Cause');
+    expect(boldTexts).toContain('Resolution');
+  });
 });

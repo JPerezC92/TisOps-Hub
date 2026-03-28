@@ -64,7 +64,7 @@ export class WeeklyCorrectiveExcelParser {
       }
 
       return {
-        requestId: String(row['Request ID'] || ''),
+        requestId: Number(row['Request ID']) || 0,
         requestIdLink,
         technician: String(row['Technician'] || ''),
         aplicativos: String(row['Aplicativos'] || ''),

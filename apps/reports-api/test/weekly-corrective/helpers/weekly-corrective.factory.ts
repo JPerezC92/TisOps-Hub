@@ -3,7 +3,7 @@ import type { WeeklyCorrective, InsertWeeklyCorrective } from '@repo/database';
 
 export class WeeklyCorrectiveFactory {
   static createWeeklyCorrective(overrides?: Partial<WeeklyCorrective>): WeeklyCorrective {
-    const requestId = overrides?.requestId ?? `REQ-${faker.number.int({ min: 100000, max: 999999 })}`;
+    const requestId = overrides?.requestId ?? faker.number.int({ min: 100000, max: 999999 });
     const priority = overrides?.priority ?? faker.helpers.arrayElement(['Alta', 'Media', 'Baja']);
     const status = overrides?.requestStatus ?? faker.helpers.arrayElement([
       'En Pruebas',
@@ -57,7 +57,7 @@ export class WeeklyCorrectiveFactory {
     return Array.from({ length: count }, (_, index) =>
       this.createWeeklyCorrective({
         ...overrides,
-        requestId: overrides?.requestId ?? `REQ-${100000 + index + 1}`,
+        requestId: overrides?.requestId ?? (100000 + index + 1),
       }),
     );
   }

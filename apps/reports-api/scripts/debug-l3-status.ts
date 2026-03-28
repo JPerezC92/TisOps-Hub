@@ -26,7 +26,7 @@ async function debugL3Status() {
   console.log(`Total weekly_correctives rows: ${weeklyResults.length}`);
 
   // Deduplicate weekly
-  const seenWeeklyIds = new Set<string>();
+  const seenWeeklyIds = new Set<number>();
   const uniqueWeekly = weeklyResults.filter((r) => {
     if (seenWeeklyIds.has(r.weeklyCorrective.requestId)) return false;
     seenWeeklyIds.add(r.weeklyCorrective.requestId);
@@ -83,7 +83,7 @@ async function debugL3Status() {
 
   // 3. Check for overlapping requestIds
   console.log('\n--- CHECK: Overlapping requestIds ---');
-  const monthlyIds = new Set(monthlyResults.map(r => String(r.monthlyReport.requestId)));
+  const monthlyIds = new Set(monthlyResults.map(r => r.monthlyReport.requestId));
   const weeklyIds = new Set(uniqueWeekly.map(r => r.weeklyCorrective.requestId));
 
   const overlap = [...monthlyIds].filter(id => weeklyIds.has(id));

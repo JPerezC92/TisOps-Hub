@@ -19,6 +19,7 @@ export function L3RequestsByStatusSection({
 }: L3RequestsByStatusSectionProps) {
   const [data, setData] = useState<L3RequestsByStatusResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showEnglish, setShowEnglish] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -52,8 +53,25 @@ export function L3RequestsByStatusSection({
     { title: 'In backlog', requests: data.inBacklog },
   ];
 
+  const hasTranslations = sections.some((s) => s.requests.some((r) => r.subjectEnglish));
+
   return (
     <div className="mt-8 space-y-6">
+      {hasTranslations && (
+        <div className="flex items-center justify-end gap-2">
+          <span className="text-xs text-muted-foreground">Subject language:</span>
+          <button
+            onClick={() => setShowEnglish(!showEnglish)}
+            className={`px-3 py-1 text-xs rounded border transition-colors ${
+              showEnglish
+                ? 'border-jpc-vibrant-cyan-500/30 bg-jpc-vibrant-cyan-500/10 text-jpc-vibrant-cyan-400'
+                : 'border-amber-500/30 bg-amber-500/10 text-amber-400'
+            }`}
+          >
+            {showEnglish ? 'EN' : 'ES'}
+          </button>
+        </div>
+      )}
       {sections.map((section) => (
         <div key={section.title} className="rounded-xl border border-jpc-vibrant-cyan-500/20 bg-card/60 overflow-hidden shadow-lg">
           <div className="px-6 py-4 border-b border-jpc-vibrant-cyan-500/20 flex items-center justify-between bg-jpc-vibrant-cyan-500/5">
@@ -104,7 +122,9 @@ export function L3RequestsByStatusSection({
                       </TableCell>
                       <TableCell className="text-sm text-foreground/80">{req.createdTime}</TableCell>
                       <TableCell className="text-sm text-foreground/80">{req.modulo}</TableCell>
-                      <TableCell className="text-sm text-foreground/80 max-w-xs truncate">{req.subject}</TableCell>
+                      <TableCell className="text-sm text-foreground/80 max-w-xs truncate" title={showEnglish ? req.subject : req.subjectEnglish || req.subject}>
+                        {showEnglish && req.subjectEnglish ? req.subjectEnglish : req.subject}
+                      </TableCell>
                       <TableCell className="text-sm">
                         <span className={`font-medium ${
                           req.priorityEnglish === 'Critical' ? 'text-red-400' :

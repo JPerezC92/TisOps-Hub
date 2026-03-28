@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { Database, DATABASE_CONNECTION, monthlyReports, InsertMonthlyReport, applicationRegistry, applicationPatterns, MonthlyReport, parentChildRequests, monthlyReportStatusRegistry, categorizationRegistry, moduleRegistry, weeklyCorrectives, correctiveStatusRegistry, problems } from '@repo/database';
+import { Database, DATABASE_CONNECTION, monthlyReports, InsertMonthlyReport, applicationRegistry, applicationPatterns, MonthlyReport, parentChildRequests, monthlyReportStatusRegistry, categorizationRegistry, moduleRegistry, weeklyCorrectives, correctiveStatusRegistry, problems, subjectTranslations, InsertSubjectTranslation, SubjectTranslation } from '@repo/database';
 import { and, eq, sql } from 'drizzle-orm';
 import { DEFAULT_DISPLAY_STATUS, DisplayStatus, Recurrency, mapRecurrency, CorrectiveStatus, PrioritySpanish, Priority } from '@repo/reports';
 import { DateTime } from 'luxon';
@@ -1347,7 +1347,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
 
     // Normalize weekly_correctives
     const normalizedWeekly: NormalizedRecord[] = weeklyResults.map((r) => ({
-      requestId: r.weeklyCorrective.requestId,
+      requestId: String(r.weeklyCorrective.requestId),
       requestStatus: r.weeklyCorrective.requestStatus || 'Unknown',
       createdTime: DateTime.fromFormat(r.weeklyCorrective.createdTime, 'dd/MM/yyyy HH:mm'),
       registeredAppCode: r.registeredAppCode,
@@ -1467,7 +1467,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       .all();
 
     // Deduplicate weekly_correctives by requestId
-    const seenWeeklyIds = new Set<string>();
+    const seenWeeklyIds = new Set<number>();
     const uniqueWeeklyResults = weeklyResults.filter((r) => {
       if (seenWeeklyIds.has(r.weeklyCorrective.requestId)) return false;
       seenWeeklyIds.add(r.weeklyCorrective.requestId);
@@ -1510,7 +1510,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     }
 
     const normalizedWeekly: NormalizedRecord[] = uniqueWeeklyResults.map((r) => ({
-      requestId: r.weeklyCorrective.requestId,
+      requestId: String(r.weeklyCorrective.requestId),
       rawStatus: r.weeklyCorrective.requestStatus || 'Unknown',
       priority: r.weeklyCorrective.priority || '',
       appCode: r.registeredAppCode,
@@ -1703,7 +1703,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       .all();
 
     // Deduplicate weekly by requestId
-    const seenWeeklyIds = new Set<string>();
+    const seenWeeklyIds = new Set<number>();
     const uniqueWeeklyResults = weeklyResults.filter((r) => {
       if (seenWeeklyIds.has(r.weeklyCorrective.requestId)) return false;
       seenWeeklyIds.add(r.weeklyCorrective.requestId);
@@ -1861,7 +1861,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     const normalizedWeekly: NormalizedRecord[] = uniqueWeeklyResults.map((r) => {
       const rawPriority = r.weeklyCorrective.priority || '';
       return {
-        requestId: r.weeklyCorrective.requestId,
+        requestId: String(r.weeklyCorrective.requestId),
         requestIdLink: r.weeklyCorrective.requestIdLink || undefined,
         rawStatus: r.weeklyCorrective.requestStatus || 'Unknown',
         createdTime: r.weeklyCorrective.createdTime || '',
@@ -1925,6 +1925,14 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       filteredResults = mergedResults.filter((r) => r.registeredAppCode === app);
     }
 
+    // ===== FETCH SUBJECT TRANSLATIONS =====
+    const translationRequestIds = filteredResults
+      .filter((r) => r.registeredAppCode === 'SB' || r.registeredAppCode === 'FFVV')
+      .map((r) => Number(r.requestId))
+      .filter((id) => !isNaN(id));
+    const translations = await this.findSubjectTranslations(translationRequestIds);
+    const translationMap = new Map(translations.map((t) => [String(t.requestId), t.subjectEnglish]));
+
     // ===== GROUP BY STATUS =====
     interface TempRequestDetail extends L3RequestDetail {
       rawCreatedTime: string;
@@ -1957,6 +1965,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
         createdTimeMs: record.createdTimeMs,
         modulo: record.modulo,
         subject: record.subject,
+        subjectEnglish: translationMap.get(record.requestId),
         priority: record.priority,
         priorityEnglish: record.priorityEnglish,
         linkedTicketsCount,
@@ -2075,7 +2084,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       .all();
 
     const correctivesMap = new Map(
-      correctivesRecords.map((r) => [r.requestId, r]),
+      correctivesRecords.map((r) => [String(r.requestId), r]),
     );
 
     // Get all problems records for lookup (requestId is integer, convert to string for comparison)
@@ -2154,18 +2163,16 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     }
 
     // Helper function to format date
-    const formatDate = (dateStr: string): string => {
+    const formatDate = (dateStr: string, format = 'd-MMM-yyyy'): string => {
       if (!dateStr) return '';
       try {
-        // Try parsing as dd/MM/yyyy HH:mm format
         const parsed = DateTime.fromFormat(dateStr, 'dd/MM/yyyy HH:mm');
         if (parsed.isValid) {
-          return parsed.toFormat('d-MMM-yyyy');
+          return parsed.toFormat(format);
         }
-        // Try parsing as ISO format
         const isoDate = DateTime.fromISO(dateStr);
         if (isoDate.isValid) {
-          return isoDate.toFormat('d-MMM-yyyy');
+          return isoDate.toFormat(format);
         }
         return dateStr;
       } catch {
@@ -2201,14 +2208,14 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       const corrective = correctivesMap.get(linkedRequestId);
       if (corrective) {
         createdDate = formatDate(corrective.createdTime);
-        eta = formatDate(corrective.eta || '');
+        eta = formatDate(corrective.eta || '', 'd-MMM');
         requestStatus = corrective.requestStatus || '';
       } else {
         // Try problems table
         const problem = problemsMap.get(linkedRequestId);
         if (problem) {
           createdDate = formatDate(problem.createdTime);
-          eta = formatDate(problem.dueByTime || '');
+          eta = formatDate(problem.dueByTime || '', 'd-MMM');
           requestStatus = problem.requestStatus || '';
         }
       }
@@ -2330,7 +2337,7 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       .all();
 
     const correctivesMapBugs = new Map(
-      correctivesRecordsBugs.map((r) => [r.requestId, r]),
+      correctivesRecordsBugs.map((r) => [String(r.requestId), r]),
     );
 
     // Get all problems records for lookup (requestId is integer, convert to string for comparison)
@@ -2409,18 +2416,16 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
     }
 
     // Helper function to format date
-    const formatDate = (dateStr: string): string => {
+    const formatDate = (dateStr: string, format = 'd-MMM-yyyy'): string => {
       if (!dateStr) return '';
       try {
-        // Try parsing as dd/MM/yyyy HH:mm format
         const parsed = DateTime.fromFormat(dateStr, 'dd/MM/yyyy HH:mm');
         if (parsed.isValid) {
-          return parsed.toFormat('d-MMM-yyyy');
+          return parsed.toFormat(format);
         }
-        // Try parsing as ISO format
         const isoDate = DateTime.fromISO(dateStr);
         if (isoDate.isValid) {
-          return isoDate.toFormat('d-MMM-yyyy');
+          return isoDate.toFormat(format);
         }
         return dateStr;
       } catch {
@@ -2456,14 +2461,14 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       const corrective = correctivesMapBugs.get(linkedRequestId);
       if (corrective) {
         createdDate = formatDate(corrective.createdTime);
-        eta = formatDate(corrective.eta || '');
+        eta = formatDate(corrective.eta || '', 'd-MMM');
         requestStatus = corrective.requestStatus || '';
       } else {
         // Try problems table
         const problem = problemsMapBugs.get(linkedRequestId);
         if (problem) {
           createdDate = formatDate(problem.createdTime);
-          eta = formatDate(problem.dueByTime || '');
+          eta = formatDate(problem.dueByTime || '', 'd-MMM');
           requestStatus = problem.requestStatus || '';
         }
       }
@@ -2774,5 +2779,34 @@ export class MonthlyReportRepository implements IMonthlyReportRepository {
       data,
       monthName: monthAbbr,
     };
+  }
+
+  async findSubjectTranslations(
+    requestIds: number[],
+  ): Promise<SubjectTranslation[]> {
+    if (requestIds.length === 0) return [];
+    return this.db
+      .select()
+      .from(subjectTranslations)
+      .where(sql`${subjectTranslations.requestId} IN (${sql.join(requestIds.map(id => sql`${id}`), sql`, `)})`)
+      .all();
+  }
+
+  async upsertSubjectTranslations(
+    translations: InsertSubjectTranslation[],
+  ): Promise<void> {
+    if (translations.length === 0) return;
+    for (const t of translations) {
+      await this.db
+        .insert(subjectTranslations)
+        .values(t)
+        .onConflictDoUpdate({
+          target: subjectTranslations.requestId,
+          set: {
+            subject: t.subject,
+            subjectEnglish: t.subjectEnglish,
+          },
+        });
+    }
   }
 }

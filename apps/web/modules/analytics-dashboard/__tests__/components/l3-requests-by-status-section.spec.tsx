@@ -27,6 +27,7 @@ function createRequest(overrides?: Record<string, unknown>) {
     createdTime: (overrides?.createdTime as string) ?? '2025-01-10',
     modulo: (overrides?.modulo as string) ?? 'Module X',
     subject: (overrides?.subject as string) ?? 'Test subject',
+    subjectEnglish: 'subjectEnglish' in (overrides ?? {}) ? (overrides!.subjectEnglish as string | undefined) : undefined,
     priority: (overrides?.priority as string) ?? 'Alta',
     priorityEnglish: (overrides?.priorityEnglish as string) ?? 'High',
     linkedTicketsCount: (overrides?.linkedTicketsCount as number) ?? 3,
@@ -168,6 +169,63 @@ describe('L3RequestsByStatusSection', () => {
 
     const labels = await screen.findAllByText(/Canales Digitales/);
     expect(labels.length).toBeGreaterThan(0);
+  });
+
+  it('should show EN/ES toggle when translations exist', async () => {
+    mockedService.getL3RequestsByStatus.mockResolvedValue(createMockData({
+      prdDeployment: [createRequest({ subject: 'Tema español', subjectEnglish: 'English subject' })],
+      inTesting: [],
+      devInProgress: [],
+      inBacklog: [],
+    }));
+    renderWithQueryClient(<L3RequestsByStatusSection {...defaultProps} />);
+
+    expect(await screen.findByText('EN')).toBeInTheDocument();
+  });
+
+  it('should not show toggle when no translations exist', async () => {
+    mockedService.getL3RequestsByStatus.mockResolvedValue(createMockData({
+      prdDeployment: [createRequest({ subject: 'Tema español' })],
+      inTesting: [],
+      devInProgress: [],
+      inBacklog: [],
+    }));
+    renderWithQueryClient(<L3RequestsByStatusSection {...defaultProps} />);
+
+    await screen.findByText('Tema español');
+    expect(screen.queryByText('EN')).not.toBeInTheDocument();
+    expect(screen.queryByText('ES')).not.toBeInTheDocument();
+  });
+
+  it('should show English subject by default when translation exists', async () => {
+    mockedService.getL3RequestsByStatus.mockResolvedValue(createMockData({
+      prdDeployment: [createRequest({ subject: 'Tema español', subjectEnglish: 'English subject' })],
+      inTesting: [],
+      devInProgress: [],
+      inBacklog: [],
+    }));
+    renderWithQueryClient(<L3RequestsByStatusSection {...defaultProps} />);
+
+    expect(await screen.findByText('English subject')).toBeInTheDocument();
+    expect(screen.queryByText('Tema español')).not.toBeInTheDocument();
+  });
+
+  it('should switch to Spanish when toggle is clicked', async () => {
+    const user = (await import('@testing-library/user-event')).default.setup();
+    mockedService.getL3RequestsByStatus.mockResolvedValue(createMockData({
+      prdDeployment: [createRequest({ subject: 'Tema español', subjectEnglish: 'English subject' })],
+      inTesting: [],
+      devInProgress: [],
+      inBacklog: [],
+    }));
+    renderWithQueryClient(<L3RequestsByStatusSection {...defaultProps} />);
+
+    await screen.findByText('EN');
+    await user.click(screen.getByText('EN'));
+
+    expect(screen.getByText('ES')).toBeInTheDocument();
+    expect(screen.getByText('Tema español')).toBeInTheDocument();
+    expect(screen.queryByText('English subject')).not.toBeInTheDocument();
   });
 
   it('should show priority with color', async () => {

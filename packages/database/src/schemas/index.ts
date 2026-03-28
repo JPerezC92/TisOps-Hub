@@ -14,3 +14,4 @@ export * from './monthly-report-status-registry.schema';
 export * from './corrective-status-registry.schema';
 export * from './categorization-registry.schema';
 export * from './module-registry.schema';
+export * from './subject-translations.schema';

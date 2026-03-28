@@ -284,6 +284,7 @@ export interface L3RequestDetail {
   createdTime: string;
   modulo: string;
   subject: string;
+  subjectEnglish?: string;
   priority: string;
   priorityEnglish: string;
   linkedTicketsCount: number;

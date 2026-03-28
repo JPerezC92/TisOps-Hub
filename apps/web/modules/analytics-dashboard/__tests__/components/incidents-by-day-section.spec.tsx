@@ -16,6 +16,7 @@ const mockApplications: Application[] = [
 
 const defaultProps = {
   selectedApp: 'all',
+  endDay: 19,
   applications: mockApplications,
 };
 
@@ -39,21 +40,37 @@ describe('IncidentsByDaySection', () => {
     expect(await screen.findByText('No data available')).toBeInTheDocument();
   });
 
-  it('should display incidents data', async () => {
+  it('should display all days up to endDay, filling gaps with 0', async () => {
     mockedService.getIncidentsByDay.mockResolvedValue({
       data: [
-        { day: 1, count: 5 },
-        { day: 2, count: 3 },
-        { day: 3, count: 8 },
+        { day: 5, count: 1 },
+        { day: 12, count: 1 },
+        { day: 18, count: 2 },
+        { day: 19, count: 1 },
       ],
-      totalIncidents: 16,
+      totalIncidents: 5,
     });
 
-    renderWithQueryClient(<IncidentsByDaySection {...defaultProps} />);
+    renderWithQueryClient(<IncidentsByDaySection {...defaultProps} endDay={19} />);
 
-    expect(await screen.findByText('Day 1')).toBeInTheDocument();
-    expect(screen.getByText('Day 2')).toBeInTheDocument();
-    expect(screen.getByText('Day 3')).toBeInTheDocument();
+    // All 19 days should be rendered
+    for (let i = 1; i <= 19; i++) {
+      expect(await screen.findByText(`Day ${i}`)).toBeInTheDocument();
+    }
+  });
+
+  it('should show 0 count for days without incidents', async () => {
+    mockedService.getIncidentsByDay.mockResolvedValue({
+      data: [{ day: 3, count: 2 }],
+      totalIncidents: 2,
+    });
+
+    renderWithQueryClient(<IncidentsByDaySection {...defaultProps} endDay={5} />);
+
+    await screen.findByText('Day 1');
+    // Days 1, 2, 4, 5 should show 0
+    const zeros = screen.getAllByText('0');
+    expect(zeros.length).toBe(4);
   });
 
   it('should show total incidents count', async () => {
@@ -96,5 +113,21 @@ describe('IncidentsByDaySection', () => {
     await screen.findByText('Day 1');
     expect(screen.getByText('day')).toBeInTheDocument();
     expect(screen.getByText('Incidents')).toBeInTheDocument();
+  });
+
+  it('should dim rows with zero incidents', async () => {
+    mockedService.getIncidentsByDay.mockResolvedValue({
+      data: [{ day: 2, count: 3 }],
+      totalIncidents: 3,
+    });
+
+    const { container } = renderWithQueryClient(<IncidentsByDaySection {...defaultProps} endDay={3} />);
+
+    await screen.findByText('Day 1');
+    const rows = container.querySelectorAll('tbody tr');
+    // Day 1 (0 incidents) should have opacity class
+    expect(rows[0].className).toContain('opacity-40');
+    // Day 2 (3 incidents) should not
+    expect(rows[1].className).not.toContain('opacity-40');
   });
 });

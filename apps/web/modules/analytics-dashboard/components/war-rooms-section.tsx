@@ -17,6 +17,16 @@ interface WarRoomsSectionProps {
   applications: Application[];
 }
 
+function formatNotes(notes: string) {
+  if (!notes) return null;
+  const parts = notes.split(/(Problem|Cause|Resolution)/g);
+  return parts.map((part, i) =>
+    part === 'Problem' || part === 'Cause' || part === 'Resolution'
+      ? <strong key={i}>{part}</strong>
+      : part,
+  );
+}
+
 export function WarRoomsSection({
   selectedApp,
   selectedMonth,
@@ -184,8 +194,8 @@ export function WarRoomsSection({
                       </Badge>
                     </TableCell>
                     <TableCell className="text-xs text-foreground/80 max-w-[200px]">
-                      <div className="truncate" title={row.notes}>
-                        {row.notes}
+                      <div className="whitespace-pre-line" title={row.notes}>
+                        {formatNotes(row.notes)}
                       </div>
                     </TableCell>
                     <TableCell className="text-xs">

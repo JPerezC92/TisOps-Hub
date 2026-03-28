@@ -100,3 +100,10 @@ export type {
   ModuleRegistry,
   InsertModuleRegistry,
 } from './schemas/module-registry.schema';
+
+// Subject Translations schema and types
+export { subjectTranslations } from './schemas/subject-translations.schema';
+export type {
+  SubjectTranslation,
+  InsertSubjectTranslation,
+} from './schemas/subject-translations.schema';
